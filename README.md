@@ -1,5 +1,5 @@
 # Crimson Desert - Offline Save Editor
-
+BIG credits to @Gek a awesome dude from discord who help me with the decryption logic. 
 A standalone save editor for Crimson Desert. Edit your inventory, swap equipment, change stacks, modify enchants — all offline, no mods required in-game.
 
 ## Download
