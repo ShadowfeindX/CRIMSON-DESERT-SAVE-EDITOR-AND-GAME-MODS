@@ -185,6 +185,16 @@ The editor handles the full save file crypto pipeline:
 
 ## Changelog
 
+### v2.5.2
+
+**New Features**
+- **Re-Fog Map** — Inverse of Reveal Map. Covers your entire map in fog again. Available in both Abyss Gates and Debug tabs.
+- **Abyss Gates tab** — Now a regular tab, no longer hidden behind Dev/Experimental mode.
+
+**UI Improvements**
+- Re-Fog button moved after Step 2 for clearer flow
+- Step-by-step instructions with warning label for the reveal + nexus process
+
 ### v2.5.1
 
 **New Features**
