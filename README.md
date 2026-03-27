@@ -10,21 +10,24 @@ Grab `CrimsonSaveEditor.exe` from the release. Single file, no installation need
 
 ## Features
 
+- **PARC Insert (NEW)** — Add brand new items to your inventory without needing a donor item. Full tree verification ensures no crashes.
+- **Clone to Vendor (NEW)** — Clone any sold item into a new vendor entry. Search by name, buy it back in-game for a fully correct item. Type-for-type swap required.
 - **Inventory Editor** — View all items with names/icons, edit stack counts, batch edit, delete items
 - **Equipment Editor** — Change enchant level (0-10), endurance, sharpness, duplicate gear for swapping
-- **Item Swap** — Transform any item into another with category filters and 2,262 real game templates
+- **Item Swap** — Transform any item into another with category filters and 2,262 real game templates. Swap 1 from stack to keep the rest intact.
 - **Repurchase (Vendor Swap)** — The most reliable swap method: sell junk, swap in editor, buy back
 - **Socket Editor** — Swap Abyss Gear gems in equipment sockets (189 gems across 30+ categories)
 - **ItemBuffs** — Edit base stats on any item in game data (damage, defense, speed, crit, resistances)
 - **Max Stacks** — Increase all stackable item max stacks to 99/999/9999 (replaces FatStacks mod)
 - **Equipment Sets** — Create, share, and apply stat buff presets as community sets via GitHub
-- **Item Packs** — Download and apply curated item collections from the community
+- **Item Packs** — Download and apply curated item collections from the community (including dye packs and Dragon packs)
 - **Community Mapping** — Help map every item in the game by scanning your saves
-- **GPatch** — Game file patches: mount death respawn timer, storage expansion
+- **GPatch** — Game file patches: mount death respawn timer, storage expansion, item effect swap
 - **PABGB Browser** — Browse any game data file (Dev mode)
 - **Give Item** — Pick any item from the database and a donor item to sacrifice
 - **Backup/Restore** — Automatic backup before every save, pristine backup support
 - **Auto-Find Saves** — Locates save files automatically (Steam, Epic, Game Pass, Linux Proton)
+- **Font Scaling** — Edit menu: scale the UI to 100%, 125%, 150%, or 200%. Persists across restarts.
 - **Guides Menu** — In-app guides for every tab explaining how to use each feature
 - **10x Faster Loading** — C-backed ChaCha20 decryption, deferred PARC parsing
 
@@ -60,8 +63,13 @@ Select an item from Inventory, pick a target from the category-filtered database
 The **most reliable** way to get new gear:
 1. Sell a junk item to any vendor in-game
 2. Save, open in editor, find the sold item here
-3. Swap it to the item you want
-4. Save, load in-game, buy it back from the vendor
+3. Use **Clone Selected to Vendor** — search by item name, pick a same-type target
+4. Or use **Swap Selected Item** for a simple key swap
+5. Save, load in-game, buy it back from the vendor
+
+**Clone to Vendor usage:** Sell a helmet to a vendor. In the editor, select it and click Clone Selected to Vendor. Search "helmet" and pick the one you want. Save, reload, buy it back. The game creates a fully correct item.
+
+**Type-for-type rule:** Glove->Glove works. Helm->Helm works. Glove->Helm does NOT work (unequippable). If you get a wrong-type item, sell it to a vendor, then Clone it to the correct type to fix it.
 
 ### Sockets (Abyss Gear)
 Swap gems in equipment sockets. 189 Abyss Gears available including combat skills, stat buffs, resistances, banes, and gathering bonuses. Empty sockets must have a gem installed in-game first (Witch NPC > Create Socket > Embed Abyss Gear).
@@ -83,6 +91,7 @@ Right-click items to add them to **Equipment Sets** — reusable buff presets yo
 Apply game file patches that survive save changes:
 - **Mount Death Respawn (1s)** — Sets all 32 mount/vehicle death respawn timers to 1 second (vanilla: ~90 min). Note: Dragon summon duration/cooldown is hardcoded and cannot be modified.
 - **Storage Expansion (900)** — Expand warehouse, bank, and camp storage to 900 slots. Does NOT modify player inventory (which causes bugs).
+- **Item Effect Swap** — Swap consumable use-effects between items by patching effect hashes in iteminfo.pabgb. Change what happens when you use an item in-game.
 
 ### Item Packs
 Download community item collections from GitHub. Create your own packs to share loadouts with others.
@@ -90,10 +99,25 @@ Download community item collections from GitHub. Create your own packs to share 
 ### Community Mapping
 Help map every item in Crimson Desert. Scan your saves to discover new item templates and upload them to the community database. The more saves we scan, the more items the editor can support.
 
-## Give Item (Donor System)
+## Adding Items
 
-Since the save format uses fixed record structures, new items can't be inserted directly. Instead, the **Give Item** feature transforms an existing item into the one you want:
+### PARC Insert (No Donor Needed)
+The **Add New Item (PARC Insert)** button creates brand new items in your inventory:
+1. Click **Add New Item (PARC Insert)** in the Inventory tab
+2. Select the item (currently Narima's Horn for Dragon CD reset)
+3. Set the quantity and confirm
+4. Save and reload in-game (may require 2 reloads but not usually)
 
+### Clone to Vendor (Best for Equipment)
+The **Clone Selected to Vendor** button in the Repurchase tab is the best way to get equipment:
+1. Sell any junk item to a vendor in-game, save
+2. Open save in editor, go to Repurchase tab
+3. Select the sold item, click **Clone Selected to Vendor**
+4. Search for the item you want by name (must be same type as donor)
+5. Save, reload, buy it back from the vendor
+
+### Give Item (Donor System)
+Transforms an existing item into the one you want:
 1. Click **Give Item** in the Inventory tab
 2. Search and select the item you want, set the quantity
 3. Pick a donor item from your inventory to sacrifice
@@ -103,12 +127,13 @@ Since the save format uses fixed record structures, new items can't be inserted 
 
 ## Known Limitations
 
-- **No item insertion** — Can't add entirely new items, only transform existing ones (donor system)
+- **PARC Insert limited items** — Currently only Narima's Horn is confirmed for direct inventory insertion. More items coming as testing continues.
+- **Type-for-type swaps only** — Vendor clone/swap must match equipment type (Glove->Glove, Helm->Helm). Cross-type produces unequippable items.
 - **Equipment stats after swap** — Swapped equipment may show wrong damage/defense until unequip + re-equip
-- **Store/Mercenary items** — Read-only, cannot be edited
 - **Empty sockets** — Cannot fill empty sockets from the editor, must install a gem in-game first
 - **Dragon summon timer** — 15 min duration / 50 min cooldown is hardcoded in game executable, cannot be patched
 - **Lobby saves** — Only `save.save` (in-game saves) are supported, not `lobby.save`
+- **Longer load time** — Full tree verification adds processing time. Optimization in progress.
 
 ## Save File Locations
 
@@ -159,6 +184,36 @@ The editor handles the full save file crypto pipeline:
 ---
 
 ## Changelog
+
+### v2.5.0
+
+**New Features**
+- **PARC Insert** — Add new items to inventory without donors. Full tree verification (63,000+ offsets validated) ensures no crashes. Currently limited to Narima's Horn (Dragon CD reset) while more items are tested.
+- **Clone Selected to Vendor** — Clone any sold item into a new vendor entry. Search by item name, pick a same-type target. Buy it back for a fully correct item.
+- **Item Search Dialog** — Search by item name across all insertion/clone flows. Shows name, key, and category.
+- **Type-for-type rule** — Cross-type swaps (Glove->Helm) produce unequippable items. Editor now warns about this.
+- **ItemBuffs Tab** — Edit base stats on any item in game data files with presets (God Mode, Max DDD, etc.)
+- **F-Key Navigation** — F1-F12 shortcuts to switch tabs
+- **Split Stack** — Split 1 from a stack without consuming the whole stack
+- **Font Scaling** — 100%/125%/150%/200% in Edit menu
+
+**Bug Fixes**
+- Repurchase list always re-scans fresh (no stale data)
+- Dragon cooldown offset corrected
+- All reload messages updated (may require 2 reloads but not usually)
+
+### v2.4.9.5
+
+**Features**
+- **Font Size Changer** — Scale UI to 100%, 125%, 150%, 200% (Edit menu, persists across restarts)
+- **Swap 1 from Stack** — Consume only 1 unit when swapping stacked items
+- **Item Effect Swap (GPatch)** — Swap consumable use-effects between items via effect hash patching
+- **Community Packs** — BlackStar Dragon No Cooldown + 10 Dye Packs
+
+**Bug Fixes**
+- Repurchase list fix (scanner now re-scans fresh, no stale data)
+- Dragon cooldown reduction offset corrected (ds+163 instead of ds+156)
+- Mount tab removed (patches were not effective)
 
 ### v2.4.9
 
