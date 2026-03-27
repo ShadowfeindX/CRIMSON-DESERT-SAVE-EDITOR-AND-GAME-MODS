@@ -185,6 +185,16 @@ The editor handles the full save file crypto pipeline:
 
 ## Changelog
 
+### v2.5.1
+
+**New Features**
+- **Show All Nexus Gate Locations** — Reveals all nexus/abyss gate locations on your map as ??? markers. Two-step process: Step 1 reveals fog of war, Step 2 injects community knowledge entries. Works on any save.
+- **Improved PARC insertion safety** — Fixed false sentinel matching in external PO fixup. Prevents corruption of FieldSaveData gimmick lists when modifying other blocks. POs are now validated against the sentinel+12 pattern before being shifted.
+
+**Bug Fixes**
+- Fixed critical bug where knowledge injection corrupted FieldSaveData on saves with large gimmick lists (805+ blocks). False sentinel matches in UUID/timestamp data were being incorrectly shifted as payload offsets.
+- Community knowledge data now loaded from bundled JSON instead of requiring community save file.
+
 ### v2.5.0
 
 **New Features**
