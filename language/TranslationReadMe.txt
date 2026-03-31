@@ -1,8 +1,28 @@
 CRIMSON DESERT SAVE EDITOR — Language Pack Guide
 =================================================
 
-HOW TO INSTALL A LANGUAGE PACK
-------------------------------
+THERE ARE TWO TYPES OF TRANSLATION FILES
+-----------------------------------------
+1. NAME PACKS (this folder — language/names_XX.json)
+   - Translates GAME DATA: item names, quest names, knowledge names
+   - ~17,000 translated names per language
+   - Downloaded separately, not bundled with exe
+   - Install via Settings > "Import Translation" or "Download Name Pack"
+
+2. UI TRANSLATIONS (locale/XX.json — bundled with exe)
+   - Translates the EDITOR INTERFACE: tab names, buttons, labels, tooltips
+   - ~166 UI strings
+   - Saved as locale/ko.json, locale/ja.json, etc. next to the exe
+   - Currently only English (en.json) and Japanese (ja.json) exist
+   - To create one: copy locale/en.json, rename to locale/ko.json,
+     translate the values, restart the editor
+
+These are independent. You can have Korean item names (name pack)
+with an English editor UI, or vice versa.
+
+
+HOW TO INSTALL A NAME PACK (Game Data Translation)
+---------------------------------------------------
 1. Download a names_XX.json file from this folder
    (e.g. names_ko.json for Korean)
 
@@ -15,6 +35,14 @@ HOW TO INSTALL A LANGUAGE PACK
 
 ALTERNATIVE: Click "Download Name Pack" in Settings to download
 directly from GitHub without manually saving the file.
+
+
+HOW TO INSTALL A UI TRANSLATION (Editor Interface)
+---------------------------------------------------
+1. Copy locale/en.json from next to the exe
+2. Rename to locale/ko.json (or your language code)
+3. Open in a text editor and translate the values (not the keys)
+4. Restart the editor and select the language in Settings
 
 
 AVAILABLE LANGUAGES
