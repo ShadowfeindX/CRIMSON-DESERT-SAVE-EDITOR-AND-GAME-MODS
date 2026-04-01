@@ -1,0 +1,62 @@
+{
+  "name": "Black Star Dragon Attack MoveSet",
+  "type": "knowledge",
+  "count": 11,
+  "entries": [
+    {
+      "key": 1004189,
+      "name": "Knowledge_Skill_TriStar_Attack",
+      "display": "Blackstar - Basic Attack"
+    },
+    {
+      "key": 1004190,
+      "name": "Knowledge_Skill_TriStar_Evade",
+      "display": "Blackstar - Evade"
+    },
+    {
+      "key": 1004191,
+      "name": "Knowledge_Skill_TriStar_Breath",
+      "display": "Blackstar - Breath"
+    },
+    {
+      "key": 1004192,
+      "name": "Knowledge_Skill_TriStar_StaminaRegen",
+      "display": "Blackstar - Stamina Restoration (30)"
+    },
+    {
+      "key": 1004193,
+      "name": "Knowledge_Skill_TriStar_Attack_Fire",
+      "display": "Blackstar - Fire Breath"
+    },
+    {
+      "key": 1004194,
+      "name": "Knowledge_Skill_TriStar_Breath_Fire",
+      "display": "Blackstar - Stamina Restoration Reduced (50)"
+    },
+    {
+      "key": 1004195,
+      "name": "Knowledge_Skill_TriStar_Attack_Ice",
+      "display": "Blackstar - Ice Breath"
+    },
+    {
+      "key": 1004196,
+      "name": "Knowledge_Skill_TriStar_Breath_Ice",
+      "display": "Blackstar - Stamina Restoration Reduced (50)"
+    },
+    {
+      "key": 1004197,
+      "name": "Knowledge_Skill_TriStar_Attack_Lightning",
+      "display": "Blackstar - Lightning Breath"
+    },
+    {
+      "key": 1004198,
+      "name": "Knowledge_Skill_TriStar_Breath_Lightning",
+      "display": "Blackstar - Stamina Restoration Reduced (50)"
+    },
+    {
+      "key": 1004199,
+      "name": "Knowledge_Skill_TriStar_MultiAttack",
+      "display": "Blackstar - Multi Attack"
+    }
+  ]
+}
