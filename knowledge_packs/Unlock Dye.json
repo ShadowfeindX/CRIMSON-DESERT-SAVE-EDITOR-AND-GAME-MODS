@@ -1,0 +1,357 @@
+{
+  "name": "Unlock Dye",
+  "type": "knowledge",
+  "count": 70,
+  "entries": [
+    {
+      "key": 1001287,
+      "name": "Knowledge_Grey_DyeColor_1",
+      "display": "Oliver's Dye"
+    },
+    {
+      "key": 1000294,
+      "name": "Knowledge_Grey_DyeColor_2",
+      "display": "Oliver's Dye"
+    },
+    {
+      "key": 1000776,
+      "name": "Knowledge_Grey_DyeColor_3",
+      "display": "Oliver's Dye"
+    },
+    {
+      "key": 1001510,
+      "name": "Knowledge_Grey_DyeColor_4",
+      "display": "Oliver's Dye"
+    },
+    {
+      "key": 1001511,
+      "name": "Knowledge_Grey_DyeColor_5",
+      "display": "Oliver's Dye"
+    },
+    {
+      "key": 1001512,
+      "name": "Knowledge_Grey_DyeColor_6",
+      "display": "Oliver's Dye"
+    },
+    {
+      "key": 1001513,
+      "name": "Knowledge_Grey_DyeColor_7",
+      "display": "Oliver's Dye"
+    },
+    {
+      "key": 1001514,
+      "name": "Knowledge_Grey_DyeColor_8",
+      "display": "Oliver's Dye"
+    },
+    {
+      "key": 1001515,
+      "name": "Knowledge_Grey_DyeColor_9",
+      "display": "Oliver's Dye"
+    },
+    {
+      "key": 1001516,
+      "name": "Knowledge_Grey_DyeColor_10",
+      "display": "Oliver's Dye"
+    },
+    {
+      "key": 1000297,
+      "name": "Knowledge_Her_DyeColor_1",
+      "display": "Hernandian Dye No. 1"
+    },
+    {
+      "key": 1000298,
+      "name": "Knowledge_Her_DyeColor_2",
+      "display": "Hernandian Dye No. 2"
+    },
+    {
+      "key": 1000299,
+      "name": "Knowledge_Her_DyeColor_3",
+      "display": "Hernandian Dye No. 3"
+    },
+    {
+      "key": 1000300,
+      "name": "Knowledge_Her_DyeColor_4",
+      "display": "Hernandian Dye No. 4"
+    },
+    {
+      "key": 1000301,
+      "name": "Knowledge_Her_DyeColor_5",
+      "display": "Hernandian Dye No. 5"
+    },
+    {
+      "key": 1000302,
+      "name": "Knowledge_Dem_DyeColor_I_1",
+      "display": "Demenissian Dye I_No. 1"
+    },
+    {
+      "key": 1000303,
+      "name": "Knowledge_Dem_DyeColor_I_2",
+      "display": "Demenissian Dye I_No. 2"
+    },
+    {
+      "key": 1000304,
+      "name": "Knowledge_Dem_DyeColor_I_3",
+      "display": "Demenissian Dye I_No. 3"
+    },
+    {
+      "key": 1000305,
+      "name": "Knowledge_Dem_DyeColor_I_4",
+      "display": "Demenissian Dye I_No. 4"
+    },
+    {
+      "key": 1000306,
+      "name": "Knowledge_Dem_DyeColor_I_5",
+      "display": "Demenissian Dye I_No. 5"
+    },
+    {
+      "key": 1000307,
+      "name": "Knowledge_Dem_DyeColor_II_1",
+      "display": "Demenissian Dye II_No. 1"
+    },
+    {
+      "key": 1000308,
+      "name": "Knowledge_Dem_DyeColor_II_2",
+      "display": "Demenissian Dye II_No. 2"
+    },
+    {
+      "key": 1000329,
+      "name": "Knowledge_Dem_DyeColor_II_3",
+      "display": "Demenissian Dye II_No. 3"
+    },
+    {
+      "key": 1000330,
+      "name": "Knowledge_Dem_DyeColor_II_4",
+      "display": "Demenissian Dye II_No. 4"
+    },
+    {
+      "key": 1000331,
+      "name": "Knowledge_Dem_DyeColor_II_5",
+      "display": "Demenissian Dye II_No. 5"
+    },
+    {
+      "key": 1000332,
+      "name": "Knowledge_Dem_DyeColor_III_1",
+      "display": "Demenissian Dye III_No. 1"
+    },
+    {
+      "key": 1000354,
+      "name": "Knowledge_Dem_DyeColor_III_2",
+      "display": "Demenissian Dye III_No. 2"
+    },
+    {
+      "key": 1000355,
+      "name": "Knowledge_Dem_DyeColor_III_3",
+      "display": "Demenissian Dye III_No. 3"
+    },
+    {
+      "key": 1000356,
+      "name": "Knowledge_Dem_DyeColor_III_4",
+      "display": "Demenissian Dye III_No. 4"
+    },
+    {
+      "key": 1000378,
+      "name": "Knowledge_Dem_DyeColor_III_5",
+      "display": "Demenissian Dye III_No. 5"
+    },
+    {
+      "key": 1000379,
+      "name": "Knowledge_Del_DyeColor_1",
+      "display": "Delesyian Dye"
+    },
+    {
+      "key": 1000386,
+      "name": "Knowledge_Del_DyeColor_2",
+      "display": "Delesyian Dye"
+    },
+    {
+      "key": 1000387,
+      "name": "Knowledge_Del_DyeColor_3",
+      "display": "Delesyian Dye"
+    },
+    {
+      "key": 1000389,
+      "name": "Knowledge_Del_DyeColor_4",
+      "display": "Delesyian Dye"
+    },
+    {
+      "key": 1000390,
+      "name": "Knowledge_Del_DyeColor_5",
+      "display": "Delesyian Dye"
+    },
+    {
+      "key": 1000391,
+      "name": "Knowledge_Kwe_DyeColor_1",
+      "display": "Pailunese Dye"
+    },
+    {
+      "key": 1000392,
+      "name": "Knowledge_Kwe_DyeColor_2",
+      "display": "Pailunese Dye"
+    },
+    {
+      "key": 1000451,
+      "name": "Knowledge_Kwe_DyeColor_3",
+      "display": "Pailunese Dye"
+    },
+    {
+      "key": 1000452,
+      "name": "Knowledge_Kwe_DyeColor_4",
+      "display": "Pailunese Dye"
+    },
+    {
+      "key": 1000453,
+      "name": "Knowledge_Kwe_DyeColor_5",
+      "display": "Pailunese Dye"
+    },
+    {
+      "key": 1000454,
+      "name": "Knowledge_Cal_DyeColor_1",
+      "display": "Calphadean Dye"
+    },
+    {
+      "key": 1000455,
+      "name": "Knowledge_Cal_DyeColor_2",
+      "display": "Calphadean Dye"
+    },
+    {
+      "key": 1000456,
+      "name": "Knowledge_Cal_DyeColor_3",
+      "display": "Calphadean Dye"
+    },
+    {
+      "key": 1000457,
+      "name": "Knowledge_Cal_DyeColor_4",
+      "display": "Calphadean Dye"
+    },
+    {
+      "key": 1000458,
+      "name": "Knowledge_Cal_DyeColor_5",
+      "display": "Calphadean Dye"
+    },
+    {
+      "key": 1000459,
+      "name": "Knowledge_Bar_DyeColor_1",
+      "display": "Varnian Dye"
+    },
+    {
+      "key": 1000460,
+      "name": "Knowledge_Bar_DyeColor_2",
+      "display": "Varnian Dye"
+    },
+    {
+      "key": 1000461,
+      "name": "Knowledge_Bar_DyeColor_3",
+      "display": "Varnian Dye"
+    },
+    {
+      "key": 1000462,
+      "name": "Knowledge_Bar_DyeColor_4",
+      "display": "Varnian Dye"
+    },
+    {
+      "key": 1000463,
+      "name": "Knowledge_Bar_DyeColor_5",
+      "display": "Varnian Dye"
+    },
+    {
+      "key": 1000464,
+      "name": "Knowledge_Por_DyeColor_1",
+      "display": "Pororin Dye"
+    },
+    {
+      "key": 1000465,
+      "name": "Knowledge_Por_DyeColor_2",
+      "display": "Pororin Dye"
+    },
+    {
+      "key": 1000466,
+      "name": "Knowledge_Por_DyeColor_3",
+      "display": "Pororin Dye"
+    },
+    {
+      "key": 1000467,
+      "name": "Knowledge_Por_DyeColor_4",
+      "display": "Pororin Dye"
+    },
+    {
+      "key": 1000468,
+      "name": "Knowledge_Por_DyeColor_5",
+      "display": "Pororin Dye"
+    },
+    {
+      "key": 1000469,
+      "name": "Knowledge_Tom_DyeColor_1",
+      "display": "Tommasoan Dye"
+    },
+    {
+      "key": 1000470,
+      "name": "Knowledge_Tom_DyeColor_2",
+      "display": "Tommasoan Dye"
+    },
+    {
+      "key": 1000576,
+      "name": "Knowledge_Tom_DyeColor_3",
+      "display": "Tommasoan Dye"
+    },
+    {
+      "key": 1000584,
+      "name": "Knowledge_Tom_DyeColor_4",
+      "display": "Tommasoan Dye"
+    },
+    {
+      "key": 1000719,
+      "name": "Knowledge_Tom_DyeColor_5",
+      "display": "Tommasoan Dye"
+    },
+    {
+      "key": 2147483454,
+      "name": "Knowledge_Her_DyeColor",
+      "display": "Theoric"
+    },
+    {
+      "key": 2147483453,
+      "name": "Knowledge_Dem_DyeColor_I",
+      "display": "Monty"
+    },
+    {
+      "key": 2147483452,
+      "name": "Knowledge_Dem_DyeColor_II",
+      "display": "Edmar"
+    },
+    {
+      "key": 2147483451,
+      "name": "Knowledge_Dem_DyeColor_III",
+      "display": "Linus"
+    },
+    {
+      "key": 2147483450,
+      "name": "Knowledge_Del_DyeColor",
+      "display": "Castiel"
+    },
+    {
+      "key": 2147483449,
+      "name": "Knowledge_Kwe_DyeColor",
+      "display": "Laurick"
+    },
+    {
+      "key": 2147483448,
+      "name": "Knowledge_Cal_DyeColor",
+      "display": "Lauendell"
+    },
+    {
+      "key": 2147483447,
+      "name": "Knowledge_Bar_DyeColor",
+      "display": "Alton"
+    },
+    {
+      "key": 2147483446,
+      "name": "Knowledge_Tom_DyeColor",
+      "display": "Cormac"
+    },
+    {
+      "key": 2147483445,
+      "name": "Knowledge_Por_DyeColor",
+      "display": "Devin"
+    }
+  ]
+}
