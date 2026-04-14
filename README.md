@@ -11,7 +11,7 @@ Two companion desktop tools for **Crimson Desert**. They share a codebase and au
 
 **Install both** if you want the full experience — they run independently, don't clobber each other's config/backups, and auto-update separately via their own version manifests.
 
-Neither tool requires the game to be closed, and neither modifies the game client in memory. Save Editor writes to your encrypted `save.save` file; Game Mods writes to PAZ overlay directories.
+Neither tool modifies the game client in memory. Save Editor writes to your encrypted `save.save` file; Game Mods writes to PAZ overlay directories.
 
 ---
 
