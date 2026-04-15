@@ -5,7 +5,7 @@
 **File analyzed:** `CrimsonSaveEditor.exe`
 **SHA-256:** `077758da8063d1e58d5533beaf5366cb4c9d825d23dd835692f4cc64907ee1ce`
 **Size:** 121,565,857 bytes (~116 MB)
-**Source repo (buildable):** https://github.com/NattKh/CrimsonSaveEditor-v3.1.2-backup
+**Source repo (buildable):** https://github.com/NattKh/CrimsonSaveEditor-v3.1.2-backup (currently private but will be release)
 **Release URL:** https://github.com/NattKh/CRIMSON-DESERT-SAVE-EDITOR-AND-GAME-MODS/releases/tag/v3.1.2
 
 ---
