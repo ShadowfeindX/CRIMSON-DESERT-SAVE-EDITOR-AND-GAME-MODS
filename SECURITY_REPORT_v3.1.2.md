@@ -166,13 +166,6 @@ If a hijack had occurred, the reverse-engineered binary would contain **non-proj
   2. Rebuild from the backup source repo yourself.
   3. Or wait for the signed release (see below).
 
-### For this project going forward
-1. **Submit false-positive report to Microsoft** at https://www.microsoft.com/wdsi/filesubmission so `Wacatac.H!ml` is cleared against this hash.
-2. **Publish SHA-256 sums** in every release's notes so users can verify the asset they received.
-3. **Code-sign future releases** — even a low-cost OV certificate dramatically reduces Defender false-positive rate and builds SmartScreen reputation over time.
-4. **Consider VirusTotal re-scan** after Microsoft clears the detection — that typically propagates to several of the other engines within a week.
-
----
 
 ## Reproducibility
 
