@@ -1,5 +1,5 @@
 {
-  "version": "1.0.0",
-  "url": "https://github.com/NattKh/CRIMSON-DESERT-SAVE-EDITOR-AND-GAME-MODS/releases/download/gamemods-v1.0.0/CrimsonGameMods.exe",
-  "notes": "Crimson Game Mods v1.0.0 — first release of the PAZ / pabgb modding tool. Companion to the Standalone Save Editor. Includes ItemBuffs, Stores, DropSets, SpawnEdit, FieldEdit tabs."
+  "version": "1.0.1",
+  "url": "https://github.com/NattKh/CRIMSON-DESERT-SAVE-EDITOR-AND-GAME-MODS/releases/download/gamemods-v1.0.1/CrimsonGameMods.exe",
+  "notes": "Crimson Game Mods v1.0.1 — Universal Proficiency (any character equips any weapon/armor type), Import Mod Folder (reverse-engineer any pabgb mod into editable config), Enable All QoL one-click bundle (no cooldown + max charges + 999999 stacks + infinity durability), Imbue dropdown search + visual tier markers, fixed bulk imbue class-hash corruption, 'Copy Buffs to All Weapons' rename + clearer UX, auto-version splash, disabled broken mesh-swap scale field."
 }
