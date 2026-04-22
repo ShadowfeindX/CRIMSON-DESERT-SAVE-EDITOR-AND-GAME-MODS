@@ -101,6 +101,21 @@ class MercPetsTab(QWidget):
         apply_btn.clicked.connect(self._apply_to_game)
         top_row.addWidget(apply_btn)
 
+        # Overlay slot — configurable. Default 65 to stay off both Stacker's
+        # 0063 (equipslotinfo) and SkillTree's default 0064.
+        top_row.addWidget(QLabel("Overlay:"))
+        self._overlay_spin = QSpinBox()
+        self._overlay_spin.setRange(1, 9999)
+        self._overlay_spin.setValue(self._config.get("mercpets_overlay_dir", 65))
+        self._overlay_spin.setFixedWidth(70)
+        self._overlay_spin.setToolTip(
+            "Overlay group number (0065 = default). Change if another mod\n"
+            "already owns this slot. Apply writes to <game>/NNNN/;\n"
+            "Restore removes the same NNNN/.")
+        self._overlay_spin.valueChanged.connect(
+            lambda v: self._config.update({"mercpets_overlay_dir": int(v)}))
+        top_row.addWidget(self._overlay_spin)
+
         export_btn = QPushButton("Export as Mod")
         export_btn.setStyleSheet("background-color: #7B1FA2; color: white; font-weight: bold;")
         export_btn.setToolTip("ADVANCED — UNSUPPORTED. Contact mod loader dev for help.")
@@ -332,7 +347,7 @@ class MercPetsTab(QWidget):
 
         new_h, new_b = self._serialize()
         INTERNAL_DIR = "gamedata/binary__/client/bin"
-        overlay_group = "0063"
+        overlay_group = f"{self._overlay_spin.value():04d}"
 
         try:
             with tempfile.TemporaryDirectory() as tmp_dir:
@@ -417,7 +432,7 @@ class MercPetsTab(QWidget):
         gp = self._get_game_path()
         if not gp:
             return
-        overlay_group = "0063"
+        overlay_group = f"{self._overlay_spin.value():04d}"
         overlay = os.path.join(gp, overlay_group)
         papgt = os.path.join(gp, "meta", "0.papgt")
         bak = papgt + ".mercpets_bak"

@@ -3018,9 +3018,25 @@ class DropsetTab(QWidget):
         apply_btn.setObjectName("accentBtn")
         apply_btn.setToolTip(
             "Deploy modified drop tables directly to the game.\n"
-            "Creates 0036/ overlay. Restart game to take effect.")
+            "Creates an overlay group (default 0036/). Restart game to take effect.")
         apply_btn.clicked.connect(self._dropset_apply)
         top_row.addWidget(apply_btn)
+
+        # Overlay group number — user-configurable so they can avoid
+        # colliding with whichever slot another mod owns.
+        top_row.addWidget(QLabel(tr("Overlay:")))
+        self._dropset_overlay_spin = QSpinBox()
+        self._dropset_overlay_spin.setRange(1, 9999)
+        self._dropset_overlay_spin.setValue(
+            self._config.get("dropset_overlay_dir", 36))
+        self._dropset_overlay_spin.setFixedWidth(70)
+        self._dropset_overlay_spin.setToolTip(
+            "Overlay group number (0036 = default). Change if another mod\n"
+            "already uses this slot. Apply to Game writes to <game>/NNNN/;\n"
+            "Restore removes the same NNNN/.")
+        self._dropset_overlay_spin.valueChanged.connect(
+            lambda v: self._config.update({"dropset_overlay_dir": int(v)}))
+        top_row.addWidget(self._dropset_overlay_spin)
 
         restore_btn = QPushButton(tr("Restore"))
         restore_btn.setToolTip(tr("Remove drop table mod and restore vanilla"))
@@ -3858,11 +3874,13 @@ class DropsetTab(QWidget):
         body_data = bytes(self._dropset_editor.body_bytes)
         header_data = self._dropset_editor.header_bytes
 
+        group_name = f"{self._dropset_overlay_spin.value():04d}"
+
         reply = QMessageBox.question(
             self, tr("Apply DropSet Changes"),
             f"Deploy modified drop tables to the game?\n\n"
             f"Data: pabgb ({len(body_data):,} bytes) + pabgh ({len(header_data):,} bytes)\n"
-            f"Overlay: 0036/ (first PAPGT entry)\n\n"
+            f"Overlay: {group_name}/\n\n"
             f"Original game files are NOT modified.\n"
             f"To undo: click Restore.\n"
             f"Restart the game for changes to take effect.",
@@ -3897,7 +3915,7 @@ class DropsetTab(QWidget):
                     game_dir=game_path,
                     mod_folder=tmp_dir,
                     output_dir=out_dir,
-                    group_name="0036",
+                    group_name=group_name,
                     compression=Compression.NONE,
                 )
 
@@ -3906,22 +3924,22 @@ class DropsetTab(QWidget):
                 if papgt_path.exists() and not backup_path.exists():
                     shutil.copy2(papgt_path, backup_path)
 
-                dest = gp / "0036"
+                dest = gp / group_name
                 dest.mkdir(exist_ok=True)
                 shutil.copyfile(
-                    os.path.join(out_dir, "0036", "0.paz"), dest / "0.paz")
+                    os.path.join(out_dir, group_name, "0.paz"), dest / "0.paz")
                 shutil.copyfile(
-                    os.path.join(out_dir, "0036", "0.pamt"), dest / "0.pamt")
+                    os.path.join(out_dir, group_name, "0.pamt"), dest / "0.pamt")
                 shutil.copyfile(
                     os.path.join(out_dir, "meta", "0.papgt"), papgt_path)
 
             paz_size = (dest / "0.paz").stat().st_size
-            self._dropset_status.setText(f"Applied! 0036/ ({paz_size:,} bytes)")
+            self._dropset_status.setText(f"Applied! {group_name}/ ({paz_size:,} bytes)")
             QMessageBox.information(self, tr("Success"),
-                f"Deployed to 0036/ ({paz_size:,} bytes)\n"
+                f"Deployed to {group_name}/ ({paz_size:,} bytes)\n"
                 f"Restart the game for changes to take effect.\n\n"
-                f"Note: If another mod also uses 0036/, they will conflict.\n"
-                f"Use Restore to remove before applying other 0036/ mods.")
+                f"Note: If another mod also uses {group_name}/, they will conflict.\n"
+                f"Use Restore to remove before applying other {group_name}/ mods.")
 
         except Exception as e:
             log.exception("Unhandled exception")
@@ -3936,17 +3954,18 @@ class DropsetTab(QWidget):
 
         from pathlib import Path
         gp = Path(game_path)
-        overlay = gp / "0036"
+        group_name = f"{self._dropset_overlay_spin.value():04d}"
+        overlay = gp / group_name
         backup = gp / "meta" / "0.papgt.dropset_bak"
 
         if not overlay.is_dir():
             QMessageBox.information(self, tr("Nothing to Restore"),
-                tr("No dropset mod found in 0036/"))
+                tr(f"No dropset mod found in {group_name}/"))
             return
 
         reply = QMessageBox.question(
             self, tr("Restore Original"),
-            tr("Remove 0036/ overlay and restore PAPGT backup?"),
+            tr(f"Remove {group_name}/ overlay and restore PAPGT backup?"),
             QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
         if reply != QMessageBox.Yes:
             return
@@ -3960,11 +3979,11 @@ class DropsetTab(QWidget):
                 backup.unlink()
                 messages.append("Restored PAPGT from backup")
             else:
-                msg = self._rebuild_papgt_fn(game_path, "0036")
+                msg = self._rebuild_papgt_fn(game_path, group_name)
                 messages.append(msg)
 
             shutil.rmtree(overlay)
-            messages.append("Removed 0036/")
+            messages.append(f"Removed {group_name}/")
 
             self._dropset_status.setText(tr("Restored"))
             QMessageBox.information(self, tr("Restored"),

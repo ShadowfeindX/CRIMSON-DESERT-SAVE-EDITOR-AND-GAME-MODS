@@ -12,6 +12,7 @@ import subprocess
 import sys
 import tempfile
 import traceback
+import textwrap
 from typing import Callable, List, Optional, Tuple
 
 from PySide6.QtCore import Qt, QSize, QTimer, Signal
@@ -149,222 +150,624 @@ class ItemBuffsTab(QWidget):
 
 
     def _build_ui(self) -> None:
-        from PySide6.QtWidgets import QScrollArea, QSizePolicy
+        # from PySide6.QtWidgets import QScrollArea, QSizePolicy
 
-        layout = QVBoxLayout(self)
-        layout.setContentsMargins(6, 6, 6, 6)
-        layout.setSpacing(4)
-        help_row = QHBoxLayout()
-        help_row.setSpacing(4)
-        help_row.addStretch(1)
-        help_row.addWidget(make_help_btn("itembuffs", self._show_guide_fn))
-        layout.addLayout(help_row)
+        def build_help_row() -> QHBoxLayout:
+            help_row = QHBoxLayout()
+            help_row.setSpacing(4)
+            help_row.addStretch(1)
+            help_row.addWidget(make_help_btn("itembuffs", self._show_guide_fn))
+            return help_row
 
-        warn_label = QLabel(
-            "\u26A0  Buff and stat names may be inaccurate — they are community-mapped, "
-            "not from official game data. Some buffs share numeric keys across different "
-            "systems (stats/buffs/passives are 3 separate ID namespaces). "
-            "If a name looks wrong, trust the in-game tooltip after applying."
-        )
-        warn_label.setWordWrap(True)
-        warn_label.setStyleSheet(
-            f"color: #FFB74D; padding: 6px; font-size: 10px; "
-            f"border: 1px solid #5D4037; border-radius: 4px; "
-            f"background-color: rgba(93,64,55,0.25);"
-        )
-        layout.addWidget(warn_label)
+        def build_warn_label() -> QLabel:
+            warn_label = QLabel(
+                "\u26A0  Buff and stat names may be inaccurate — they are community-mapped, "
+                "not from official game data. Some buffs share numeric keys across different "
+                "systems (stats/buffs/passives are 3 separate ID namespaces). "
+                "If a name looks wrong, trust the in-game tooltip after applying."
+            )
+            warn_label.setWordWrap(True)
+            warn_label.setStyleSheet(
+                f"color: #FFB74D; padding: 6px; font-size: 10px; "
+                f"border: 1px solid #5D4037; border-radius: 4px; "
+                f"background-color: rgba(93,64,55,0.25);"
+            )
+            return warn_label
 
+        def build_more_menu() -> QMenu:
+            more_menu = QMenu(self)
+            more_menu.setToolTipsVisible(True)
+
+            act_sync = more_menu.addAction("Sync Buff Names from GitHub")
+            act_sync.setToolTip(
+                "Download community-verified buff/stat/passive names.")
+            act_sync.triggered.connect(self._buff_sync_community_names)
+
+            more_menu.addSeparator()
+            
+            act_verify = more_menu.addAction("Verify Applied Overlay...")
+            act_verify.setToolTip(
+                "Diagnostics: extract your current overlay and report how many "
+                "items actually have each mutation applied. Use after Apply to "
+                "Game to confirm the overlay matches expectations.")
+            act_verify.triggered.connect(self._buff_verify_applied_overlay)
+
+            act_restore = more_menu.addAction("Restore Original (remove overlay)")
+            act_restore.setToolTip(
+                "Undo 'Apply to Game': remove the ItemBuffs PAZ overlay and its "
+                "PAPGT entry. Requires admin.")
+            act_restore.triggered.connect(self._buff_restore_original)
+
+            act_reset_vanilla = more_menu.addAction(
+                "Reset to Vanilla PAPGT (nuclear)")
+            act_reset_vanilla.setToolTip(
+                "NUCLEAR RECOVERY: restore first-apply PAPGT snapshot. "
+                "Disables ALL overlays. Requires admin.")
+            act_reset_vanilla.triggered.connect(self._buff_reset_vanilla_papgt)
+  
+            return more_menu
+
+        def build_action_row() -> QHBoxLayout:
+            action_row = QHBoxLayout()
+            action_row.setSpacing(4)
+
+            extract_rust_btn = QPushButton("Extract")
+            extract_rust_btn.setObjectName("accentBtn")
+            extract_rust_btn.setToolTip("Extract iteminfo from game using Rust parser")
+            extract_rust_btn.clicked.connect(self._buff_extract_rust)
+            action_row.addWidget(extract_rust_btn)
+
+            desc_search_btn = QPushButton("Search by Description")
+            desc_search_btn.setToolTip(
+                "Search ALL buffs, passives, stats by in-game description.\n"
+                "Keywords: 'imbue fire', 'damage', 'stamina', 'immunity', etc.")
+            desc_search_btn.clicked.connect(self._buff_open_desc_search)
+            # action_row.addWidget(desc_search_btn)
+
+            adv_json_btn = QPushButton("JSON Edit")
+            adv_json_btn.setToolTip(
+                "Open raw enchant data as editable JSON — full control")
+            adv_json_btn.clicked.connect(self._eb_json_edit)
+            # action_row.addWidget(adv_json_btn)
+
+            reset_btn = QPushButton("Reset")
+            reset_btn.setToolTip("Discard all in-memory changes, re-extract from disk")
+            reset_btn.clicked.connect(self._buff_remove_all)
+            action_row.addWidget(reset_btn)
+
+            apply_game_btn = QPushButton("Apply to Game")
+            apply_game_btn.setStyleSheet("QPushButton {"
+                "background-color: #B71C1C; color: white; font-weight: bold; }")
+            apply_game_btn.setToolTip(
+                "Deploy modified iteminfo.pabgb directly to the game.\n"
+                "Creates a PAZ overlay — original files are NOT modified.\n"
+                "Restart the game for changes to take effect.\n"
+                "Use Restore (More ▾) to undo.")
+            apply_game_btn.clicked.connect(self._buff_apply_to_game)
+            self._buff_apply_game_btn = apply_game_btn
+            action_row.addWidget(apply_game_btn)
+
+            import_mod_btn = QPushButton("Import")
+            import_mod_btn.setStyleSheet("QPushButton {"
+                "background-color: #00695C; color: white; font-weight: bold; }")
+            
+            # START Import Menu
+            import_mod_menu = QMenu(self)
+            import_mod_menu.setToolTipsVisible(True)
+            import_mod_btn.setMenu(import_mod_menu)
+            action_row.addWidget(import_mod_btn)
+            
+            act_import_config = import_mod_menu.addAction("Import ItemBuffs Config")
+            act_import_config.setToolTip(
+                "Load a previously saved config file.")
+            act_import_config.triggered.connect(self._buff_load_config)
+            
+            
+            def transmog_config_load():
+                "STUB"
+            # act_import_transmog_config = import_mod_menu.addAction("Import Transmog Config")        
+            # act_import_transmog_config.triggered.connect(transmog_config_load)
+             
+            # act_import_custom_item_config = import_mod_menu.addAction("Import Custom Item")
+            
+            import_mod_menu.addSeparator()
+            
+            # act_import_perfect_mod = import_mod_menu.addAction("Import Perfect Loader Mod...")
+            # act_import_perfect_mod.setToolTip(
+            #     "Import a Perfect/Semantic-format MOD.")
+            # act_import_perfect_mod.triggered.connect(self._buff_import_perfect_mod)
+            
+            act_import_json_mod = import_mod_menu.addAction("Import JSON Mod...")
+            act_import_json_mod.setToolTip(
+                "Import a Pldada/DMM-format JSON byte patch (e.g. Infinity Durability).")
+            act_import_json_mod.triggered.connect(self._buff_import_community_json)
+            
+            act_import_cdumm_mod = import_mod_menu.addAction("Import CDUMM/PAZ Mod...")
+            act_import_cdumm_mod.setToolTip(
+                "Reverse-engineer any CDUMM/PAZ mod folder back into an editable "
+                "config.\nPoint at a mod's files/gamedata/binary__/client/bin/"
+                "iteminfo.pabgb — every modified field becomes editable here.")
+            act_import_cdumm_mod.triggered.connect(self._buff_import_mod_folder)
+            # END Import Menu
+            
+            export_mod_btn = QPushButton("Export")
+            export_mod_btn.setStyleSheet("QPushButton {"
+                "background-color: #00695C; color: white; font-weight: bold; }")
+
+            export_mod_menu = QMenu(self)
+            export_mod_menu.setToolTipsVisible(True)
+            export_mod_btn.setMenu(export_mod_menu)
+            action_row.addWidget(export_mod_btn)
+            
+            # START Export Menu
+            # Export buttons are dev-gated (normal users never see them).
+            act_export_config = export_mod_menu.addAction("Export ItemBuffs Config")
+            act_export_config.setToolTip(
+                "Save your current edits as a reusable config file.")
+            act_export_config.triggered.connect(self._buff_save_config)
+            
+            export_mod_menu.addSeparator()
+            
+            # act_export_perfect_mod = export_mod_menu.addAction("Export Perfect Loader Mod...")
+            # act_export_perfect_mod.setToolTip(
+            #     "Export a Perfect/Semantic-format MOD.")
+            # act_export_perfect_mod.triggered.connect(self._buff_export_perfect_mod)
+
+            act_export_json_mod = export_mod_menu.addAction("Export JSON Patch...")
+            act_export_json_mod.setToolTip(
+                "ADVANCED — UNSUPPORTED. Contact mod loader dev for help.\n\n"
+                "Export value-only changes as a JSON patch file.")
+            act_export_json_mod.triggered.connect(self._buff_export_json)
+            export_mod_menu.addAction(act_export_json_mod)
+
+            act_export_mod = export_mod_menu.addAction("Export Mod...")
+            act_export_mod.setToolTip(
+                "ADVANCED — UNSUPPORTED. Contact mod loader dev for help.\n\n"
+                "Export as raw game files for mod loaders (CDMM, DMM, CDUMM).")
+            act_export_mod.triggered.connect(self._buff_export_mod)
+            export_mod_menu.addAction(act_export_mod)
+
+            act_export_cdumm_mod = export_mod_menu.addAction("Export CDUMM Mod...")
+            act_export_cdumm_mod.setToolTip(
+                "ADVANCED — UNSUPPORTED. Contact mod loader dev for help.\n\n"
+                "Export as pre-packed PAZ mod for JMM / CDUMM / DMM.")
+            act_export_cdumm_mod.triggered.connect(self._buff_export_cdumm_mod)
+            export_mod_menu.addAction(act_export_cdumm_mod)
+
+            act_export_all = export_mod_menu.addAction("Export All Mod Formats...")
+            act_export_all.setToolTip(
+                "ADVANCED — UNSUPPORTED. Export in all three formats at once.")
+            act_export_all.triggered.connect(self._buff_export_all_formats)
+            export_mod_menu.addAction(act_export_all)
+            # END Export Menu
+            
+            
+
+            transmog_btn = QPushButton("Transmog (Armor / Weapon Visual Swap)")
+            transmog_btn.setStyleSheet("QPushButton {"
+                "background-color: #6A1B9A; color: white; font-weight: bold; }")
+            transmog_btn.setToolTip(
+                "Visual Transmog for ANY armor or weapon you own.\n\n"
+                "• Make your endgame armor look like a fancy starter set\n"
+                "• Make your sword look like a legendary weapon you don't have\n"
+                "• Mix and match looks per slot — boots from one set, helm from another\n\n"
+                "Opens a dialog with quick-filter buttons (Helm, Chest, Sword,\n"
+                "Bow, Ring, etc.) so you find the right slot in one click.\n"
+                "Stats / buffs / enchants are kept — only the visual model changes.\n\n"
+                "Queued swaps apply automatically on Export as Mod or Apply to Game.")
+            transmog_btn.clicked.connect(self._buff_open_transmog_dialog)
+            action_row.addWidget(transmog_btn)
+
+            create_item_btn = QPushButton("⚒ Create Custom Item")
+            create_item_btn.setStyleSheet(
+                "QPushButton { background-color: #00695C; color: white; "
+                "font-weight: bold; padding: 8px 14px; font-size: 13px; }")
+            create_item_btn.setToolTip(
+                "Design a brand-new item by cloning an existing donor.\n\n"
+                "• Pick any of 6,000+ game items as a starting point\n"
+                "• Edit stats per enchant level, passives, buffs, sockets, gimmicks\n"
+                "• Save/Load shareable configs\n"
+                "• Two deploy modes:\n"
+                "    — Swap to Vendor: replace a vendor item with your stats\n"
+                "    — Apply to Game (New Item): mint a brand new key 999001+\n"
+                "      with custom localized name\n\n"
+                "Use 'Add to Save File' from inside the creator to push the new\n"
+                "item into your save without external tools.")
+            create_item_btn.clicked.connect(self._open_item_creator)
+            action_row.addWidget(create_item_btn)
+
+            # Standalone entry into the Add-to-Save dialog without having to
+            # re-run Create Item. Scans the current 0058/ overlay for any
+            # custom keys (>= 999001) and lets the user pick one to swap
+            # into a save-file vendor item. Useful for testing or adding
+            # an already-deployed custom item to additional saves.
+            add_save_btn = QPushButton("🎒 Add Custom Item to Save")
+            add_save_btn.setStyleSheet(
+                "QPushButton { background-color: #1565C0; color: white; "
+                "font-weight: bold; padding: 8px 14px; font-size: 13px; }")
+            add_save_btn.setToolTip(
+                "Open the Add-to-Save dialog for an ALREADY-deployed custom item.\n"
+                "Scans <game>/0058/iteminfo.pabgb for keys in the custom range\n"
+                "(999001+) and lets you pick one, then swaps it into a save file\n"
+                "vendor/repurchase item — same flow as the Create Item post-apply\n"
+                "prompt, but reusable without re-running Create Item.")
+            add_save_btn.clicked.connect(self._open_add_to_save_picker)
+            action_row.addWidget(add_save_btn)
+
+            more_btn = QPushButton("More")
+            more_menu = build_more_menu()
+            more_btn.setMenu(more_menu)
+            action_row.addWidget(more_btn)
+
+            action_row.addWidget(make_help_btn("itembuffs", self._show_guide_fn))
+            action_row.addStretch(1)
+            
+            credit = QLabel("credit: Potter420 & LukeFZ")
+            credit.setStyleSheet("color: #FF5252; font-style: italic; padding: 2px;")
+            action_row.addWidget(credit)
+            
+            return action_row
+
+        def build_search_row() -> QHBoxLayout:
+            search_row = QHBoxLayout()
+            search_row.setSpacing(4)
+            self._buff_search = QLineEdit()
+            self._buff_search.setPlaceholderText("Item name (e.g. Earring, Sword, Necklace)...")
+            self._buff_search.returnPressed.connect(self._buff_search_items)
+
+            search_btn = QPushButton("Search")
+            search_btn.clicked.connect(self._buff_search_items)
+
+            # Category filter (populated after extract — empty until then)
+            self._buff_category_filter = QComboBox()
+            self._buff_category_filter.setToolTip(
+                "Restrict results to items in a specific category.\n"
+                "Populated from live iteminfo after Extract.")
+            self._buff_category_filter.setMinimumWidth(180)
+            self._buff_category_filter.addItem("All categories", None)
+            self._buff_category_filter.currentIndexChanged.connect(self._buff_search_items)
+            
+            desc_search_btn = QPushButton("Search by Description")
+            desc_search_btn.setToolTip(
+                "Search ALL buffs, passives, stats by in-game description.\n"
+                "Keywords: 'imbue fire', 'damage', 'stamina', 'immunity', etc.")
+            desc_search_btn.clicked.connect(self._buff_open_desc_search)
+
+            diff_btn = QPushButton("Item Diff")
+            diff_btn.setToolTip(
+                "Compare two items field by field — see exactly what's different\n"
+                "between e.g. a working modded item and a broken one.")
+            diff_btn.clicked.connect(self._buff_open_item_diff_dialog)
+            # search_row.addWidget(diff_btn)
+
+            inspect_btn = QPushButton("Inspect Item")
+            inspect_btn.setToolTip(
+                "Deep-dive on the currently selected item — every field, type,\n"
+                "and value rendered in a searchable tree. Shows crafting deps\n"
+                "and any references back to this item from elsewhere in iteminfo.")
+            inspect_btn.clicked.connect(self._buff_open_item_inspector)
+            # search_row.addWidget(inspect_btn)
+
+            my_inv_btn = QPushButton("My Inventory")
+            my_inv_btn.setToolTip("Show only items from your loaded save that exist in iteminfo")
+            my_inv_btn.clicked.connect(self._buff_show_my_inventory)
+
+            self._buff_show_icons_btn = QPushButton("Icons")
+            self._buff_show_icons_btn.setToolTip("Toggle item icons in the items list")
+            self._buff_show_icons_btn.clicked.connect(self._buff_toggle_icons)
+            self._buff_icons_enabled = False
+            
+            search_row.addWidget(QLabel("Search:"))
+            search_row.addWidget(self._buff_search, 1)
+            search_row.addWidget(search_btn)
+            search_row.addWidget(self._buff_category_filter)
+            # search_row.addWidget(desc_search_btn)
+            search_row.addWidget(my_inv_btn)
+            search_row.addWidget(self._buff_show_icons_btn)
+            
+            return search_row
+
+        def build_items_frame() -> QFrame:
+            items_frame = QFrame()
+            items_vlayout = QVBoxLayout(items_frame)
+            items_vlayout.setContentsMargins(0, 0, 0, 0)
+            items_vlayout.setSpacing(2)
+            items_vlayout.addWidget(QLabel("Matching Items:"))
+            self._buff_items_table = QTableWidget()
+            self._buff_items_table.setColumnCount(6)
+            self._buff_items_table.setHorizontalHeaderLabels(["", "Name", "Type", "Tier", "Enchants", "Stack"])
+            self._buff_items_table.setEditTriggers(QAbstractItemView.NoEditTriggers)
+            self._buff_items_table.setSelectionBehavior(QAbstractItemView.SelectRows)
+            self._buff_items_table.setSelectionMode(QAbstractItemView.SingleSelection)
+            hdr_items = self._buff_items_table.horizontalHeader()
+            hdr_items.setSectionResizeMode(0, QHeaderView.Interactive)
+            self._buff_items_table.setColumnWidth(0, 0)
+            hdr_items.setSectionResizeMode(1, QHeaderView.Interactive)
+            self._buff_items_table.setColumnWidth(1, 180)
+            hdr_items.setSectionResizeMode(2, QHeaderView.Interactive)
+            self._buff_items_table.setColumnWidth(2, 70)
+            hdr_items.setSectionResizeMode(3, QHeaderView.Interactive)
+            self._buff_items_table.setColumnWidth(3, 70)
+            hdr_items.setSectionResizeMode(4, QHeaderView.Interactive)
+            self._buff_items_table.setColumnWidth(4, 70)
+            hdr_items.setSectionResizeMode(5, QHeaderView.Interactive)
+            self._buff_items_table.setColumnWidth(5, 50)
+            hdr_items.setStretchLastSection(False)
+            self._buff_items_table.verticalHeader().setDefaultSectionSize(24)
+            self._buff_items_table.setIconSize(QSize(ICON_SIZE, ICON_SIZE))
+            self._buff_items_table.setSortingEnabled(True)
+            self._buff_items_table.setContextMenuPolicy(Qt.CustomContextMenu)
+            self._buff_items_table.customContextMenuRequested.connect(self._buff_items_context_menu)
+            self._buff_items_table.selectionModel().selectionChanged.connect(
+                self._buff_item_selected
+            )
+            self._buff_items_table.setMinimumHeight(120)
+            self._buff_items_table.setColumnHidden(2, True)
+            self._buff_items_table.setColumnHidden(4, True)
+            self._buff_items_table.setColumnHidden(5, True)
+            items_vlayout.addWidget(self._buff_items_table, 1)
+            items_frame.setMinimumWidth(120)
+            # items_frame.setMaximumWidth(280)
+            return items_frame
+
+        def build_stats_table_frame() -> QFrame:
+            stats_table_frame = QFrame()
+            stf_layout = QVBoxLayout(stats_table_frame)
+            stf_layout.setContentsMargins(0, 0, 0, 0)
+            stf_layout.setSpacing(2)
+            self._buff_selected_label = QLabel("No item selected — search and click an item on the left")
+            self._buff_selected_label.setStyleSheet(
+                f"color: {COLORS['text_dim']}; font-weight: bold; padding: 2px 4px;"
+            )
+            stf_layout.addWidget(self._buff_selected_label)
+            stf_layout.addWidget(QLabel("Current Stats / Buffs:"))
+            self._buff_stats_table = QTableWidget()
+            self._buff_stats_table.setColumnCount(2)
+            self._buff_stats_table.setHorizontalHeaderLabels([
+                "Stat/Buff", "Value",
+            ])
+            self._buff_stats_table.setEditTriggers(QAbstractItemView.NoEditTriggers)
+            self._buff_stats_table.setSelectionBehavior(QAbstractItemView.SelectRows)
+            self._buff_stats_table.setSelectionMode(QAbstractItemView.SingleSelection)
+            self._buff_stats_table.setContextMenuPolicy(Qt.CustomContextMenu)
+            self._buff_stats_table.customContextMenuRequested.connect(self._buff_stats_context_menu)
+            hdr_stats = self._buff_stats_table.horizontalHeader()
+            hdr_stats.setSectionResizeMode(0, QHeaderView.Interactive)
+            self._buff_stats_table.setColumnWidth(0, 240)
+            hdr_stats.setSectionResizeMode(1, QHeaderView.Interactive)
+            self._buff_stats_table.setColumnWidth(1, 100)
+            hdr_stats.setStretchLastSection(False)
+            self._buff_stats_table.verticalHeader().setDefaultSectionSize(24)
+            self._buff_stats_table.setMinimumHeight(100)
+            stf_layout.addWidget(self._buff_stats_table, 1)
+            stats_table_frame.setMinimumHeight(120)
+            stats_table_frame.setMinimumWidth(120)
+            return stats_table_frame
+        
+        def build_buff_action_tabs() -> None:
+            # ══════════════════════════════════════════════════════════════════
+            # Action tabs — replaces the old scrollable controls panel and the
+            # third-column "right panel". All the ~35 control rows that used to
+            # be crammed into one scrollarea now live in a QTabWidget with 8
+            # focused sub-tabs. Every widget attribute name (_buff_*, _eb_*,
+            # _stack_check, _inf_dura_check, _buff_overlay_spin, etc.) is
+            # preserved so existing handlers continue to reference them.
+            #
+            # Layout now: two-column horizontal splitter — items list | stats/tabs.
+            # The old third "_buff_right_panel" is kept as an empty widget for
+            # backwards compatibility; nothing is added to it.
+            # ══════════════════════════════════════════════════════════════════
+
+            # Build the QTabWidget and its 8 sub-pages via helper methods.
+            self._buff_action_tabs = QTabWidget()
+            self._buff_action_tabs.setMinimumHeight(220)
+            self._buff_action_tabs.setMinimumWidth(120)
+            self._buff_action_tabs.addTab(
+                self._build_buff_hero_presets_page(), "Presets")
+            self._buff_action_tabs.addTab(
+                self._build_buff_quick_edit_page(), "Quick Edit")
+            self._buff_action_tabs.addTab(
+                self._build_buff_effects_page(), "Passives & Effects")
+            self._buff_action_tabs.addTab(
+                self._build_buff_stats_page(), "Stats & Buffs")
+            self._buff_action_tabs.addTab(
+                self._build_buff_imbue_page(), "Imbue")
+            self._buff_action_tabs.addTab(
+                self._build_buff_global_mods_page(), "Global Mods")
+            self._buff_action_tabs.addTab(
+                self._build_buff_bulk_page(), "Bulk Actions")
+            self._buff_action_adv_idx = self._buff_action_tabs.count()
+            self._buff_action_tabs.addTab(
+                self._build_buff_advanced_page(), "Advanced")
+            # tab_test_idx = self._buff_action_tabs.count()
+
+            # Advanced tab hidden unless dev/experimental mode is on.
+            self._buff_action_tabs.setTabVisible(
+                self._buff_action_adv_idx, self._experimental_mode)
+            # for i in range(self._buff_action_tabs.count()):
+            #     if i >= tab_test_idx:
+            #          self._buff_action_tabs.setTabVisible(i, False)
+
+        def build_status_label() -> QLabel:
+            # Status label — always visible, directly above the compact bottom bar.
+            self._buff_status_label = QLabel("")
+            self._buff_status_label.setWordWrap(True)
+            self._buff_status_label.setStyleSheet(
+                f"color: {COLORS['text_dim']}; padding: 2px;"
+            )
+
+        def build_bottom_bar_wrap() -> QWidget:
+            # ── Compact bottom bar: 4 primary buttons + More ▾ menu ──
+            # Old bar had ~15 widgets in a FlowLayout that silently wrapped to
+            # multiple rows at smaller resolutions. New bar keeps the must-have
+            # actions visible on one row at 1280px wide and moves the rest into
+            # a popup menu.
+            from PySide6.QtWidgets import QToolButton
+            bottom_bar_wrap = QWidget()
+            bottom_bar = QHBoxLayout(bottom_bar_wrap)
+            bottom_bar.setContentsMargins(0, 0, 0, 0)
+            bottom_bar.setSpacing(6)
+
+            # Export buttons are dev-gated (normal users never see them).
+            export_buffs_btn = QPushButton("Export JSON Patch")
+            export_buffs_btn.setToolTip(
+                "ADVANCED — UNSUPPORTED. Contact mod loader dev for help.\n\n"
+                "Export value-only changes as a JSON patch file.")
+            export_buffs_btn.clicked.connect(self._buff_export_json)
+            export_buffs_btn.setVisible(False)
+            bottom_bar.addWidget(export_buffs_btn)
+
+            export_mod_btn = QPushButton("Export as Mod")
+            export_mod_btn.setStyleSheet(
+                "background-color: #7B1FA2; color: white; font-weight: bold;")
+            export_mod_btn.setToolTip(
+                "ADVANCED — UNSUPPORTED. Contact mod loader dev for help.\n\n"
+                "Export as raw game files for mod loaders (CDMM, DMM, CDUMM).")
+            export_mod_btn.clicked.connect(self._buff_export_mod)
+            export_mod_btn.setVisible(False)
+            bottom_bar.addWidget(export_mod_btn)
+
+            export_cdumm_btn = QPushButton("Export as CDUMM Mod")
+            export_cdumm_btn.setStyleSheet(
+                "background-color: #1B5E20; color: white; font-weight: bold;")
+            export_cdumm_btn.setToolTip(
+                "ADVANCED — UNSUPPORTED. Contact mod loader dev for help.\n\n"
+                "Export as pre-packed PAZ mod for JMM / CDUMM / DMM.")
+            export_cdumm_btn.clicked.connect(self._buff_export_cdumm_mod)
+            export_cdumm_btn.setVisible(False)
+            bottom_bar.addWidget(export_cdumm_btn)
+
+            export_all_btn = QPushButton("Export All Formats")
+            export_all_btn.setStyleSheet(
+                "background-color: #00695C; color: white; font-weight: bold;")
+            export_all_btn.setToolTip(
+                "ADVANCED — UNSUPPORTED. Export in all three formats at once.")
+            export_all_btn.clicked.connect(self._buff_export_all_formats)
+            export_all_btn.setVisible(False)
+            bottom_bar.addWidget(export_all_btn)
+
+            self._dev_export_btns_buffs = [
+                export_buffs_btn, export_mod_btn, export_cdumm_btn, export_all_btn
+            ]
+
+            # Primary action 1: Create Item (green)
+            create_item_btn = QPushButton("Create Item")
+            create_item_btn.setStyleSheet(
+                "background-color: #00695C; color: white; font-weight: bold;")
+            create_item_btn.setToolTip(
+                "Create a new custom item by cloning an existing one.\n"
+                "Pick a donor item, customize name and stats, deploy.\n"
+                "Use the save editor Repurchase tab to acquire it in-game.")
+            create_item_btn.clicked.connect(self._open_item_creator)
+            bottom_bar.addWidget(create_item_btn)
+
+            # Primary action 2: Apply to Game (red)
+            apply_game_btn = QPushButton("Apply to Game")
+            apply_game_btn.setStyleSheet(
+                "background-color: #B71C1C; color: white; font-weight: bold;")
+            apply_game_btn.setToolTip(
+                "Deploy modified iteminfo.pabgb directly to the game.\n"
+                "Creates a PAZ overlay — original files are NOT modified.\n"
+                "Restart the game for changes to take effect.\n"
+                "Use Restore (More ▾) to undo.")
+            apply_game_btn.clicked.connect(self._buff_apply_to_game)
+            self._buff_apply_game_btn = apply_game_btn
+            bottom_bar.addWidget(apply_game_btn)
+
+            # Primary action 3: Import Mod Folder (teal, power-user friendly)
+            import_mod_btn = QPushButton("Import Mod Folder")
+            import_mod_btn.setStyleSheet(
+                "background-color: #00695C; color: white; font-weight: bold;")
+            import_mod_btn.setToolTip(
+                "Reverse-engineer any CDUMM/PAZ mod folder back into an editable "
+                "config.\nPoint at a mod's files/gamedata/binary__/client/bin/"
+                "iteminfo.pabgb — every modified field becomes editable here.")
+            import_mod_btn.clicked.connect(self._buff_import_mod_folder)
+            bottom_bar.addWidget(import_mod_btn)
+
+            # More ▾ popup menu — collapses the other 6 rarely-used actions.
+            more_btn = QToolButton()
+            more_btn.setText("More ▾")
+            more_btn.setPopupMode(QToolButton.InstantPopup)
+            more_btn.setToolButtonStyle(Qt.ToolButtonTextOnly)
+            more_btn.setStyleSheet(
+                "QToolButton { padding: 6px 12px; border: 1px solid #554430; "
+                "border-radius: 4px; background: #3d2e1a; color: #f0e6d4; } "
+                "QToolButton:hover { background: #5c4320; } "
+                "QToolButton::menu-indicator { image: none; width: 0; }"
+            )
+            more_menu = QMenu(self)
+
+            act_import = more_menu.addAction("Import Community JSON Patch...")
+            act_import.setToolTip(
+                "Import a Pldada/DMM-format JSON byte patch (e.g. Infinity Durability).")
+            act_import.triggered.connect(self._buff_import_community_json)
+
+            act_sync = more_menu.addAction("Sync Buff Names from GitHub")
+            act_sync.setToolTip(
+                "Download community-verified buff/stat/passive names.")
+            act_sync.triggered.connect(self._buff_sync_community_names)
+
+            more_menu.addSeparator()
+
+            act_save = more_menu.addAction("Save Config...")
+            act_save.setToolTip(
+                "Save your current edits as a reusable config file.")
+            act_save.triggered.connect(self._buff_save_config)
+
+            act_load = more_menu.addAction("Load Config...")
+            act_load.setToolTip(
+                "Load a previously saved config file.")
+            act_load.triggered.connect(self._buff_load_config)
+
+            more_menu.addSeparator()
+
+            act_restore = more_menu.addAction("Restore Original (remove overlay)")
+            act_restore.setToolTip(
+                "Undo 'Apply to Game': remove the ItemBuffs PAZ overlay and its "
+                "PAPGT entry. Requires admin.")
+            act_restore.triggered.connect(self._buff_restore_original)
+
+            act_reset_vanilla = more_menu.addAction(
+                "Reset to Vanilla PAPGT (nuclear)")
+            act_reset_vanilla.setToolTip(
+                "NUCLEAR RECOVERY: restore first-apply PAPGT snapshot. "
+                "Disables ALL overlays. Requires admin.")
+            act_reset_vanilla.triggered.connect(self._buff_reset_vanilla_papgt)
+
+            more_menu.addSeparator()
+
+            act_verify = more_menu.addAction("Verify Applied Overlay...")
+            act_verify.setToolTip(
+                "Diagnostics: extract your current overlay and report how many "
+                "items actually have each mutation applied. Use after Apply to "
+                "Game to confirm the overlay matches expectations.")
+            act_verify.triggered.connect(self._buff_verify_applied_overlay)
+
+            more_btn.setMenu(more_menu)
+            bottom_bar.addWidget(more_btn)
+
+            bottom_bar.addStretch(1)
+
+            credit = QLabel("credit: Potter420 & LukeFZ")
+            credit.setStyleSheet("color: #FF5252; font-style: italic; padding: 2px;")
+            bottom_bar.addWidget(credit)
+            
+            return bottom_bar_wrap
+        
+        outer_layout = QVBoxLayout(self)
+        outer_layout.setContentsMargins(6, 6, 6, 6)
+        outer_layout.setSpacing(4)
+        
+        inner_layout = QSplitter(Qt.Horizontal)
+        inner_layout.setChildrenCollapsible(False)
+        
+        # Kept as empty widget for any legacy code that references it.
+        self._buff_right_panel = QWidget()
+        
         self._buff_path_widget = QWidget()
         self._buff_path_widget.setVisible(False)
         self._buff_game_path = None
-
-        action_row = QHBoxLayout()
-        action_row.setSpacing(4)
-
-        extract_rust_btn = QPushButton("Extract")
-        extract_rust_btn.setObjectName("accentBtn")
-        extract_rust_btn.setToolTip("Extract iteminfo from game using Rust parser")
-        extract_rust_btn.clicked.connect(self._buff_extract_rust)
-        action_row.addWidget(extract_rust_btn)
-
-        desc_search_btn = QPushButton("Search by Description")
-        desc_search_btn.setToolTip(
-            "Search ALL buffs, passives, stats by in-game description.\n"
-            "Keywords: 'imbue fire', 'damage', 'stamina', 'immunity', etc.")
-        desc_search_btn.clicked.connect(self._buff_open_desc_search)
-        action_row.addWidget(desc_search_btn)
-
-        adv_json_btn = QPushButton("JSON Edit")
-        adv_json_btn.setToolTip(
-            "Open raw enchant data as editable JSON — full control")
-        adv_json_btn.clicked.connect(self._eb_json_edit)
-        action_row.addWidget(adv_json_btn)
-
-        transmog_btn = QPushButton("🪄 Transmog (Armor / Weapon Visual Swap)")
-        transmog_btn.setStyleSheet(
-            "background-color: #6A1B9A; color: white; font-weight: bold; "
-            "padding: 8px 14px; font-size: 13px;")
-        transmog_btn.setToolTip(
-            "Visual Transmog for ANY armor or weapon you own.\n\n"
-            "• Make your endgame armor look like a fancy starter set\n"
-            "• Make your sword look like a legendary weapon you don't have\n"
-            "• Mix and match looks per slot — boots from one set, helm from another\n\n"
-            "Opens a dialog with quick-filter buttons (Helm, Chest, Sword,\n"
-            "Bow, Ring, etc.) so you find the right slot in one click.\n"
-            "Stats / buffs / enchants are kept — only the visual model changes.\n\n"
-            "Queued swaps apply automatically on Export as Mod or Apply to Game.")
-        transmog_btn.clicked.connect(self._buff_open_transmog_dialog)
-        action_row.addWidget(transmog_btn)
-
-
-        action_row.addStretch()
-        layout.addLayout(action_row)
-
-        search_row = QHBoxLayout()
-        search_row.setSpacing(4)
-        search_row.addWidget(QLabel("Search:"))
-        self._buff_search = QLineEdit()
-        self._buff_search.setPlaceholderText("Item name (e.g. Earring, Sword, Necklace)...")
-        self._buff_search.returnPressed.connect(self._buff_search_items)
-        search_row.addWidget(self._buff_search, 1)
-
-        search_btn = QPushButton("Search")
-        search_btn.clicked.connect(self._buff_search_items)
-        search_row.addWidget(search_btn)
-
-        # Category filter (populated after extract — empty until then)
-        self._buff_category_filter = QComboBox()
-        self._buff_category_filter.setToolTip(
-            "Restrict results to items in a specific category.\n"
-            "Populated from live iteminfo after Extract.")
-        self._buff_category_filter.setMinimumWidth(180)
-        self._buff_category_filter.addItem("All categories", None)
-        self._buff_category_filter.currentIndexChanged.connect(self._buff_search_items)
-        search_row.addWidget(self._buff_category_filter)
-
-        diff_btn = QPushButton("Item Diff")
-        diff_btn.setToolTip(
-            "Compare two items field by field — see exactly what's different\n"
-            "between e.g. a working modded item and a broken one.")
-        diff_btn.clicked.connect(self._buff_open_item_diff_dialog)
-        search_row.addWidget(diff_btn)
-
-        inspect_btn = QPushButton("Inspect Item")
-        inspect_btn.setToolTip(
-            "Deep-dive on the currently selected item — every field, type,\n"
-            "and value rendered in a searchable tree. Shows crafting deps\n"
-            "and any references back to this item from elsewhere in iteminfo.")
-        inspect_btn.clicked.connect(self._buff_open_item_inspector)
-        search_row.addWidget(inspect_btn)
-
-        my_inv_btn = QPushButton("My Inventory")
-        my_inv_btn.setToolTip("Show only items from your loaded save that exist in iteminfo")
-        my_inv_btn.clicked.connect(self._buff_show_my_inventory)
-        search_row.addWidget(my_inv_btn)
-
-        self._buff_show_icons_btn = QPushButton("Icons")
-        self._buff_show_icons_btn.setToolTip("Toggle item icons in the items list")
-        self._buff_show_icons_btn.clicked.connect(self._buff_toggle_icons)
-        search_row.addWidget(self._buff_show_icons_btn)
-        self._buff_icons_enabled = False
-
-        layout.addLayout(search_row)
-
-        buff_splitter = QSplitter(Qt.Horizontal)
-        buff_splitter.setChildrenCollapsible(False)
-
-        items_frame = QFrame()
-        items_vlayout = QVBoxLayout(items_frame)
-        items_vlayout.setContentsMargins(0, 0, 0, 0)
-        items_vlayout.setSpacing(2)
-        items_vlayout.addWidget(QLabel("Matching Items:"))
-        self._buff_items_table = QTableWidget()
-        self._buff_items_table.setColumnCount(6)
-        self._buff_items_table.setHorizontalHeaderLabels(["", "Name", "Type", "Tier", "Enchants", "Stack"])
-        self._buff_items_table.setEditTriggers(QAbstractItemView.NoEditTriggers)
-        self._buff_items_table.setSelectionBehavior(QAbstractItemView.SelectRows)
-        self._buff_items_table.setSelectionMode(QAbstractItemView.SingleSelection)
-        hdr_items = self._buff_items_table.horizontalHeader()
-        hdr_items.setSectionResizeMode(0, QHeaderView.Interactive)
-        self._buff_items_table.setColumnWidth(0, 0)
-        hdr_items.setSectionResizeMode(1, QHeaderView.Interactive)
-        self._buff_items_table.setColumnWidth(1, 180)
-        hdr_items.setSectionResizeMode(2, QHeaderView.Interactive)
-        self._buff_items_table.setColumnWidth(2, 70)
-        hdr_items.setSectionResizeMode(3, QHeaderView.Interactive)
-        self._buff_items_table.setColumnWidth(3, 50)
-        hdr_items.setSectionResizeMode(4, QHeaderView.Interactive)
-        self._buff_items_table.setColumnWidth(4, 70)
-        hdr_items.setSectionResizeMode(5, QHeaderView.Interactive)
-        self._buff_items_table.setColumnWidth(5, 50)
-        hdr_items.setStretchLastSection(False)
-        self._buff_items_table.verticalHeader().setDefaultSectionSize(24)
-        self._buff_items_table.setIconSize(QSize(ICON_SIZE, ICON_SIZE))
-        self._buff_items_table.setSortingEnabled(True)
-        self._buff_items_table.setContextMenuPolicy(Qt.CustomContextMenu)
-        self._buff_items_table.customContextMenuRequested.connect(self._buff_items_context_menu)
-        self._buff_items_table.selectionModel().selectionChanged.connect(
-            self._buff_item_selected
-        )
-        self._buff_items_table.setMinimumHeight(120)
-        self._buff_items_table.setColumnHidden(3, True)
-        self._buff_items_table.setColumnHidden(4, True)
-        self._buff_items_table.setColumnHidden(5, True)
-        items_vlayout.addWidget(self._buff_items_table, 1)
-        items_frame.setMinimumWidth(120)
-        items_frame.setMaximumWidth(280)
-        buff_splitter.addWidget(items_frame)
-
-        stats_outer = QSplitter(Qt.Vertical)
-        stats_outer.setChildrenCollapsible(False)
-
-        stats_table_frame = QFrame()
-        stf_layout = QVBoxLayout(stats_table_frame)
-        stf_layout.setContentsMargins(0, 0, 0, 0)
-        stf_layout.setSpacing(2)
-        self._buff_selected_label = QLabel("No item selected — search and click an item on the left")
-        self._buff_selected_label.setStyleSheet(
-            f"color: {COLORS['text_dim']}; font-weight: bold; padding: 2px 4px;"
-        )
-        stf_layout.addWidget(self._buff_selected_label)
-        stf_layout.addWidget(QLabel("Current Stats / Buffs:"))
-        self._buff_stats_table = QTableWidget()
-        self._buff_stats_table.setColumnCount(2)
-        self._buff_stats_table.setHorizontalHeaderLabels([
-            "Stat/Buff", "Value",
-        ])
-        self._buff_stats_table.setEditTriggers(QAbstractItemView.NoEditTriggers)
-        self._buff_stats_table.setSelectionBehavior(QAbstractItemView.SelectRows)
-        self._buff_stats_table.setSelectionMode(QAbstractItemView.SingleSelection)
-        self._buff_stats_table.setContextMenuPolicy(Qt.CustomContextMenu)
-        self._buff_stats_table.customContextMenuRequested.connect(self._buff_stats_context_menu)
-        hdr_stats = self._buff_stats_table.horizontalHeader()
-        hdr_stats.setSectionResizeMode(0, QHeaderView.Interactive)
-        self._buff_stats_table.setColumnWidth(0, 240)
-        hdr_stats.setSectionResizeMode(1, QHeaderView.Interactive)
-        self._buff_stats_table.setColumnWidth(1, 100)
-        hdr_stats.setStretchLastSection(False)
-        self._buff_stats_table.verticalHeader().setDefaultSectionSize(24)
-        self._buff_stats_table.setMinimumHeight(100)
-        stf_layout.addWidget(self._buff_stats_table, 1)
-        stats_table_frame.setMinimumHeight(120)
-        stats_outer.addWidget(stats_table_frame)
-
-        # ══════════════════════════════════════════════════════════════════
-        # Action tabs — replaces the old scrollable controls panel and the
-        # third-column "right panel". All the ~35 control rows that used to
-        # be crammed into one scrollarea now live in a QTabWidget with 8
-        # focused sub-tabs. Every widget attribute name (_buff_*, _eb_*,
-        # _stack_check, _inf_dura_check, _buff_overlay_spin, etc.) is
-        # preserved so existing handlers continue to reference them.
-        #
-        # Layout now: two-column horizontal splitter — items list | stats/tabs.
-        # The old third "_buff_right_panel" is kept as an empty widget for
-        # backwards compatibility; nothing is added to it.
-        # ══════════════════════════════════════════════════════════════════
-
-        # Kept as empty widget for any legacy code that references it.
-        self._buff_right_panel = QWidget()
 
         # Passive skill + equip buff name maps — populated by helper before
         # building the Passives/Stats sub-tabs, so their combos can be filled.
@@ -376,201 +779,34 @@ class ItemBuffsTab(QWidget):
         self._dev_buff_widgets: list = getattr(self, '_dev_buff_widgets', [])
         self._buff_load_name_data()
 
-        # Build the QTabWidget and its 8 sub-pages via helper methods.
-        self._buff_action_tabs = QTabWidget()
-        self._buff_action_tabs.setMinimumHeight(220)
-        self._buff_action_tabs.addTab(
-            self._build_buff_quick_edit_page(), "Quick Edit")
-        self._buff_action_tabs.addTab(
-            self._build_buff_effects_page(), "Passives & Effects")
-        self._buff_action_tabs.addTab(
-            self._build_buff_stats_page(), "Stats & Buffs")
-        self._buff_action_tabs.addTab(
-            self._build_buff_hero_presets_page(), "Hero Presets")
-        self._buff_action_tabs.addTab(
-            self._build_buff_imbue_page(), "Imbue")
-        self._buff_action_tabs.addTab(
-            self._build_buff_global_mods_page(), "Global Mods")
-        self._buff_action_tabs.addTab(
-            self._build_buff_bulk_page(), "Bulk Actions")
-        self._buff_action_adv_idx = self._buff_action_tabs.count()
-        self._buff_action_tabs.addTab(
-            self._build_buff_advanced_page(), "Advanced")
-        # Advanced tab hidden unless dev/experimental mode is on.
-        self._buff_action_tabs.setTabVisible(
-            self._buff_action_adv_idx, self._experimental_mode)
+        warn_label = build_warn_label()
+        outer_layout.addWidget(warn_label)
 
-        stats_outer.addWidget(self._buff_action_tabs)
+        action_row = build_action_row()
+        outer_layout.addLayout(action_row)
 
-        # Vertical splitter sizes: stats table ~50%, action tabs ~50%.
-        stats_outer.setStretchFactor(0, 1)
-        stats_outer.setStretchFactor(1, 1)
-        stats_outer.setSizes([280, 280])
-        stats_outer.setMinimumWidth(300)
-        buff_splitter.addWidget(stats_outer)
+        search_row = build_search_row()
+        outer_layout.addLayout(search_row)
 
-        # Horizontal splitter: items ~18%, stats/tabs ~82%. Just two columns
-        # now — the old 3rd "right panel" column is gone.
-        buff_splitter.setStretchFactor(0, 1)
-        buff_splitter.setStretchFactor(1, 5)
-        buff_splitter.setSizes([220, 1060])
-        layout.addWidget(buff_splitter, 1)
+        items_frame = build_items_frame()
+        inner_layout.addWidget(items_frame)
 
-        # ── Compact bottom bar: 4 primary buttons + More ▾ menu ──
-        # Old bar had ~15 widgets in a FlowLayout that silently wrapped to
-        # multiple rows at smaller resolutions. New bar keeps the must-have
-        # actions visible on one row at 1280px wide and moves the rest into
-        # a popup menu.
-        from PySide6.QtWidgets import QToolButton
-        bottom_bar_wrap = QWidget()
-        bottom_bar = QHBoxLayout(bottom_bar_wrap)
-        bottom_bar.setContentsMargins(0, 0, 0, 0)
-        bottom_bar.setSpacing(6)
+        stats_table_frame = build_stats_table_frame()
+        inner_layout.addWidget(stats_table_frame)
 
-        # Export buttons are dev-gated (normal users never see them).
-        export_buffs_btn = QPushButton("Export JSON Patch")
-        export_buffs_btn.setToolTip(
-            "ADVANCED — UNSUPPORTED. Contact mod loader dev for help.\n\n"
-            "Export value-only changes as a JSON patch file.")
-        export_buffs_btn.clicked.connect(self._buff_export_json)
-        export_buffs_btn.setVisible(False)
-        bottom_bar.addWidget(export_buffs_btn)
+        build_buff_action_tabs()
+        inner_layout.addWidget(self._buff_action_tabs)
 
-        export_mod_btn = QPushButton("Export as Mod")
-        export_mod_btn.setStyleSheet(
-            "background-color: #7B1FA2; color: white; font-weight: bold;")
-        export_mod_btn.setToolTip(
-            "ADVANCED — UNSUPPORTED. Contact mod loader dev for help.\n\n"
-            "Export as raw game files for mod loaders (CDMM, DMM, CDUMM).")
-        export_mod_btn.clicked.connect(self._buff_export_mod)
-        export_mod_btn.setVisible(False)
-        bottom_bar.addWidget(export_mod_btn)
+        outer_layout.addWidget(inner_layout, 1)
 
-        export_cdumm_btn = QPushButton("Export as CDUMM Mod")
-        export_cdumm_btn.setStyleSheet(
-            "background-color: #1B5E20; color: white; font-weight: bold;")
-        export_cdumm_btn.setToolTip(
-            "ADVANCED — UNSUPPORTED. Contact mod loader dev for help.\n\n"
-            "Export as pre-packed PAZ mod for JMM / CDUMM / DMM.")
-        export_cdumm_btn.clicked.connect(self._buff_export_cdumm_mod)
-        export_cdumm_btn.setVisible(False)
-        bottom_bar.addWidget(export_cdumm_btn)
+        build_status_label()
+        outer_layout.addWidget(self._buff_status_label)
 
-        export_all_btn = QPushButton("Export All Formats")
-        export_all_btn.setStyleSheet(
-            "background-color: #00695C; color: white; font-weight: bold;")
-        export_all_btn.setToolTip(
-            "ADVANCED — UNSUPPORTED. Export in all three formats at once.")
-        export_all_btn.clicked.connect(self._buff_export_all_formats)
-        export_all_btn.setVisible(False)
-        bottom_bar.addWidget(export_all_btn)
+        bottom_bar_wrap = build_bottom_bar_wrap()
+        outer_layout.addWidget(bottom_bar_wrap)
+        bottom_bar_wrap.setVisible(False)
 
-        self._dev_export_btns_buffs = [
-            export_buffs_btn, export_mod_btn, export_cdumm_btn, export_all_btn
-        ]
-
-        # Primary action 1: Create Item (green)
-        create_item_btn = QPushButton("Create Item")
-        create_item_btn.setStyleSheet(
-            "background-color: #00695C; color: white; font-weight: bold;")
-        create_item_btn.setToolTip(
-            "Create a new custom item by cloning an existing one.\n"
-            "Pick a donor item, customize name and stats, deploy.\n"
-            "Use the save editor Repurchase tab to acquire it in-game.")
-        create_item_btn.clicked.connect(self._open_item_creator)
-        bottom_bar.addWidget(create_item_btn)
-
-        # Primary action 2: Apply to Game (red)
-        apply_game_btn = QPushButton("Apply to Game")
-        apply_game_btn.setStyleSheet(
-            "background-color: #B71C1C; color: white; font-weight: bold;")
-        apply_game_btn.setToolTip(
-            "Deploy modified iteminfo.pabgb directly to the game.\n"
-            "Creates a PAZ overlay — original files are NOT modified.\n"
-            "Restart the game for changes to take effect.\n"
-            "Use Restore (More ▾) to undo.")
-        apply_game_btn.clicked.connect(self._buff_apply_to_game)
-        self._buff_apply_game_btn = apply_game_btn
-        bottom_bar.addWidget(apply_game_btn)
-
-        # Primary action 3: Import Mod Folder (teal, power-user friendly)
-        import_mod_btn = QPushButton("Import Mod Folder")
-        import_mod_btn.setStyleSheet(
-            "background-color: #00695C; color: white; font-weight: bold;")
-        import_mod_btn.setToolTip(
-            "Reverse-engineer any CDUMM/PAZ mod folder back into an editable "
-            "config.\nPoint at a mod's files/gamedata/binary__/client/bin/"
-            "iteminfo.pabgb — every modified field becomes editable here.")
-        import_mod_btn.clicked.connect(self._buff_import_mod_folder)
-        bottom_bar.addWidget(import_mod_btn)
-
-        # More ▾ popup menu — collapses the other 6 rarely-used actions.
-        more_btn = QToolButton()
-        more_btn.setText("More ▾")
-        more_btn.setPopupMode(QToolButton.InstantPopup)
-        more_btn.setToolButtonStyle(Qt.ToolButtonTextOnly)
-        more_btn.setStyleSheet(
-            "QToolButton { padding: 6px 12px; border: 1px solid #554430; "
-            "border-radius: 4px; background: #3d2e1a; color: #f0e6d4; } "
-            "QToolButton:hover { background: #5c4320; } "
-            "QToolButton::menu-indicator { image: none; width: 0; }"
-        )
-        more_menu = QMenu(self)
-
-        act_import = more_menu.addAction("Import Community JSON Patch...")
-        act_import.setToolTip(
-            "Import a Pldada/DMM-format JSON byte patch (e.g. Infinity Durability).")
-        act_import.triggered.connect(self._buff_import_community_json)
-
-        act_sync = more_menu.addAction("Sync Buff Names from GitHub")
-        act_sync.setToolTip(
-            "Download community-verified buff/stat/passive names.")
-        act_sync.triggered.connect(self._buff_sync_community_names)
-
-        more_menu.addSeparator()
-
-        act_save = more_menu.addAction("Save Config...")
-        act_save.setToolTip(
-            "Save your current edits as a reusable config file.")
-        act_save.triggered.connect(self._buff_save_config)
-
-        act_load = more_menu.addAction("Load Config...")
-        act_load.setToolTip(
-            "Load a previously saved config file.")
-        act_load.triggered.connect(self._buff_load_config)
-
-        more_menu.addSeparator()
-
-        act_restore = more_menu.addAction("Restore Original (remove overlay)")
-        act_restore.setToolTip(
-            "Undo 'Apply to Game': remove the ItemBuffs PAZ overlay and its "
-            "PAPGT entry. Requires admin.")
-        act_restore.triggered.connect(self._buff_restore_original)
-
-        act_reset_vanilla = more_menu.addAction(
-            "Reset to Vanilla PAPGT (nuclear)")
-        act_reset_vanilla.setToolTip(
-            "NUCLEAR RECOVERY: restore first-apply PAPGT snapshot. "
-            "Disables ALL overlays. Requires admin.")
-        act_reset_vanilla.triggered.connect(self._buff_reset_vanilla_papgt)
-
-        more_menu.addSeparator()
-
-        act_verify = more_menu.addAction("Verify Applied Overlay...")
-        act_verify.setToolTip(
-            "Diagnostics: extract your current overlay and report how many "
-            "items actually have each mutation applied. Use after Apply to "
-            "Game to confirm the overlay matches expectations.")
-        act_verify.triggered.connect(self._buff_verify_applied_overlay)
-
-        more_btn.setMenu(more_menu)
-        bottom_bar.addWidget(more_btn)
-
-        bottom_bar.addStretch(1)
-
-        credit = QLabel("credit: Potter420 & LukeFZ")
-        credit.setStyleSheet("color: #FF5252; font-style: italic; padding: 2px;")
-        bottom_bar.addWidget(credit)
+        #---------------------------------------------------------------------
 
         # Mod folder load-order spinners — kept accessible but compact.
         # The attribute names (_buff_overlay_spin, _buff_modgroup_spin) are
@@ -599,16 +835,6 @@ class ItemBuffsTab(QWidget):
         self._buff_overlay_spin.setVisible(False)
         self._buff_modgroup_spin.setParent(bottom_bar_wrap)
         self._buff_modgroup_spin.setVisible(False)
-
-        # Status label — always visible, directly above the compact bottom bar.
-        self._buff_status_label = QLabel("")
-        self._buff_status_label.setWordWrap(True)
-        self._buff_status_label.setStyleSheet(
-            f"color: {COLORS['text_dim']}; padding: 2px;"
-        )
-        layout.addWidget(self._buff_status_label)
-
-        layout.addWidget(bottom_bar_wrap)
 
         self._item_buffs_tab_widget = self
         self._itembuffs_tab_widget = self
@@ -1280,50 +1506,165 @@ class ItemBuffsTab(QWidget):
         pl.setSpacing(8)
 
         pl.addWidget(QLabel(
-            "One-click presets. Click a boots/weapon/item in the list, "
+            "One-click presets. Click an item in the list, "
             "then click a preset below."))
 
         grid = QGridLayout()
         grid.setSpacing(8)
+        grid_columns = 3
+        grid_buttons: list[QPushButton] = []
+      
+        sockets_btn = QPushButton("5 Sockets")
+        sockets_btn.setToolTip("Item will drop with 5 open sockets by default.")
+        sockets_btn.clicked.connect(
+            lambda: self._eb_apply_preset("open_sockets"))
+        grid_buttons.append(sockets_btn)
+        
+        enchant_btn = QPushButton("Max Refine")
+        enchant_btn.setToolTip("Item will drop at lvl 10 by default.")
+        enchant_btn.clicked.connect(
+            lambda: self._eb_apply_preset("max_enchant"))
+        grid_buttons.append(enchant_btn)
+        
+        cooldown_btn = QPushButton("No Cooldown")
+        cooldown_btn.setToolTip("Item will have 1s cooldown by default.")
+        cooldown_btn.clicked.connect(
+            lambda: self._eb_apply_preset("no_cooldown"))
+        grid_buttons.append(cooldown_btn)
+        
+        charges_btn = QPushButton("Max Charges")
+        charges_btn.setToolTip("Item will have 100 charges by default.")
+        charges_btn.clicked.connect(
+            lambda: self._eb_apply_preset("max_charges"))
+        grid_buttons.append(charges_btn)
+        
+        godmode_desc = textwrap.dedent("""
+            - No Cooldown   
+            - Max Charges
+            - Max Sockets
+            - Max Enchant
+            - Invincible
+            - Great Thief (All Crimes)
+            - Max Attack/Defense
+            - Max Attack/Move Speed
+            - Max Regen
+            - Max Crit/Resist
+            - 8 Equipment Buffs at level 10
+        """).strip()
+        def apply_godmode():
+            if not hasattr(self, '_buff_rust_items') or not self._buff_rust_items:
+                QMessageBox.warning(self, "God Mode", "Extract with Rust parser first.")
+                return
+            if not hasattr(self, '_buff_current_item') or self._buff_current_item is None:
+                QMessageBox.warning(self, "God Mode", "Select an item first.")
+                return
 
+            rust_info = self._buff_rust_lookup.get(self._buff_current_item.item_key)
+            if not rust_info:
+                QMessageBox.warning(self, "God Mode", "Item not found in Rust data.")
+                return
+
+            edl = rust_info.get('enchant_data_list', [])
+            if not edl:
+                QMessageBox.warning(self, "God Mode",
+                    "This item has no enchant data.\n"
+                    "Only equippable items (weapons, armor, accessories) can have buffs.")
+                return
+
+            display_name = self._name_db.get_name(self._buff_current_item.item_key)
+
+            reply = QMessageBox.warning(
+                self, "Potter's God Mode",
+                f"Apply God Mode to {display_name}?\n\n"
+                f"This will inject into ALL enchant levels:\n"
+                f"{godmode_desc}\n\n"
+                f"Click 'Export as Mod' after to write.",
+                QMessageBox.Yes | QMessageBox.No, QMessageBox.No,
+            )
+            if reply != QMessageBox.Yes:
+                return
+            self._eb_god_mode(True)
+            self._eb_apply_preset("open_sockets", True)
+            self._eb_apply_preset("max_enchant", True)
+            self._eb_apply_preset("no_cooldown", True)
+            self._eb_apply_preset("max_charges", True)
+            self._eb_apply_preset("great_thief_all", True)
+        godmode_btn = QPushButton("God Mode")
+        godmode_btn.setToolTip(f"Inject full God Mode stats:\n{godmode_desc}")
+        godmode_btn.clicked.connect(apply_godmode)
+        grid_buttons.append(godmode_btn)
+        
         shadow_boots_btn = QPushButton("Shadow Boots")
         shadow_boots_btn.setToolTip(
             "Apply Potter's Shadow Boots config to selected item:\n"
             "Skills: Shadow Dash (7201) + Breeze Step (7055) + Swimming (7202)\n"
             "Gimmick: 1004431 (boots gimmick — activates the skills)")
-        shadow_boots_btn.setStyleSheet(
-            "background-color: #4A148C; color: white; font-weight: bold; "
-            "padding: 16px 24px; font-size: 13px;")
         shadow_boots_btn.clicked.connect(
             lambda: self._eb_apply_preset("shadow_boots"))
-        grid.addWidget(shadow_boots_btn, 0, 0)
+        grid_buttons.append(shadow_boots_btn)
 
         lightning_btn = QPushButton("Lightning Weapon")
         lightning_btn.setToolTip(
             "Apply lightning weapon config (Potter's Hwando recipe):\n"
             "Skills: Lightning (91101) + Fire (91105) + Ice (91104) affinity\n"
             "Gimmick: 1001961 (weapon gimmick)")
-        lightning_btn.setStyleSheet(
-            "background-color: #FFB300; color: black; font-weight: bold; "
-            "padding: 16px 24px; font-size: 13px;")
         lightning_btn.clicked.connect(
             lambda: self._eb_apply_preset("lightning_weapon"))
-        grid.addWidget(lightning_btn, 0, 1)
-
+        grid_buttons.append(lightning_btn)
+        
         great_thief_btn = QPushButton("Great Thief")
         great_thief_btn.setToolTip(
             "Apply Great Thief activated skill (works on ANY item).\n"
             "Opens a picker: Block Theft only, or Block ALL crime.\n"
             "Gimmick: 1002041, 1 charge, 30-min cooldown.")
-        great_thief_btn.setStyleSheet(
-            "background-color: #00695C; color: white; font-weight: bold; "
-            "padding: 16px 24px; font-size: 13px;")
         great_thief_btn.clicked.connect(self._eb_great_thief_pick_variant)
-        grid.addWidget(great_thief_btn, 0, 2)
+        grid_buttons.append(great_thief_btn)
+        
+        def gen_styles(font_color: str, bkg_color: str):
+            return f"""
+            QPushButton, QToolTip {{
+                font-size: 13px;
+                font-weight: bold;
+            }}
+            
+            QPushButton {{
+                color: {font_color};
+                background-color: {bkg_color};
+                padding: 16px 24px;
+            }}
+            
+            QToolTip {{
+                color: black;
+                background-color: white;
+                border: 1px solid black;
+            }}
+            """        
+
+        # TEMP styles array
+        styles = [
+            ("#FFFFFF","Black"),
+            ("#00FF7F","Black"),
+            ("#00BFFF","Black"),
+            ("#9370DB","Black"),
+            ("#DC143C","White"),
+            ("#778899","Black"),
+            ("#FFD700","Black"),
+            ("#FF69B4","Black"),
+        ]
+        
+        # Apply Layout and Styles to all grid buttons
+        i = 0
+        for btn in grid_buttons:
+            bc,fc = styles[i % len(styles)]
+            r,c = divmod(i,grid_columns)
+            btn.setStyleSheet(gen_styles(fc,bc))
+            grid.addWidget(btn,r,c)
+            i += 1
 
         pl.addLayout(grid)
         pl.addStretch(1)
         return page
+
 
     def _build_buff_imbue_page(self) -> QWidget:
         """Imbue sub-tab — searchable passive combo + add/preview/coverage."""
@@ -9642,6 +9983,179 @@ class ItemBuffsTab(QWidget):
             f"Drop the JSON file into the mod manager and click Apply.")
 
 
+    def _sync_buff_state_after_creator(
+        self,
+        mode: str,
+        item_bytes: bytes,
+        new_key: int = 0,
+        donor_key: int = 0,
+    ) -> None:
+        """Keep _buff_rust_items in sync with what Create Custom Item just
+        wrote to disk. Without this, a later Enable All + Apply to Game
+        serializes a stale dict and clobbers the custom item on 0058/.
+
+        mode='new'  → append the new item dict (keyed new_key).
+        mode='swap' → replace the donor's dict entry (keyed donor_key).
+        """
+        if not hasattr(self, '_buff_rust_items') or not self._buff_rust_items:
+            return
+        if not item_bytes:
+            return
+        try:
+            import crimson_rs
+            parsed = crimson_rs.parse_iteminfo_from_bytes(bytes(item_bytes))
+        except Exception:
+            return
+        if not parsed:
+            return
+        new_dict = parsed[0]
+
+        if mode == 'new':
+            new_dict['key'] = int(new_key)
+            # Avoid duplicates if user creates the same key twice
+            self._buff_rust_items[:] = [
+                it for it in self._buff_rust_items
+                if it.get('key') != int(new_key)
+            ]
+            self._buff_rust_items.append(new_dict)
+            if hasattr(self, '_buff_rust_lookup'):
+                self._buff_rust_lookup[int(new_key)] = new_dict
+            log.info("Synced new item key=%d into _buff_rust_items", new_key)
+        elif mode == 'swap':
+            new_dict['key'] = int(donor_key)
+            replaced = False
+            for i, it in enumerate(self._buff_rust_items):
+                if it.get('key') == int(donor_key):
+                    self._buff_rust_items[i] = new_dict
+                    replaced = True
+                    break
+            if hasattr(self, '_buff_rust_lookup'):
+                self._buff_rust_lookup[int(donor_key)] = new_dict
+            log.info("Synced donor key=%d in _buff_rust_items (%s)",
+                     donor_key, "replaced" if replaced else "not found")
+
+        # Rebuild any derived caches so UI reflects the change.
+        if hasattr(self, '_rebuild_index'):
+            try:
+                self._rebuild_index()
+            except Exception:
+                pass
+
+    def _open_add_to_save_picker(self) -> None:
+        """Scan live 0058/iteminfo for already-deployed custom items,
+        let the user pick one, then open the Add-to-Save dialog for it.
+
+        Independent of Create Custom Item -- useful when the user created
+        the item earlier but didn't complete the save-file swap, or wants
+        to add the same custom item to another save slot.
+        """
+        gp = getattr(self, '_game_path', '') or \
+            self._config.get('game_install_path', '')
+        if not gp or not os.path.isdir(gp):
+            QMessageBox.warning(
+                self, "Add Custom Item to Save",
+                "Game install path not set.")
+            return
+
+        # Scan 0058/iteminfo for custom-range keys. Fall back to vanilla
+        # comparison to be safe.
+        try:
+            import crimson_rs
+            dp = 'gamedata/binary__/client/bin'
+            try:
+                body_058 = bytes(crimson_rs.extract_file(
+                    gp, '0058', dp, 'iteminfo.pabgb'))
+            except Exception:
+                QMessageBox.warning(
+                    self, "Add Custom Item to Save",
+                    "No 0058/ overlay found. Create a custom item first "
+                    "(Apply to Game (New Item) mode).")
+                return
+            body_vanilla = bytes(crimson_rs.extract_file(
+                gp, '0008', dp, 'iteminfo.pabgb'))
+            items_058 = crimson_rs.parse_iteminfo_from_bytes(body_058)
+            vanilla_keys = {it['key']
+                            for it in crimson_rs.parse_iteminfo_from_bytes(body_vanilla)}
+            custom_items = [it for it in items_058
+                            if it['key'] not in vanilla_keys]
+        except Exception as e:
+            log.exception("Add-to-save picker: scan failed")
+            QMessageBox.critical(
+                self, "Add Custom Item to Save",
+                f"Failed to scan 0058/ for custom items:\n{e}")
+            return
+
+        if not custom_items:
+            QMessageBox.information(
+                self, "Add Custom Item to Save",
+                "No custom items found in 0058/iteminfo.pabgb.\n\n"
+                "Create one first via the Create Custom Item button.")
+            return
+
+        # Resolve display names via paloc if present, else fall back to string_key.
+        try:
+            from item_creator import compute_paloc_ids
+            paloc_bytes = None
+            try:
+                paloc_bytes = bytes(crimson_rs.extract_file(
+                    gp, '0064', 'gamedata/stringtable/binary__',
+                    'localizationstring_eng.paloc'))
+            except Exception:
+                pass
+
+            def resolve_name(it):
+                sk = it.get('string_key', '') or f"Custom_{it['key']}"
+                if paloc_bytes is None:
+                    return sk
+                try:
+                    name_id, _ = compute_paloc_ids(it['key'])
+                    needle = str(name_id).encode('utf-8')
+                    if needle in paloc_bytes:
+                        idx = paloc_bytes.index(needle)
+                        v_off = idx + len(needle)
+                        v_len = struct.unpack_from('<I', paloc_bytes, v_off)[0]
+                        if 0 < v_len < 500:
+                            return paloc_bytes[v_off+4:v_off+4+v_len].decode(
+                                'utf-8', errors='replace')
+                except Exception:
+                    pass
+                return sk
+        except Exception:
+            resolve_name = lambda it: it.get('string_key', f"Custom_{it['key']}")
+
+        # Pick which custom item (if more than one)
+        if len(custom_items) == 1:
+            chosen = custom_items[0]
+        else:
+            from PySide6.QtWidgets import QInputDialog
+            labels = [f"{resolve_name(it)}  (key {it['key']})"
+                      for it in custom_items]
+            label, ok = QInputDialog.getItem(
+                self, "Pick Custom Item",
+                f"Found {len(custom_items)} custom items in 0058/. "
+                f"Pick one to swap into a save file:",
+                labels, 0, False)
+            if not ok:
+                return
+            chosen = custom_items[labels.index(label)]
+
+        # Open the Add-to-Save dialog with the chosen item
+        try:
+            from gui.add_to_save_dialog import AddCustomItemToSaveDialog
+            dlg = AddCustomItemToSaveDialog(
+                custom_key=chosen['key'],
+                custom_name=resolve_name(chosen),
+                name_db=self._name_db,
+                icon_cache=self._icon_cache,
+                parent=self,
+            )
+            dlg.exec()
+        except Exception as e:
+            log.exception("AddCustomItemToSaveDialog failed to open")
+            QMessageBox.critical(
+                self, "Add Custom Item to Save",
+                f"Couldn't open the dialog:\n{e}")
+
     def _open_item_creator(self) -> None:
         """Open the visual item creator dialog."""
         if not hasattr(self, '_buff_rust_items') or not self._buff_rust_items:
@@ -9671,11 +10185,18 @@ class ItemBuffsTab(QWidget):
                 self._config.get('game_install_path', '')
             dp = 'gamedata/binary__/client/bin'
 
+            # Read iteminfo from 0058/ overlay if the ItemBuffs tab has
+            # written there (sentinel file present), otherwise vanilla 0008.
+            # Without this, "Create Custom Item" clobbers the All Sockets /
+            # UP v2 / other edits the user already applied.
+            iteminfo_sentinel = os.path.join(gp, '0058', '.se_itembuffs')
+            iteminfo_source = '0058' if os.path.isfile(iteminfo_sentinel) else '0008'
+
             if dlg.finish_mode == 'swap':
                 # ── SWAP TO VENDOR ──
                 # Modify the donor item's stats in iteminfo, then swap
                 # the store entry to point at the donor key
-                body = bytes(crimson_rs.extract_file(gp, '0008', dp, 'iteminfo.pabgb'))
+                body = bytes(crimson_rs.extract_file(gp, iteminfo_source, dp, 'iteminfo.pabgb'))
                 items = crimson_rs.parse_iteminfo_from_bytes(body)
 
                 # Find and replace the donor item with our edited version
@@ -9732,6 +10253,12 @@ class ItemBuffsTab(QWidget):
                                      os.path.join(dest, '0.paz'))
                         shutil.copy2(os.path.join(gdir, '0.pamt'),
                                      os.path.join(dest, '0.pamt'))
+                        # Sentinel on 0058 so ItemBuffs' Extract recognizes
+                        # this overlay and preserves it on next Apply.
+                        if gid == '0058':
+                            with open(os.path.join(dest, '.se_itembuffs'),
+                                      'w') as _sf:
+                                _sf.write("Created by CrimsonSaveEditor Custom Item Creator (Swap to Vendor)\n")
                         groups[gid] = ck
 
                 papgt_path = os.path.join(gp, 'meta', '0.papgt')
@@ -9744,6 +10271,19 @@ class ItemBuffsTab(QWidget):
                         papgt, gid, groups[gid], 0, 16383)
                 crimson_rs.write_papgt_file(papgt, papgt_path)
 
+                # Sync the in-memory dict with the donor's new stats so a
+                # subsequent Enable All → Apply to Game doesn't clobber the
+                # changes we just wrote. Without this, _buff_rust_items
+                # carries stale donor data.
+                try:
+                    self._sync_buff_state_after_creator(
+                        mode='swap',
+                        donor_key=dlg.created_donor_key,
+                        item_bytes=dlg.created_item_bytes,
+                    )
+                except Exception as _sync_e:
+                    log.warning("Post-swap in-memory sync failed: %s", _sync_e)
+
                 QMessageBox.information(
                     self, "Swapped to Vendor",
                     f"Item deployed to vendor!\n\n"
@@ -9755,10 +10295,199 @@ class ItemBuffsTab(QWidget):
                 self._buff_status_label.setText(
                     f"Vendor swap: {dlg.created_name} — restart game")
 
+            elif dlg.finish_mode == 'export_single':
+                # ── EXPORT AS SINGLE-ITEM MOD ──
+                # Build a standalone folder mod: vanilla iteminfo + just
+                # this one item, plus paloc with the name. Does NOT touch
+                # the live game. Shareable + re-importable.
+                from PySide6.QtWidgets import QFileDialog, QInputDialog
+                default_name = f"CustomItem_{dlg.created_key}_" + "".join(
+                    c if c.isalnum() else '_' for c in dlg.created_name)[:40]
+                parent_dir = QFileDialog.getExistingDirectory(
+                    self, "Pick export location",
+                    self._config.get("custom_item_export_dir",
+                                     os.path.expanduser("~/Desktop")))
+                if not parent_dir:
+                    return
+                self._config["custom_item_export_dir"] = parent_dir
+                mod_name, ok = QInputDialog.getText(
+                    self, "Mod name",
+                    "Folder name for this single-item mod:",
+                    text=default_name)
+                if not ok or not mod_name.strip():
+                    return
+                mod_name = "".join(c if (c.isalnum() or c in "-_ .") else "_"
+                                   for c in mod_name.strip())
+                out_dir = os.path.join(parent_dir, mod_name)
+                if os.path.isdir(out_dir) and os.listdir(out_dir):
+                    QMessageBox.warning(self, "Export",
+                        f"Output folder exists and is not empty:\n{out_dir}")
+                    return
+                os.makedirs(out_dir, exist_ok=True)
+
+                # Build vanilla+item iteminfo
+                v_body = bytes(crimson_rs.extract_file(gp, '0008', dp, 'iteminfo.pabgb'))
+                v_head = bytes(crimson_rs.extract_file(gp, '0008', dp, 'iteminfo.pabgh'))
+                new_body, new_head = append_items_to_iteminfo(
+                    v_body, v_head, [(dlg.created_key, dlg.created_item_bytes)])
+
+                # Build vanilla+name paloc
+                paloc_bytes = None
+                try:
+                    from item_creator import compute_paloc_ids
+                    paloc_raw = bytes(crimson_rs.extract_file(
+                        gp, '0020', 'gamedata/stringtable/binary__',
+                        'localizationstring_eng.paloc'))
+                    entries = []
+                    off = 0
+                    while off < len(paloc_raw) - 16:
+                        marker = paloc_raw[off:off+8]
+                        if off + 12 > len(paloc_raw):
+                            break
+                        k_len = struct.unpack_from('<I', paloc_raw, off+8)[0]
+                        if k_len == 0 or k_len > 500:
+                            break
+                        if off + 12 + k_len + 4 > len(paloc_raw):
+                            break
+                        key_s = paloc_raw[off+12:off+12+k_len].decode('utf-8', errors='replace')
+                        v_off = off + 12 + k_len
+                        v_len = struct.unpack_from('<I', paloc_raw, v_off)[0]
+                        if v_len > 500000:
+                            break
+                        val = paloc_raw[v_off+4:v_off+4+v_len].decode('utf-8', errors='replace')
+                        entries.append({'marker': marker, 'key': key_s, 'value': val})
+                        off = v_off + 4 + v_len
+                    paloc_tail = paloc_raw[off:]
+
+                    name_id, desc_id = compute_paloc_ids(dlg.created_key)
+                    ITEM_MARKER = bytes.fromhex('0700000000000000')
+                    entries.append({'marker': ITEM_MARKER, 'key': str(name_id),
+                                    'value': dlg.created_name})
+                    if dlg.created_desc:
+                        entries.append({'marker': ITEM_MARKER, 'key': str(desc_id),
+                                        'value': dlg.created_desc})
+
+                    def _sort_key(e):
+                        try: return (0, int(e['key']), '')
+                        except ValueError: return (1, 0, e['key'])
+                    entries.sort(key=_sort_key)
+
+                    paloc_out = bytearray()
+                    for e in entries:
+                        paloc_out += e['marker']
+                        kb = e['key'].encode('utf-8')
+                        paloc_out += struct.pack('<I', len(kb)) + kb
+                        vb = e['value'].encode('utf-8')
+                        paloc_out += struct.pack('<I', len(vb)) + vb
+                    paloc_out += paloc_tail
+                    paloc_bytes = bytes(paloc_out)
+                except Exception as _pe:
+                    log.warning("Export: paloc build failed: %s", _pe)
+
+                # Write the two groups as shareable folders (0036 + 0064,
+                # matching the standard single-item mod convention).
+                import tempfile
+                with tempfile.TemporaryDirectory() as tmp:
+                    # 0036/ = iteminfo
+                    gdir36 = os.path.join(tmp, '0036')
+                    os.makedirs(gdir36)
+                    b = crimson_rs.PackGroupBuilder(
+                        gdir36, crimson_rs.Compression.NONE,
+                        crimson_rs.Crypto.NONE)
+                    b.add_file(dp, 'iteminfo.pabgb', new_body)
+                    b.add_file(dp, 'iteminfo.pabgh', new_head)
+                    b.finish()
+                    dest36 = os.path.join(out_dir, '0036')
+                    os.makedirs(dest36)
+                    shutil.copy2(os.path.join(gdir36, '0.paz'),
+                                 os.path.join(dest36, '0.paz'))
+                    shutil.copy2(os.path.join(gdir36, '0.pamt'),
+                                 os.path.join(dest36, '0.pamt'))
+
+                    # 0064/ = paloc (if built)
+                    if paloc_bytes:
+                        gdir64 = os.path.join(tmp, '0064')
+                        os.makedirs(gdir64)
+                        b2 = crimson_rs.PackGroupBuilder(
+                            gdir64, crimson_rs.Compression.NONE,
+                            crimson_rs.Crypto.NONE)
+                        b2.add_file('gamedata/stringtable/binary__',
+                                    'localizationstring_eng.paloc', paloc_bytes)
+                        b2.finish()
+                        dest64 = os.path.join(out_dir, '0064')
+                        os.makedirs(dest64)
+                        shutil.copy2(os.path.join(gdir64, '0.paz'),
+                                     os.path.join(dest64, '0.paz'))
+                        shutil.copy2(os.path.join(gdir64, '0.pamt'),
+                                     os.path.join(dest64, '0.pamt'))
+
+                # modinfo.json + README for mod-loader compatibility
+                import json as _json
+                modinfo = {
+                    "id": mod_name.lower().replace(" ", "_"),
+                    "name": mod_name,
+                    "version": "1.0.0",
+                    "author": "CrimsonGameMods Item Creator",
+                    "description": (
+                        f"Single-item mod: {dlg.created_name} "
+                        f"(key {dlg.created_key}). Adds one new item to iteminfo; "
+                        f"does not modify any other items."),
+                    "custom_item_key": dlg.created_key,
+                    "custom_item_name": dlg.created_name,
+                    "bundled_files": (
+                        ["iteminfo.pabgb", "iteminfo.pabgh"] +
+                        (["localizationstring_eng.paloc"] if paloc_bytes else [])),
+                }
+                with open(os.path.join(out_dir, "modinfo.json"), "w", encoding="utf-8") as f:
+                    _json.dump(modinfo, f, indent=2, ensure_ascii=False)
+
+                readme = (
+                    f"{mod_name}\n"
+                    f"{'=' * len(mod_name)}\n\n"
+                    f"Single-item mod built from CrimsonGameMods Item Creator.\n\n"
+                    f"Item:\n"
+                    f"  Name : {dlg.created_name}\n"
+                    f"  Key  : {dlg.created_key}\n\n"
+                    f"Contents:\n"
+                    f"  0036/  iteminfo.pabgb + iteminfo.pabgh (vanilla + this item)\n"
+                    f"  0064/  localizationstring_eng.paloc (with custom name)\n\n"
+                    f"HOW TO INSTALL\n"
+                    f"--------------\n"
+                    f"Via mod loader (recommended):\n"
+                    f"  JMM: drag this folder into mods/_enabled/, click Apply.\n"
+                    f"  CDUMM: import this folder, enable, Apply.\n\n"
+                    f"Via CrimsonGameMods:\n"
+                    f"  ItemBuffs tab -> Import menu -> Import CDUMM/PAZ Mod,\n"
+                    f"  then pick this folder. The item gets added to your\n"
+                    f"  in-memory dict and ships with your next Apply to Game.\n\n"
+                    f"This mod was built against vanilla iteminfo and contains\n"
+                    f"only the one new item. It will not overwrite or conflict\n"
+                    f"with other item-data changes you have installed.\n"
+                )
+                with open(os.path.join(out_dir, "README.txt"), "w", encoding="utf-8") as f:
+                    f.write(readme)
+
+                QMessageBox.information(
+                    self, "Exported",
+                    f"Single-item mod exported:\n\n{out_dir}\n\n"
+                    f"Item: {dlg.created_name} (key {dlg.created_key})\n"
+                    f"Contents: 0036/ + {'0064/ + ' if paloc_bytes else ''}modinfo.json + README.txt\n\n"
+                    f"Share this folder, or re-import via ItemBuffs -> Import menu.")
+                self._buff_status_label.setText(
+                    f"Exported: {dlg.created_name} -> {mod_name}/")
             else:
                 # ── APPLY TO GAME (NEW ITEM) ──
-                body = bytes(crimson_rs.extract_file(gp, '0008', dp, 'iteminfo.pabgb'))
-                head = bytes(crimson_rs.extract_file(gp, '0008', dp, 'iteminfo.pabgh'))
+                # Read from 0058/ if ItemBuffs has already modded it; else
+                # vanilla. The pabgh MUST match the pabgb we read -- if the
+                # 0058/ overlay lacks pabgh (pre-v1.0.5 write), regenerate
+                # from the pabgb so append_items_to_iteminfo's offsets line up.
+                body = bytes(crimson_rs.extract_file(gp, iteminfo_source, dp, 'iteminfo.pabgb'))
+                try:
+                    head = bytes(crimson_rs.extract_file(gp, iteminfo_source, dp, 'iteminfo.pabgh'))
+                except Exception:
+                    # Older overlay without pabgh -- rebuild from current body
+                    from item_creator import build_iteminfo_pabgh
+                    head = build_iteminfo_pabgh(body)
                 new_body, new_head = append_items_to_iteminfo(
                     body, head, [(dlg.created_key, dlg.created_item_bytes)])
 
@@ -9847,6 +10576,11 @@ class ItemBuffsTab(QWidget):
                                  os.path.join(dest, '0.paz'))
                     shutil.copy2(os.path.join(gdir58, '0.pamt'),
                                  os.path.join(dest, '0.pamt'))
+                    # Sentinel so ItemBuffs' Extract-prefer-overlay recognizes
+                    # this 0058/ as safe-to-read and layers its edits on top
+                    # instead of clobbering us with a vanilla-based rewrite.
+                    with open(os.path.join(dest, '.se_itembuffs'), 'w') as _sf:
+                        _sf.write("Created by CrimsonSaveEditor Custom Item Creator\n")
 
                     # 0064: paloc (if patched)
                     if paloc_bytes:
@@ -9879,21 +10613,51 @@ class ItemBuffsTab(QWidget):
                         papgt, gid, groups_to_deploy[gid], 0, 16383)
                 crimson_rs.write_papgt_file(papgt, papgt_path)
 
+                # Sync in-memory state — append the new item so subsequent
+                # ItemBuffs actions (Enable All, Apply to Game) see it and
+                # don't clobber it on the next serialize.
+                try:
+                    self._sync_buff_state_after_creator(
+                        mode='new',
+                        new_key=dlg.created_key,
+                        item_bytes=dlg.created_item_bytes,
+                    )
+                except Exception as _sync_e:
+                    log.warning("Post-create in-memory sync failed: %s", _sync_e)
+
                 overlays = ', '.join(sorted(groups_to_deploy.keys()))
-                QMessageBox.information(
+                reply = QMessageBox.question(
                     self, "Item Created",
                     f"New item deployed!\n\n"
                     f"Name: {dlg.created_name}\n"
                     f"Key: {dlg.created_key}\n"
                     f"Overlays: {overlays}{paloc_msg}\n\n"
-                    f"TO GET IT IN-GAME:\n"
-                    f"1. Open the Save Editor\n"
-                    f"2. Go to Repurchase tab\n"
-                    f"3. Swap a junk item to key {dlg.created_key}\n"
-                    f"4. Save, load game, buy it back"
+                    f"Add it to your save file now?\n"
+                    f"(Picks a save + swaps an existing item's key to "
+                    f"{dlg.created_key} so it shows up in-game.)",
+                    QMessageBox.Yes | QMessageBox.No, QMessageBox.Yes,
                 )
                 self._buff_status_label.setText(
                     f"Created: {dlg.created_name} (key={dlg.created_key})")
+                if reply == QMessageBox.Yes:
+                    try:
+                        from gui.add_to_save_dialog import AddCustomItemToSaveDialog
+                        add_dlg = AddCustomItemToSaveDialog(
+                            custom_key=dlg.created_key,
+                            custom_name=dlg.created_name,
+                            name_db=self._name_db,
+                            icon_cache=self._icon_cache,
+                            parent=self,
+                        )
+                        add_dlg.exec()
+                    except Exception as _e:
+                        log.exception("AddCustomItemToSaveDialog failed to open")
+                        QMessageBox.warning(
+                            self, "Add to Save",
+                            f"Couldn't open the Add-to-Save dialog:\n{_e}\n\n"
+                            f"You can still use the standalone Save Editor's "
+                            f"Repurchase tab to swap an item to key "
+                            f"{dlg.created_key}.")
 
         except Exception as e:
             log.exception("Item creator deploy failed")

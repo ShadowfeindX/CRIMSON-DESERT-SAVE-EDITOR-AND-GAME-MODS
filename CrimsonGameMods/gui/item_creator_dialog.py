@@ -76,7 +76,7 @@ class ItemCreatorDialog(QDialog):
         self.created_name: str = ''
         self.created_desc: str = ''
         self.created_donor_key: int = 0
-        self.finish_mode: str = ''  # 'new' or 'swap'
+        self.finish_mode: str = ''  # 'new' | 'swap' | 'export_single'
         self.swap_store_key: int = 0  # which store to swap into
         self.swap_replace_item_key: int = 0  # which store item to replace
 
@@ -348,6 +348,20 @@ class ItemCreatorDialog(QDialog):
         self._create_btn.clicked.connect(lambda: self._on_finish('new'))
         bottom.addWidget(self._create_btn)
 
+        self._export_single_btn = QPushButton("Export as Single-Item Mod")
+        self._export_single_btn.setStyleSheet(
+            "background-color:#2E7D32;color:white;font-weight:bold;"
+            "font-size:14px;padding:10px 24px;")
+        self._export_single_btn.setToolTip(
+            "Export a clean standalone folder mod containing ONLY this item.\n"
+            "Built against vanilla iteminfo (not your current modded state),\n"
+            "so the mod is shareable and doesn't include your other edits.\n\n"
+            "Output folder can be imported by any mod loader (JMM, CDUMM)\n"
+            "or re-imported back into this tool via Import Mod.")
+        self._export_single_btn.setEnabled(False)
+        self._export_single_btn.clicked.connect(lambda: self._on_finish('export_single'))
+        bottom.addWidget(self._export_single_btn)
+
         # Separator
         bottom.addWidget(QLabel("  |  "))
 
@@ -446,6 +460,7 @@ class ItemCreatorDialog(QDialog):
         self._load_raw_fields()
         self._update_preview()
         self._create_btn.setEnabled(True)
+        self._export_single_btn.setEnabled(True)
 
     # ── Identity tab ──────────────────────────────────────────────────
 
@@ -944,6 +959,15 @@ class ItemCreatorDialog(QDialog):
             self.swap_replace_item_key = replace_key
             self.created_key = donor_key  # reuse donor key
             self.finish_mode = 'swap'
+        elif mode == 'export_single':
+            # Same key-selection flow as 'new' but will be written as a
+            # standalone shareable folder mod, not installed to the live game.
+            key = self._key_spin.value()
+            if key in self._items_by_key:
+                QMessageBox.warning(self, "Error", f"Key {key} already exists.")
+                return
+            self.created_key = key
+            self.finish_mode = 'export_single'
         else:
             # New Item — use custom key
             key = self._key_spin.value()
@@ -960,7 +984,7 @@ class ItemCreatorDialog(QDialog):
             import crimson_rs
             modified_bytes = crimson_rs.serialize_iteminfo([edited])
 
-            if mode == 'new':
+            if mode in ('new', 'export_single'):
                 from item_creator import clone_item_bytes
                 internal = 'Custom_' + ''.join(
                     c if c.isalnum() else '_' for c in name)[:40]

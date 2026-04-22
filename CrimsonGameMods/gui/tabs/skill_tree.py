@@ -14,7 +14,7 @@ import tempfile
 from typing import Callable, Optional
 
 from PySide6.QtCore import Qt, Signal
-from PySide6.QtWidgets import (
+from PySide6.QtWidgets import (QSpinBox,
     QComboBox, QHBoxLayout, QHeaderView, QLabel, QMessageBox,
     QPushButton, QTableWidget, QTableWidgetItem, QVBoxLayout, QWidget,
 )
@@ -83,6 +83,22 @@ class SkillTreeTab(QWidget):
         self._btn_apply.clicked.connect(self._on_apply)
         self._btn_apply.setEnabled(False)
         top_row.addWidget(self._btn_apply)
+
+        # Overlay group number — configurable. Default 64 because 63 is
+        # taken by Stacker's equipslotinfo overlay (applying both would
+        # clobber). User can still pick 63 if they don't use Stacker.
+        top_row.addWidget(QLabel("Overlay:"))
+        self._overlay_spin = QSpinBox()
+        self._overlay_spin.setRange(1, 9999)
+        self._overlay_spin.setValue(self._config.get("skilltree_overlay_dir", 64))
+        self._overlay_spin.setFixedWidth(70)
+        self._overlay_spin.setToolTip(
+            "Overlay group number (0064 = default). 0063 is reserved for\n"
+            "Stacker's equipslotinfo — changing this avoids the clash.\n"
+            "Apply writes to <game>/NNNN/; Restore removes the same NNNN/.")
+        self._overlay_spin.valueChanged.connect(
+            lambda v: self._config.update({"skilltree_overlay_dir": int(v)}))
+        top_row.addWidget(self._overlay_spin)
 
         self._btn_restore = QPushButton("Restore")
         self._btn_restore.clicked.connect(self._on_restore)
@@ -499,9 +515,11 @@ class SkillTreeTab(QWidget):
         new_pabgh, new_pabgb = serialize_all(records)
         new_grp_gh, new_grp_gb = serialize_groups(groups)
 
+        overlay_group = f"{self._overlay_spin.value():04d}"
+
         # Build overlay with PackGroupBuilder(NONE)
         with tempfile.TemporaryDirectory() as tmp_dir:
-            group_dir = os.path.join(tmp_dir, OVERLAY_GROUP)
+            group_dir = os.path.join(tmp_dir, overlay_group)
             os.makedirs(group_dir, exist_ok=True)
 
             builder = crimson_rs.PackGroupBuilder(
@@ -521,7 +539,7 @@ class SkillTreeTab(QWidget):
             ]
 
             # Deploy files to game directory
-            game_mod = os.path.join(game_path, OVERLAY_GROUP)
+            game_mod = os.path.join(game_path, overlay_group)
             if os.path.isdir(game_mod):
                 shutil.rmtree(game_mod)
             os.makedirs(game_mod, exist_ok=True)
@@ -540,10 +558,10 @@ class SkillTreeTab(QWidget):
         papgt = crimson_rs.parse_papgt_file(papgt_path)
         papgt["entries"] = [
             e for e in papgt["entries"]
-            if e.get("group_name") != OVERLAY_GROUP
+            if e.get("group_name") != overlay_group
         ]
         papgt = crimson_rs.add_papgt_entry(
-            papgt, OVERLAY_GROUP, pamt_checksum, 0, 16383
+            papgt, overlay_group, pamt_checksum, 0, 16383
         )
         crimson_rs.write_papgt_file(papgt, papgt_path)
 
@@ -554,14 +572,14 @@ class SkillTreeTab(QWidget):
                 f.write(f"  {c}\n")
 
         summary = "\n".join(changes)
-        self._lbl_status.setText(f"Deployed to {OVERLAY_GROUP}/")
+        self._lbl_status.setText(f"Deployed to {overlay_group}/")
         self.status_message.emit(
-            f"SkillTree overlay deployed to {OVERLAY_GROUP}/ "
+            f"SkillTree overlay deployed to {overlay_group}/ "
             f"({len(changes)} swap(s))"
         )
         QMessageBox.information(
             self, "Deployed",
-            f"Skill tree overlay deployed to {OVERLAY_GROUP}/\n\n"
+            f"Skill tree overlay deployed to {overlay_group}/\n\n"
             f"{summary}\n\n"
             f"Restart the game to apply changes.",
         )
@@ -575,16 +593,17 @@ class SkillTreeTab(QWidget):
                                 "Set the game install path first.")
             return
 
-        game_mod = os.path.join(game_path, OVERLAY_GROUP)
+        overlay_group = f"{self._overlay_spin.value():04d}"
+        game_mod = os.path.join(game_path, overlay_group)
         if not os.path.isdir(game_mod):
             QMessageBox.information(self, "Nothing to restore",
-                                    f"No {OVERLAY_GROUP}/ overlay found.")
+                                    f"No {overlay_group}/ overlay found.")
             return
 
         try:
             # Remove PAPGT entry first
             if self._rebuild_papgt_fn:
-                msg = self._rebuild_papgt_fn(game_path, OVERLAY_GROUP)
+                msg = self._rebuild_papgt_fn(game_path, overlay_group)
                 log.info("PAPGT restore: %s", msg)
 
             # Remove overlay directory
@@ -592,11 +611,11 @@ class SkillTreeTab(QWidget):
 
             self._lbl_status.setText("Restored -- overlay removed")
             self.status_message.emit(
-                f"SkillTree overlay {OVERLAY_GROUP}/ removed"
+                f"SkillTree overlay {overlay_group}/ removed"
             )
             QMessageBox.information(
                 self, "Restored",
-                f"Removed {OVERLAY_GROUP}/ overlay.\n"
+                f"Removed {overlay_group}/ overlay.\n"
                 f"Restart the game to revert to vanilla skill trees.",
             )
         except Exception as e:
