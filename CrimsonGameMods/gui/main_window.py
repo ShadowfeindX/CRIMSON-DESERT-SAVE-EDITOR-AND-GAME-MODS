@@ -121,6 +121,7 @@ from gui.tabs.world import (
 )
 from gui.tabs.patches import GamePatchesTab
 from gui.tabs.field_edit import FieldEditTab
+from gui.tabs.bagspace import BagSpaceTab
 from gui.tabs.skill_tree import SkillTreeTab
 from gui.dialogs import (
     _FloatingTabWindow, DetachableTabWidget,
@@ -786,6 +787,20 @@ class MainWindow(QMainWindow):
             except Exception:
                 pass
         self._mods_tabs.addTab(self._store_tab, tr("tab.stores"))
+
+        self._bagspace_tab = BagSpaceTab(
+            config=self._config,
+            rebuild_papgt_fn=self._rebuild_papgt_without,
+        )
+        self._bagspace_tab.status_message.connect(self._update_status)
+        self._bagspace_tab.config_save_requested.connect(self._save_config)
+        _saved_gp_bagspace = self._config.get("game_install_path", "")
+        if _saved_gp_bagspace:
+            try:
+                self._bagspace_tab.set_game_path(_saved_gp_bagspace)
+            except Exception:
+                pass
+        self._mods_tabs.addTab(self._bagspace_tab, "BagSpace")
 
         self._dropset_tab = DropsetTab(
             name_db=self._name_db,
@@ -2377,6 +2392,8 @@ QCheckBox::indicator {{
             self._buffs_tab.set_game_path(path)
         if hasattr(self, '_field_edit_tab_obj'):
             self._field_edit_tab_obj.set_game_path(path)
+        if hasattr(self, '_bagspace_tab'):
+            self._bagspace_tab.set_game_path(path)
 
     def _validate_game_path(self, path: str) -> bool:
         paz = os.path.join(path, "0008", "0.paz")
