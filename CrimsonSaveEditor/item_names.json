@@ -2,7 +2,7 @@
   "items": [
     {
       "itemKey": 1,
-      "name": "Copper",
+      "name": "Silver",
       "category": "Currency",
       "internalName": "Money_Copper",
       "maxStack": 100000
@@ -1237,322 +1237,322 @@
       "name": "Paddlefish",
       "category": "Consumable",
       "internalName": "Food_SpatulaSturgeon",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 29502,
       "name": "Broadnose Sevengill Shark",
       "category": "Consumable",
       "internalName": "Food_SevenStarShark",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 29503,
       "name": "Giant Red Seabream",
       "category": "Consumable",
       "internalName": "Food_GiantRedSeaBream",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 29504,
       "name": "Crimson Opaleye",
       "category": "Consumable",
       "internalName": "Food_RedSnapper",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 29505,
       "name": "Giant Pond Loach",
       "category": "Consumable",
       "internalName": "Food_GiantMudfish",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 29506,
       "name": "Sailfish",
       "category": "Consumable",
       "internalName": "Food_Sailfish",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 29507,
       "name": "Golden Tench",
       "category": "Consumable",
       "internalName": "Food_GoldTenchi",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 29508,
       "name": "Coelacanth",
       "category": "Consumable",
       "internalName": "Food_Coelacanth",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 29509,
       "name": "Golden Carp",
       "category": "Consumable",
       "internalName": "Food_GoldCarp",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 29511,
       "name": "Anglerfish",
       "category": "Consumable",
       "internalName": "Food_LightCrotch",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 29513,
       "name": "Electric Eel",
       "category": "Consumable",
       "internalName": "Food_LightningEel",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 29601,
       "name": "Red Tonguesole",
       "category": "Consumable",
       "internalName": "Food_Dover_Sole",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 29602,
       "name": "Red Seabream",
       "category": "Consumable",
       "internalName": "Food_Red_Seabream",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 29603,
       "name": "Salmon",
       "category": "Consumable",
       "internalName": "Food_Salmon",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 29604,
       "name": "Sturgeon",
       "category": "Consumable",
       "internalName": "Food_Sturgeon",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 29605,
       "name": "Sockeye Salmon",
       "category": "Consumable",
       "internalName": "Food_Sockeye_Salmon",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 29606,
       "name": "Blackhead Seabream",
       "category": "Consumable",
       "internalName": "Food_BlackSeaBream",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 29607,
       "name": "Opaleye",
       "category": "Consumable",
       "internalName": "Food_Red_Snapper",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 29608,
       "name": "Barred Knifejaw",
       "category": "Consumable",
       "internalName": "Food_Rock_Bream",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 29609,
       "name": "Mackerel",
       "category": "Consumable",
       "internalName": "Food_Mackerel",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 29612,
       "name": "Striped Marlin",
       "category": "Consumable",
       "internalName": "Food_Marlin",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 29613,
       "name": "Seahorse",
       "category": "Consumable",
       "internalName": "Food_Seahorse",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 29615,
       "name": "Starfish",
       "category": "Consumable",
       "internalName": "Food_Starfish",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 29616,
       "name": "Squid",
       "category": "Consumable",
       "internalName": "Food_Squid",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 29617,
       "name": "Saw-Edged Perch",
       "category": "Consumable",
       "internalName": "Food_Cuvier",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 29801,
       "name": "Small Blackbrow Bleak",
       "category": "Consumable",
       "internalName": "Food_Blackbrow_Bleak",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 29802,
       "name": "Small Minnow",
       "category": "Consumable",
       "internalName": "Food_BaliOgluChub",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 29803,
       "name": "Small Spirlin",
       "category": "Consumable",
       "internalName": "Food_Schneider",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 29804,
       "name": "Small Gudgeon",
       "category": "Consumable",
       "internalName": "Food_Sammy",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 29805,
       "name": "Small Rasbora",
       "category": "Consumable",
       "internalName": "Food_Beyaz",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 29806,
       "name": "Northern Pike",
       "category": "Consumable",
       "internalName": "Food_Pikefish",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 29807,
       "name": "Trout",
       "category": "Consumable",
       "internalName": "Food_Trout",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 29808,
       "name": "Carp",
       "category": "Consumable",
       "internalName": "Food_Carp",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 29809,
       "name": "Tench",
       "category": "Consumable",
       "internalName": "Food_Tenchi",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 29810,
       "name": "Pond Loach",
       "category": "Consumable",
       "internalName": "Food_Mudfish",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 29811,
       "name": "Catfish",
       "category": "Consumable",
       "internalName": "Food_Catfish",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 29812,
       "name": "Lenok",
       "category": "Consumable",
       "internalName": "Food_Lenok",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 29813,
       "name": "Burbot",
       "category": "Consumable",
       "internalName": "Food_Burbot",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 29814,
       "name": "Freshwater Eel",
       "category": "Consumable",
       "internalName": "Food_Eel",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 29815,
       "name": "Perch",
       "category": "Consumable",
       "internalName": "Food_Perch",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 29816,
       "name": "Bass",
       "category": "Consumable",
       "internalName": "Food_Bass_I",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 29817,
       "name": "Yellow Bass",
       "category": "Consumable",
       "internalName": "Food_Bass_II",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 29818,
       "name": "Leopard Perch",
       "category": "Consumable",
       "internalName": "Food_Ssogari",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 29819,
       "name": "Crucian Carp",
       "category": "Consumable",
       "internalName": "Food_Crucian_Carp",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 29820,
       "name": "Clockwork Fish",
       "category": "Consumable",
       "internalName": "Food_MechanicFish",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 29821,
       "name": "Crayfish",
       "category": "Consumable",
       "internalName": "Food_Crayfish",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 30010,
@@ -1850,7 +1850,7 @@
     },
     {
       "itemKey": 101001,
-      "name": "Rekhia Plate Helm",
+      "name": "Baltheon Plate Helm",
       "category": "Misc",
       "internalName": "Lekia_PlateArmor_Helm",
       "maxStack": 1
@@ -2270,7 +2270,7 @@
     },
     {
       "itemKey": 103033,
-      "name": "Melvin Leather Helm",
+      "name": "Melvin Leather Cap",
       "category": "Material",
       "internalName": "Melvin_Leather_Helm",
       "maxStack": 1
@@ -2284,7 +2284,7 @@
     },
     {
       "itemKey": 103036,
-      "name": "Rondel Leather Helm",
+      "name": "Rondel Leather Cap",
       "category": "Material",
       "internalName": "Londel_Leather_Helm",
       "maxStack": 1
@@ -2298,7 +2298,7 @@
     },
     {
       "itemKey": 103047,
-      "name": "Rueconec Leather Helm",
+      "name": "Rueconec Leather Hat",
       "category": "Material",
       "internalName": "Luconek_Leather_Helm",
       "maxStack": 1
@@ -2312,7 +2312,7 @@
     },
     {
       "itemKey": 103057,
-      "name": "Dimfeld Leather Helm",
+      "name": "Dimfeld Leather Hat",
       "category": "Material",
       "internalName": "Dimfeld_Leather_Helm",
       "maxStack": 1
@@ -2361,7 +2361,7 @@
     },
     {
       "itemKey": 103104,
-      "name": "Dekter Leather Helm",
+      "name": "Dekter Leather Cap",
       "category": "Material",
       "internalName": "Dekcher_Leather_Helm",
       "maxStack": 1
@@ -3089,7 +3089,7 @@
     },
     {
       "itemKey": 111187,
-      "name": "Lauer Chain Mail",
+      "name": "Flame Knights Chain Mail",
       "category": "Misc",
       "internalName": "Lower_ChainMail_Armor",
       "maxStack": 1
@@ -6001,7 +6001,7 @@
     },
     {
       "itemKey": 121009,
-      "name": "Behrun Hide Bracers",
+      "name": "Behrun Leather Bracers",
       "category": "Material",
       "internalName": "Veroon_Leather_Gloves",
       "maxStack": 1
@@ -7625,7 +7625,7 @@
     },
     {
       "itemKey": 132006,
-      "name": "Regglia Leather Boots",
+      "name": "Rekhia Leather Boots",
       "category": "Material",
       "internalName": "Lekia_Leather_Boots",
       "maxStack": 1
@@ -8038,7 +8038,7 @@
     },
     {
       "itemKey": 133199,
-      "name": "Driseld Leather Boots",
+      "name": "Dimfeld Leather Boots",
       "category": "Material",
       "internalName": "Dimfeld_Leather_Boots",
       "maxStack": 1
@@ -8115,7 +8115,7 @@
     },
     {
       "itemKey": 133226,
-      "name": "Beattie Leather Boots",
+      "name": "Bettie Leather Boots",
       "category": "Material",
       "internalName": "Betty_Leather_Boots",
       "maxStack": 1
@@ -8535,7 +8535,7 @@
     },
     {
       "itemKey": 133329,
-      "name": "Dreiger Leather Boots",
+      "name": "Dekter Leather Boots",
       "category": "Material",
       "internalName": "Dekcher_Leather_Boots",
       "maxStack": 1
@@ -11055,7 +11055,7 @@
     },
     {
       "itemKey": 754062,
-      "name": "Acidic Spider Venom",
+      "name": "Acid Spider Venom",
       "category": "Misc",
       "internalName": "Acid_Spider_Poison",
       "maxStack": 50
@@ -12115,7 +12115,7 @@
       "name": "Swallowtail",
       "category": "Misc",
       "internalName": "Item_Eastern_Tiger_Swallowtail",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 1000021,
@@ -12150,7 +12150,7 @@
       "name": "Ornythion Swallowtail Butterfly",
       "category": "Misc",
       "internalName": "Item_Ornythion_Swallowtail",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 1000026,
@@ -12220,7 +12220,7 @@
       "name": "Spicebush Swallowtail Butterfly",
       "category": "Misc",
       "internalName": "Item_Spicebush_Swallowtail",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 1000036,
@@ -12269,7 +12269,7 @@
       "name": "Pipevine Swallowtail Butterfly",
       "category": "Misc",
       "internalName": "Item_Pipevine_Swallowtail",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 1000043,
@@ -12360,14 +12360,14 @@
       "name": "Polydamas Swallowtail Butterfly",
       "category": "Misc",
       "internalName": "Item_Polydamas_Swallowtail",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 1000056,
       "name": "Zebra Swallowtail",
       "category": "Misc",
       "internalName": "Item_Zebra_Swallowtail",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 1000057,
@@ -12500,7 +12500,7 @@
       "name": "Checkered White Butterfly",
       "category": "Misc",
       "internalName": "Item_Checkered_White",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 1000076,
@@ -12528,7 +12528,7 @@
       "name": "Orange-Barred Sulphur Butterfly",
       "category": "Misc",
       "internalName": "Item_Orange_Barred_Sulphur",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 1000080,
@@ -12728,7 +12728,7 @@
     },
     {
       "itemKey": 1000108,
-      "name": "Low-heeled Leather Boots",
+      "name": "Low-Heeled Leather Boots",
       "category": "Material",
       "internalName": "DamianOnly_Leather_Boots_II",
       "maxStack": 1
@@ -12777,7 +12777,7 @@
     },
     {
       "itemKey": 1000115,
-      "name": "Bounty Hunter's Scale Helm",
+      "name": "Bounty Hunter's Scale Hat",
       "category": "Material",
       "internalName": "BountyHunter_Leather_Helm_I",
       "maxStack": 1
@@ -12808,7 +12808,7 @@
       "name": "Sleepy Scarlet Butterfly",
       "category": "Misc",
       "internalName": "Item_Sleepy_Orange",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 1000120,
@@ -12822,7 +12822,7 @@
       "name": "Flames of Judgment",
       "category": "Misc",
       "internalName": "Item_Skill_AbyssGear_Bastier",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 1000122,
@@ -12857,7 +12857,7 @@
       "name": "Scarlet Leafwing Butterfly",
       "category": "Misc",
       "internalName": "Item_Desert_Orange_tip",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 1000127,
@@ -12889,7 +12889,7 @@
     },
     {
       "itemKey": 1000131,
-      "name": "Bounty Hunter's Leather Helm",
+      "name": "Bounty Hunter's Leather Cap",
       "category": "Material",
       "internalName": "BountyHunter_Leather_Helm_II",
       "maxStack": 1
@@ -12990,7 +12990,7 @@
       "name": "White Streaked butterfly",
       "category": "Misc",
       "internalName": "Item_White_M_Hairstreak",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 1000146,
@@ -13004,7 +13004,7 @@
       "name": "Great Purple Hairstreak Butterfly",
       "category": "Misc",
       "internalName": "Item_Great_Purple_Hairstreak",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 1000148,
@@ -13179,7 +13179,7 @@
       "name": "Buckeye Butterfly",
       "category": "Misc",
       "internalName": "Item_Common_Buckeye",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 1000173,
@@ -13270,20 +13270,20 @@
       "name": "Flame-Bordered Butterfly",
       "category": "Misc",
       "internalName": "Item_Milbert_Tortoiseshell",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 1000186,
       "name": "Goldleaves' Cloth Armor",
       "category": "Material",
-      "internalName": "Goblin_Merchant_Fabric_Armor_���",
+      "internalName": "Goblin_Merchant_Fabric_Armor_   ",
       "maxStack": 1
     },
     {
       "itemKey": 1000187,
       "name": "Nibrak Cloth Armor",
       "category": "Material",
-      "internalName": "Goblin_Merchant_Fabric_Armor_���",
+      "internalName": "Goblin_Merchant_Fabric_Armor_   ",
       "maxStack": 1
     },
     {
@@ -13297,7 +13297,7 @@
       "itemKey": 1000189,
       "name": "Goldleaves' Cloth Armor",
       "category": "Material",
-      "internalName": "Goblin_Merchant_Fabric_Armor_���",
+      "internalName": "Goblin_Merchant_Fabric_Armor_   ",
       "maxStack": 1
     },
     {
@@ -13466,7 +13466,7 @@
       "name": "Yellow Comma Butterfly",
       "category": "Misc",
       "internalName": "Item_Eastern_Comma",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 1000214,
@@ -13529,14 +13529,14 @@
       "name": "Red Lycaenid Butterfly",
       "category": "Misc",
       "internalName": "Item_Lustrous_Copper",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 1000223,
       "name": "Blue Lycaenid Butterfly",
       "category": "Misc",
       "internalName": "Item_Blue_Copper",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 1000224,
@@ -13557,14 +13557,14 @@
       "name": "Grizzled Skipper Butterfly",
       "category": "Misc",
       "internalName": "Item_Grizzled_Skipper",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 1000227,
       "name": "Blue Tailed Butterfly",
       "category": "Misc",
       "internalName": "Item_Eastern_Tailed_Blue",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 1000228,
@@ -13753,7 +13753,7 @@
       "name": "Theona Checkerspot Butterfly",
       "category": "Misc",
       "internalName": "Item_Theona_Checkerspot",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 1000255,
@@ -13820,7 +13820,7 @@
     },
     {
       "itemKey": 1000264,
-      "name": "Goblin Pumpkin Helm",
+      "name": "Pumpkin Head",
       "category": "Misc",
       "internalName": "Goblin_Pumpkin_Helm_I",
       "maxStack": 1
@@ -13932,7 +13932,7 @@
     },
     {
       "itemKey": 1000280,
-      "name": "Lunar Reapers' Plate Gloves",
+      "name": "Lunar Reaper Plate Gloves",
       "category": "Misc",
       "internalName": "Moonhead_PlateArmor_Gloves",
       "maxStack": 1
@@ -13955,14 +13955,14 @@
       "itemKey": 1000283,
       "name": "Goldleaves' Cloth Cloak",
       "category": "Material",
-      "internalName": "Goblin_Merchant_Fabric_Cloak_���",
+      "internalName": "Goblin_Merchant_Fabric_Cloak_   ",
       "maxStack": 1
     },
     {
       "itemKey": 1000284,
       "name": "Goldleaves' Cloth Cloak",
       "category": "Material",
-      "internalName": "Goblin_Merchant_Fabric_Cloak_���",
+      "internalName": "Goblin_Merchant_Fabric_Cloak_   ",
       "maxStack": 1
     },
     {
@@ -14205,7 +14205,7 @@
     },
     {
       "itemKey": 1000319,
-      "name": "Trukan Cloth Armor",
+      "name": "T'rukan's Cloth Armor",
       "category": "Material",
       "internalName": "OrcuMer_Fabric_Armor",
       "maxStack": 1
@@ -14604,7 +14604,7 @@
     },
     {
       "itemKey": 1000376,
-      "name": "One-Armed Jackals' Leather Armor",
+      "name": "One-Armed Jackal's Leather Armor",
       "category": "Material",
       "internalName": "Ludvic_OneArmed_Leather_Armor",
       "maxStack": 1
@@ -14947,7 +14947,7 @@
     },
     {
       "itemKey": 1000425,
-      "name": "Kuku Communicative Pack Blueprint",
+      "name": "Kuku Transmission Pack Blueprint",
       "category": "Misc",
       "internalName": "CraftingRecipe_Kuku_Golden999K",
       "maxStack": 1
@@ -14992,7 +14992,7 @@
       "name": "Freshwater Clam",
       "category": "Misc",
       "internalName": "Item_Rare_Collect_RazorClam_01",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 1000432,
@@ -15118,7 +15118,7 @@
       "name": "Equestrian II",
       "category": "Misc",
       "internalName": "Item_Skill_AbyssGear_Equip_AddHorseExp_LV2",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 1000450,
@@ -15241,7 +15241,7 @@
     },
     {
       "itemKey": 1000467,
-      "name": "Myurdin Leather Armor",
+      "name": "Myurdin's Leather Armor",
       "category": "Material",
       "internalName": "Myurdin_Leather_Armor_II",
       "maxStack": 1
@@ -15276,14 +15276,14 @@
     },
     {
       "itemKey": 1000472,
-      "name": "Trukan Cloth Boots",
+      "name": "T'rukan's Cloth Boots",
       "category": "Material",
       "internalName": "OrcuMer_Fabric_Boots",
       "maxStack": 1
     },
     {
       "itemKey": 1000473,
-      "name": "Trukan Cloth Gloves",
+      "name": "T'rukan's Cloth Gloves",
       "category": "Material",
       "internalName": "OrcuMer_Fabric_Gloves",
       "maxStack": 1
@@ -15416,7 +15416,7 @@
     },
     {
       "itemKey": 1000492,
-      "name": "Recipe: Meat Stew",
+      "name": "Recipe: Meat Soup",
       "category": "Misc",
       "internalName": "Recipe_Pan_fried_Meat_Grain_Pancake",
       "maxStack": 5
@@ -15692,7 +15692,7 @@
       "name": "Equestrian III",
       "category": "Misc",
       "internalName": "Item_Skill_AbyssGear_Equip_AddHorseExp_LV3",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 1000532,
@@ -15902,7 +15902,7 @@
       "name": "Little Metalmark Butterfly",
       "category": "Misc",
       "internalName": "Item_Little_Metalmark",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 1000562,
@@ -16049,14 +16049,14 @@
       "name": "Yellow Garden Spider",
       "category": "Misc",
       "internalName": "Item_BananaSpider",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 1000583,
       "name": "Golden Silk Spider",
       "category": "Misc",
       "internalName": "Item_DiademSpider",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 1000584,
@@ -16095,7 +16095,7 @@
     },
     {
       "itemKey": 1000589,
-      "name": "Gold-Decorated Stirrups",
+      "name": "Gilded Stirrups",
       "category": "Misc",
       "internalName": "HorseShoe_HorseArmor_Stirrup_III",
       "maxStack": 1
@@ -16735,7 +16735,7 @@
       "name": "Grasshopper",
       "category": "Misc",
       "internalName": "Item_GrassHopper",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 1000681,
@@ -16833,7 +16833,7 @@
       "name": "Zebra Longwing Butterfly",
       "category": "Misc",
       "internalName": "Item_Zebra_Heliconian",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 1000695,
@@ -17253,7 +17253,7 @@
       "name": "Shrimp",
       "category": "Consumable",
       "internalName": "Food_Shrimp",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 1000755,
@@ -17488,7 +17488,7 @@
     },
     {
       "itemKey": 1000788,
-      "name": "Captive's Cloth Headband",
+      "name": "Captive's Cloth Cap",
       "category": "Material",
       "internalName": "Prisoner_Fabric_Helm",
       "maxStack": 1
@@ -17502,21 +17502,21 @@
     },
     {
       "itemKey": 1000790,
-      "name": "Captive's Cloth Helm",
+      "name": "Captive's Cloth Cap",
       "category": "Material",
       "internalName": "Prisoner_Fabric_Helm_II",
       "maxStack": 1
     },
     {
       "itemKey": 1000791,
-      "name": "Captive's Cloth Helm",
+      "name": "Captive's Cloth Headband",
       "category": "Material",
       "internalName": "Prisoner_Fabric_Helm_III",
       "maxStack": 1
     },
     {
       "itemKey": 1000792,
-      "name": "Captive's Cloth Helm",
+      "name": "Captive's Cloth Cap",
       "category": "Material",
       "internalName": "Prisoner_Fabric_Helm_IV",
       "maxStack": 1
@@ -17554,7 +17554,7 @@
       "name": "Tiger Mimic Queen Butterfly",
       "category": "Misc",
       "internalName": "Item_Tiger_Mimic_Queen",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 1000798,
@@ -17635,14 +17635,14 @@
     },
     {
       "itemKey": 1000809,
-      "name": "Captive's Leather Helm",
+      "name": "Captive's Leather Hat",
       "category": "Material",
       "internalName": "Prisoner_Leather_Helm",
       "maxStack": 1
     },
     {
       "itemKey": 1000810,
-      "name": "Captive's Folded Leather Helm",
+      "name": "Captive's Folded Leather Hat",
       "category": "Material",
       "internalName": "Prisoner_Leather_Helm_I",
       "maxStack": 1
@@ -18002,7 +18002,7 @@
       "name": "Companionship II",
       "category": "Misc",
       "internalName": "Item_Skill_AbyssGear_Equip_AddPetFriendly_LV2",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 1000862,
@@ -18100,7 +18100,7 @@
       "name": "Blue Crab",
       "category": "Consumable",
       "internalName": "Food_BlueCrab",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 1000876,
@@ -18156,7 +18156,7 @@
       "name": "Regal Fritillary Butterfly",
       "category": "Misc",
       "internalName": "Item_Regal_Fritillary",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 1000884,
@@ -18205,7 +18205,7 @@
       "name": "Companionship III",
       "category": "Misc",
       "internalName": "Item_Skill_AbyssGear_Equip_AddPetFriendly_LV3",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 1000891,
@@ -18797,7 +18797,7 @@
     },
     {
       "itemKey": 1000975,
-      "name": "KuKu Rocket Helmet - Equipped by Default",
+      "name": "Kuku Rocket Helmet - Equipped by Default",
       "category": "Misc",
       "internalName": "Oongka_Rocket_Helm",
       "maxStack": 1
@@ -18972,7 +18972,7 @@
     },
     {
       "itemKey": 1001001,
-      "name": "Ravirun Cloth Helm",
+      "name": "Ravirun Cloth Cap",
       "category": "Material",
       "internalName": "Laviren_Fabric_Helm",
       "maxStack": 1
@@ -18989,42 +18989,42 @@
       "name": "Diana Fritillary Butterfly",
       "category": "Misc",
       "internalName": "Item_Diana_Fritillary",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 1001004,
       "name": "Crimson Patch Butterfly",
       "category": "Misc",
       "internalName": "Item_Crimson_Patch",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 1001005,
       "name": "White Peacock Butterfly",
       "category": "Misc",
       "internalName": "Item_White_Peacock",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 1001006,
       "name": "Banded Peacock Butterfly",
       "category": "Misc",
       "internalName": "Item_Banded_Peacock",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 1001007,
       "name": "Malachite Butterfly",
       "category": "Misc",
       "internalName": "Item_Malachite",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 1001008,
       "name": "Rusty Tipped Page Butterfly",
       "category": "Misc",
       "internalName": "Item_Rusty_Tipped_Page",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 1001009,
@@ -19392,7 +19392,7 @@
     },
     {
       "itemKey": 1001061,
-      "name": "Blinding Arrow Cloth Cloak",
+      "name": "Blinding Arrow's Cloth Cloak",
       "category": "Material",
       "internalName": "Light_Arrowhead_Fabric_Cloak_I",
       "maxStack": 1
@@ -19423,7 +19423,7 @@
       "name": "Painted Lady Butterfly",
       "category": "Misc",
       "internalName": "Item_Painted_Lady",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 1001066,
@@ -19437,7 +19437,7 @@
       "name": "Relentless",
       "category": "Misc",
       "internalName": "Item_Skill_AbyssGear_Combo_LV1",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 1001068,
@@ -19539,7 +19539,7 @@
     },
     {
       "itemKey": 1001082,
-      "name": "Falstaff Cloth Helm",
+      "name": "Falstaff's Cloth Cap",
       "category": "Material",
       "internalName": "Falstaff_Fabric_Helm",
       "maxStack": 1
@@ -19906,14 +19906,14 @@
       "name": "Scorpion",
       "category": "Misc",
       "internalName": "scorpion",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 1001135,
       "name": "Centipede",
       "category": "Misc",
       "internalName": "centipede",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 1001136,
@@ -20046,28 +20046,28 @@
       "name": "Poison Frog",
       "category": "Misc",
       "internalName": "frog",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 1001155,
       "name": "Tree Frog",
       "category": "Misc",
       "internalName": "greenfrog",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 1001156,
       "name": "Toad",
       "category": "Misc",
       "internalName": "toad",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 1001157,
       "name": "Burrowing Toad",
       "category": "Misc",
       "internalName": "burrowingtoad",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 1001158,
@@ -20354,7 +20354,7 @@
       "name": "Camel Cricket",
       "category": "Misc",
       "internalName": "Item_Camel_Cricket",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 1001199,
@@ -20585,7 +20585,7 @@
       "name": "House Centipede",
       "category": "Misc",
       "internalName": "Item_House_Centipede",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 1001232,
@@ -20599,7 +20599,7 @@
       "name": "Black Centipede",
       "category": "Misc",
       "internalName": "Item_Black_Centipede",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 1001234,
@@ -20627,21 +20627,21 @@
       "name": "Meadow Butterfly",
       "category": "Misc",
       "internalName": "Item_Butterfly",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 1001238,
       "name": "Fruit Fly",
       "category": "Misc",
       "internalName": "Item_Gnat",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 1001239,
       "name": "Cockroach",
       "category": "Misc",
       "internalName": "Item_Cockroach",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 1001240,
@@ -20655,35 +20655,35 @@
       "name": "Ricefish",
       "category": "Consumable",
       "internalName": "Food_Ricefish",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 1001242,
       "name": "Freshwater Crab",
       "category": "Consumable",
       "internalName": "Food_river_Crab",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 1001243,
       "name": "Wharf Roach",
       "category": "Misc",
       "internalName": "Item_Sea_Siater",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 1001244,
       "name": "Mountain Moth",
       "category": "Misc",
       "internalName": "Item_Moth",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 1001245,
       "name": "Dragonfly",
       "category": "Misc",
       "internalName": "Item_dragonfly",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 1001246,
@@ -20739,14 +20739,14 @@
       "name": "Commander Butterfly",
       "category": "Misc",
       "internalName": "Item_Viceroy",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 1001254,
       "name": "Monarch Butterfly",
       "category": "Misc",
       "internalName": "Item_Monarch",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 1001255,
@@ -20925,28 +20925,28 @@
     },
     {
       "itemKey": 1001280,
-      "name": "Colton's Cloth Helm",
+      "name": "Colton's Cloth Cap",
       "category": "Material",
       "internalName": "Greyfur_Fabric_Helm",
       "maxStack": 1
     },
     {
       "itemKey": 1001281,
-      "name": "Arnold's Cloth Helm",
+      "name": "Arnold's Cloth Cap",
       "category": "Material",
       "internalName": "Greyfur_Fabric_Helm_I",
       "maxStack": 1
     },
     {
       "itemKey": 1001282,
-      "name": "Wybert's Cloth Helm",
+      "name": "Wybert's Cloth Cap",
       "category": "Material",
       "internalName": "Greyfur_Fabric_Helm_II",
       "maxStack": 1
     },
     {
       "itemKey": 1001283,
-      "name": "Fritz's Cloth Helm",
+      "name": "Fritz's Cloth Cap",
       "category": "Material",
       "internalName": "Greyfur_Fabric_Helm_III",
       "maxStack": 1
@@ -21012,14 +21012,14 @@
       "name": "Firefly",
       "category": "Misc",
       "internalName": "Item_Firefly",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 1001293,
       "name": "Golden Coelacanth",
       "category": "Consumable",
       "internalName": "Food_Golden_Coelacanth",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 1001294,
@@ -21054,7 +21054,7 @@
       "name": "Chameleon",
       "category": "Misc",
       "internalName": "Item_Chameleon",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 1001299,
@@ -21117,7 +21117,7 @@
       "name": "Palmar Beetle",
       "category": "Misc",
       "internalName": "Item_JijeongLeaf_Insect",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 1001308,
@@ -21152,7 +21152,7 @@
       "name": "Spider",
       "category": "Misc",
       "internalName": "Spider",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 1001313,
@@ -21229,7 +21229,7 @@
       "name": "Medium Fly",
       "category": "Misc",
       "internalName": "Item_GnatWide",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 1001324,
@@ -21313,7 +21313,7 @@
       "name": "Rat",
       "category": "Misc",
       "internalName": "Item_Rat",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 1001336,
@@ -21334,7 +21334,7 @@
       "name": "Muskrat",
       "category": "Misc",
       "internalName": "Item_Muskrat",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 1001339,
@@ -21772,7 +21772,7 @@
     },
     {
       "itemKey": 1001401,
-      "name": "Noble Private Soldier's Leather Gloves",
+      "name": "Private Soldier's Leather Gloves",
       "category": "Material",
       "internalName": "Noble_Retainer_Leather_Gloves",
       "maxStack": 1
@@ -21845,7 +21845,7 @@
       "name": "Opossum",
       "category": "Misc",
       "internalName": "Item_Possum",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 1001412,
@@ -21880,7 +21880,7 @@
       "name": "Chipmunk",
       "category": "Misc",
       "internalName": "Item_Squirrel",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 1001417,
@@ -21915,7 +21915,7 @@
       "name": "Rhinoceros Beetle",
       "category": "Misc",
       "internalName": "Item_Rhinoceros_Beetle",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 1001422,
@@ -21936,21 +21936,21 @@
       "name": "Flameward I",
       "category": "Misc",
       "internalName": "Item_Stat_AbyssGear_FireResistance_LV1",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 1001425,
       "name": "Flameward II",
       "category": "Misc",
       "internalName": "Item_Stat_AbyssGear_FireResistance_LV2",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 1001426,
       "name": "Flameward III",
       "category": "Misc",
       "internalName": "Item_Stat_AbyssGear_FireResistance_LV3",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 1001427,
@@ -21985,14 +21985,14 @@
       "name": "Snowfield Chipmunk",
       "category": "Misc",
       "internalName": "Item_Snow_Chipmunk",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 1001432,
       "name": "Red Squirrel",
       "category": "Misc",
       "internalName": "Item_Red_Squirrel",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 1001433,
@@ -22006,7 +22006,7 @@
       "name": "Flying Squirrel",
       "category": "Misc",
       "internalName": "Item_Flying_Squirrel",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 1001435,
@@ -22108,7 +22108,7 @@
     },
     {
       "itemKey": 1001449,
-      "name": "Blue-Green Glass Water Bottle",
+      "name": "Crimson Glass Container",
       "category": "Misc",
       "internalName": "Collection_Prop_Bottle_0001",
       "maxStack": 10
@@ -22384,7 +22384,7 @@
       "name": "Mole",
       "category": "Misc",
       "internalName": "Item_Mole",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 1001489,
@@ -22409,7 +22409,7 @@
     },
     {
       "itemKey": 1001492,
-      "name": "Medicine Ceramic Jar",
+      "name": "Ceramic for Medicinal Use",
       "category": "Misc",
       "internalName": "Collection_Prop_Ceramic_0004",
       "maxStack": 10
@@ -23186,7 +23186,7 @@
     },
     {
       "itemKey": 1001603,
-      "name": "Tarnished Four Candle Candelabra",
+      "name": "Tarnished Four-Candle Candelabra",
       "category": "Misc",
       "internalName": "Collection_Prop_Candle_0011",
       "maxStack": 10
@@ -24082,7 +24082,7 @@
     },
     {
       "itemKey": 1001731,
-      "name": "Packaged Packaged Gun",
+      "name": "Packaged Gun",
       "category": "Misc",
       "internalName": "Trade_Gun_PackedInVehicle",
       "maxStack": 50
@@ -24155,7 +24155,7 @@
       "name": "Snail",
       "category": "Misc",
       "internalName": "Item_Snail",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 1001742,
@@ -24393,7 +24393,7 @@
       "name": "Blue Jay",
       "category": "Misc",
       "internalName": "Item_BlueJay",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 1001776,
@@ -24421,28 +24421,28 @@
       "name": "Sparrow",
       "category": "Ammo",
       "internalName": "Item_Sparrow",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 1001780,
       "name": "Black-Naped Oriole",
       "category": "Misc",
       "internalName": "Item_Oriole",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 1001781,
       "name": "Kentish Plover",
       "category": "Misc",
       "internalName": "Item_Snowy_Plover",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 1001782,
       "name": "Meadow Bunting",
       "category": "Misc",
       "internalName": "Item_Bunting_Bird",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 1001783,
@@ -24456,7 +24456,7 @@
       "name": "Baby Hedgehog",
       "category": "Misc",
       "internalName": "Item_Baby_Hedgehog",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 1001785,
@@ -24526,7 +24526,7 @@
       "name": "Water Strider",
       "category": "Misc",
       "internalName": "Item_WaterStrider",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 1001795,
@@ -24918,21 +24918,21 @@
       "name": "Meerkat",
       "category": "Misc",
       "internalName": "Item_Meerkat",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 1001851,
       "name": "Desert Wheatear",
       "category": "Misc",
       "internalName": "Item_BlackTail_Flycatcher",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 1001852,
       "name": "Yellow-Billed Oxpecker",
       "category": "Misc",
       "internalName": "Item_Oxpecker",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 1001853,
@@ -24953,14 +24953,14 @@
       "name": "Three-Toed Woodpecker",
       "category": "Misc",
       "internalName": "Item_Wood_Pecker",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 1001856,
       "name": "White-winged Redstart",
       "category": "Misc",
       "internalName": "Item_WhiteWing_Flycatcher",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 1001857,
@@ -24981,21 +24981,21 @@
       "name": "Honeybee",
       "category": "Misc",
       "internalName": "Item_Bee",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 1001860,
       "name": "Hornet",
       "category": "Misc",
       "internalName": "Item_Hornet",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 1001861,
       "name": "Bumblebee",
       "category": "Misc",
       "internalName": "Item_Bumblebee",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 1001862,
@@ -25023,42 +25023,42 @@
       "name": "Burrowing Salamander",
       "category": "Misc",
       "internalName": "Item_Giant_Salamander",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 1001866,
       "name": "Salamander",
       "category": "Misc",
       "internalName": "Item_Salamander",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 1001867,
       "name": "Axolotl",
       "category": "Misc",
       "internalName": "Item_Axolotl",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 1001868,
       "name": "Goanna",
       "category": "Misc",
       "internalName": "Item_Goanna",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 1001869,
       "name": "Iguana",
       "category": "Misc",
       "internalName": "Item_Iguana",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 1001870,
       "name": "Heloderma Lizard",
       "category": "Misc",
       "internalName": "Item_Hila_Lizard",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 1001871,
@@ -25072,7 +25072,7 @@
       "name": "Frilled-neck Lizard",
       "category": "Misc",
       "internalName": "Item_Frilled_Lizard",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 1001873,
@@ -25142,7 +25142,7 @@
       "name": "Red-spotted Purple Butterfly",
       "category": "Misc",
       "internalName": "Item_Red_Spotted_Purple",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 1001883,
@@ -25219,7 +25219,7 @@
       "name": "Rising Torrent",
       "category": "Misc",
       "internalName": "Item_Skill_AbyssGear_Catfish_BodySlam_LV1",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 1001894,
@@ -25359,21 +25359,21 @@
       "name": "Ruddy Daggerwing Butterfly",
       "category": "Misc",
       "internalName": "Item_Ruddy_Daggerwing",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 1001914,
       "name": "Little Wood Satyr Butterfly",
       "category": "Misc",
       "internalName": "Item_Little_Wood_Satyr",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 1001915,
       "name": "Guava Skipper Butterfly",
       "category": "Misc",
       "internalName": "Item_Guava_Skipper",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 1001916,
@@ -25387,35 +25387,35 @@
       "name": "Purple Emperor Butterfly",
       "category": "Misc",
       "internalName": "Item_Purple_Emperor",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 1001918,
       "name": "Southern Blue Peacock Butterfly",
       "category": "Misc",
       "internalName": "Item_Blue_Pansy_Butterfly",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 1001919,
       "name": "Nawab Butterfly",
       "category": "Misc",
       "internalName": "Item_Common_Nawab",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 1001920,
       "name": "Green Birdwing Butterfly",
       "category": "Misc",
       "internalName": "Item_Common_Green_Birdwing",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 1001921,
       "name": "Eighty-eight Butterfly",
       "category": "Misc",
       "internalName": "Item_88_Butterfly",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 1001922,
@@ -25447,14 +25447,14 @@
     },
     {
       "itemKey": 1001926,
-      "name": "Trukan Cloth Cloak",
+      "name": "T'rukan's Cloth Cloak",
       "category": "Material",
       "internalName": "OrcuMer_Fabric_Cloak",
       "maxStack": 1
     },
     {
       "itemKey": 1001927,
-      "name": "Flame Knight's Plate Helm",
+      "name": "Elite Flame Knights Plate Helm",
       "category": "Misc",
       "internalName": "Flame_Knights_PlateArmor_Helm",
       "maxStack": 1
@@ -25464,42 +25464,42 @@
       "name": "White Butterfly",
       "category": "Misc",
       "internalName": "Item_Neophasia_Terlooii",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 1001929,
       "name": "Green Sulphur Butterfly",
       "category": "Misc",
       "internalName": "Item_Colias_Nastes",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 1001930,
       "name": "Violet Hairstreak Butterfly",
       "category": "Misc",
       "internalName": "Item_Hypaurotis_Crysalus",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 1001931,
       "name": "Spotted Lycaenid Butterfly",
       "category": "Misc",
       "internalName": "Item_Lycaena_Phlaeas",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 1001932,
       "name": "Bluewing Butterfly",
       "category": "Misc",
       "internalName": "Item_Myscelia_Ethusa",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 1001933,
       "name": "Orange Oakleaf Butterfly",
       "category": "Misc",
       "internalName": "Item_Kallima_Inachus",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 1001934,
@@ -25632,7 +25632,7 @@
       "name": "Hexe Earthen Fish",
       "category": "Consumable",
       "internalName": "Food_HexeFish",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 1001953,
@@ -26535,35 +26535,35 @@
       "name": "Stag Beetle",
       "category": "Misc",
       "internalName": "Item_Stag_Beetle",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 1002082,
       "name": "Silkworm Moth",
       "category": "Misc",
       "internalName": "Item_Silkworm_Moth",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 1002083,
       "name": "Wild Silkworm Moth",
       "category": "Misc",
       "internalName": "Item_Luna_Moth",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 1002084,
       "name": "Longhorn Beetle",
       "category": "Misc",
       "internalName": "Item_Longhorn_Beetle",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 1002085,
       "name": "Jewel Beetle",
       "category": "Misc",
       "internalName": "Item_Jewel_Beetle",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 1002086,
@@ -26633,7 +26633,7 @@
       "name": "Beetle",
       "category": "Misc",
       "internalName": "Item_Beetle",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 1002096,
@@ -26738,7 +26738,7 @@
       "name": "Threeline Grunt",
       "category": "Consumable",
       "internalName": "Food_Benjari",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 1002111,
@@ -26917,7 +26917,7 @@
     },
     {
       "itemKey": 1002136,
-      "name": "Kuku Enhanced Disruptor",
+      "name": "Enhanced Kuku Disruptor",
       "category": "Misc",
       "internalName": "Kuku_EMP_Enhance_BackPack",
       "maxStack": 1
@@ -27137,7 +27137,7 @@
       "name": "Frostward I",
       "category": "Misc",
       "internalName": "Item_Stat_AbyssGear_IceResistance_LV1",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 1002168,
@@ -27154,24 +27154,10 @@
       "maxStack": 1
     },
     {
-      "itemKey": 1002170,
-      "name": "Sage's Eye",
-      "category": "Misc",
-      "internalName": "Boss_Reward_QuickLearner",
-      "maxStack": 1
-    },
-    {
       "itemKey": 1002171,
       "name": "Hidden Treasure Map Piece 2",
       "category": "Misc",
       "internalName": "Hidden_TreasureMap_II",
-      "maxStack": 1
-    },
-    {
-      "itemKey": 1002172,
-      "name": "Golden Beer",
-      "category": "Misc",
-      "internalName": "Boss_Reward_Efficiency",
       "maxStack": 1
     },
     {
@@ -28691,7 +28677,7 @@
       "name": "Frostward II",
       "category": "Misc",
       "internalName": "Item_Stat_AbyssGear_IceResistance_LV2",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 1002390,
@@ -29237,7 +29223,7 @@
       "name": "Frostward III",
       "category": "Misc",
       "internalName": "Item_Stat_AbyssGear_IceResistance_LV3",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 1002468,
@@ -29440,28 +29426,28 @@
       "name": "Lightning God's Affliction",
       "category": "Misc",
       "internalName": "Item_Skill_AbyssGear_Titan",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 1002497,
       "name": "Shockward I",
       "category": "Misc",
       "internalName": "Item_Stat_AbyssGear_ElectricityResistance_LV1",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 1002498,
       "name": "Shockward II",
       "category": "Misc",
       "internalName": "Item_Stat_AbyssGear_ElectricityResistance_LV2",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 1002499,
       "name": "Shockward III",
       "category": "Misc",
       "internalName": "Item_Stat_AbyssGear_ElectricityResistance_LV3",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 1002500,
@@ -29531,14 +29517,14 @@
       "name": "Groundsurge",
       "category": "Misc",
       "internalName": "Item_Skill_AbyssGear_LandMash_LV1",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 1002510,
       "name": "The Showstopper",
       "category": "Misc",
       "internalName": "Item_Skill_AbyssGear_Muscan",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 1002511,
@@ -29608,28 +29594,28 @@
       "name": "Solidarity I",
       "category": "Misc",
       "internalName": "Item_Skill_AbyssGear_AddFrendly_LV1",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 1002521,
       "name": "Solidarity II",
       "category": "Misc",
       "internalName": "Item_Skill_AbyssGear_AddFrendly_LV2",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 1002522,
       "name": "Solidarity III",
       "category": "Misc",
       "internalName": "Item_Skill_AbyssGear_AddFrendly_LV3",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 1002523,
       "name": "Spirit's Judgment",
       "category": "Misc",
       "internalName": "Item_Skill_AbyssGear_SoulStrike_LV1",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 1002524,
@@ -29727,14 +29713,14 @@
       "name": "Companionship I",
       "category": "Misc",
       "internalName": "Item_Skill_AbyssGear_Equip_AddPetFriendly_LV1",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 1002539,
       "name": "Crow's Pursuit",
       "category": "Misc",
       "internalName": "Item_Skill_AbyssGear_CrowAttack_LV1",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 1002540,
@@ -29755,7 +29741,7 @@
       "name": "Pillar of Wind",
       "category": "Misc",
       "internalName": "Item_Skill_AbyssGear_Karanda",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 1002543,
@@ -29797,7 +29783,7 @@
       "name": "Slashing Reeds",
       "category": "Misc",
       "internalName": "Item_Skill_AbyssGear_FlashCombo_LV1",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 1002549,
@@ -29825,7 +29811,7 @@
       "name": "Warden of Darkness",
       "category": "Misc",
       "internalName": "Item_Skill_AbyssGear_Antumbra_Spear",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 1002553,
@@ -29839,7 +29825,7 @@
       "name": "Ancient Reckoning",
       "category": "Misc",
       "internalName": "Item_Skill_AbyssGear_Primus",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 1002555,
@@ -29944,7 +29930,7 @@
       "name": "Wind Slash",
       "category": "Misc",
       "internalName": "Item_Skill_AbyssGear_SwordAura_LV1",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 1002570,
@@ -30007,7 +29993,7 @@
       "name": "Storm Fang",
       "category": "Misc",
       "internalName": "Item_Skill_AbyssGear_LightningStab_LV1",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 1002579,
@@ -30021,7 +30007,7 @@
       "name": "Wound of Darkness",
       "category": "Misc",
       "internalName": "Item_Skill_AbyssGear_DarkenRobe_LV1",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 1002581,
@@ -30042,11 +30028,11 @@
       "name": "Karmic Pulse",
       "category": "Misc",
       "internalName": "Item_Skill_AbyssGear_EnlightenmentWave_LV1",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 1002584,
-      "name": "Note from the Street Shop",
+      "name": "Note from the Shopping Street",
       "category": "Misc",
       "internalName": "Paper_Eliza_I",
       "maxStack": 1
@@ -30105,7 +30091,7 @@
       "name": "Hound's Claws",
       "category": "Misc",
       "internalName": "Item_Skill_AbyssGear_DogClaw_LV1",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 1002593,
@@ -30175,7 +30161,7 @@
       "name": "Crow Storm",
       "category": "Misc",
       "internalName": "Item_Skill_AbyssGear_CrowStorm_LV1",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 1002603,
@@ -30203,7 +30189,7 @@
       "name": "Abyssal Rays",
       "category": "Misc",
       "internalName": "Item_Skill_AbyssGear_PhantomStab_LV1",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 1002607,
@@ -30270,7 +30256,7 @@
     },
     {
       "itemKey": 1002616,
-      "name": "Lightning-struck Tree",
+      "name": "Lightning-Struck Tree",
       "category": "Misc",
       "internalName": "Memo_lightningstriketree",
       "maxStack": 1
@@ -30333,7 +30319,7 @@
     },
     {
       "itemKey": 1002625,
-      "name": "Greymane Leather Helm",
+      "name": "Greymanes' Leather Helm",
       "category": "Material",
       "internalName": "Greyfur_Leather_Helm_II",
       "maxStack": 1
@@ -30522,7 +30508,7 @@
     },
     {
       "itemKey": 1002652,
-      "name": "Note at Point of Contact",
+      "name": "Note from Point of Contact",
       "category": "Misc",
       "internalName": "Paper_SecretSip_I",
       "maxStack": 1
@@ -30567,21 +30553,21 @@
       "name": "Crescent Moon Slash",
       "category": "Misc",
       "internalName": "Item_Skill_AbyssGear_CresecentAura_1_LV1",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 1002659,
       "name": "Half Moon Slash",
       "category": "Misc",
       "internalName": "Item_Skill_AbyssGear_CresecentAura_2_LV1",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 1002660,
       "name": "Fullmoon Slash",
       "category": "Misc",
       "internalName": "Item_Skill_AbyssGear_CresecentAura_3_LV1",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 1002661,
@@ -30595,7 +30581,7 @@
       "name": "Equestrian I",
       "category": "Misc",
       "internalName": "Item_Skill_AbyssGear_Equip_AddHorseExp_LV1",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 1002663,
@@ -31036,14 +31022,14 @@
       "name": "Vigor I",
       "category": "Misc",
       "internalName": "Item_Stat_AbyssGear_StaminaRegen_LV1",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 1002748,
       "name": "Vigor II",
       "category": "Misc",
       "internalName": "Item_Stat_AbyssGear_StaminaRegen_LV2",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 1002749,
@@ -31064,28 +31050,28 @@
       "name": "Vigor III",
       "category": "Misc",
       "internalName": "Item_Stat_AbyssGear_StaminaRegen_LV3",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 1002752,
       "name": "Composure I",
       "category": "Misc",
       "internalName": "Item_Stat_AbyssGear_MpRegen_LV1",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 1002753,
       "name": "Composure II",
       "category": "Misc",
       "internalName": "Item_Stat_AbyssGear_MpRegen_LV2",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 1002754,
       "name": "Composure III",
       "category": "Misc",
       "internalName": "Item_Stat_AbyssGear_MpRegen_LV3",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 1002755,
@@ -31155,7 +31141,7 @@
       "name": "Frost Hail",
       "category": "Misc",
       "internalName": "Item_Skill_AbyssGear_FrostBreath_LV1",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 1002765,
@@ -31169,7 +31155,7 @@
       "name": "Volcanic Eruption",
       "category": "Misc",
       "internalName": "Item_Skill_AbyssGear_FireBreath_LV1",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 1002767,
@@ -31302,21 +31288,21 @@
       "name": "Destruction I",
       "category": "Misc",
       "internalName": "Item_Stat_AbyssGear_DDD_LV1",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 1002786,
       "name": "Destruction II",
       "category": "Misc",
       "internalName": "Item_Stat_AbyssGear_DDD_LV2",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 1002787,
       "name": "Destruction III",
       "category": "Misc",
       "internalName": "Item_Stat_AbyssGear_DDD_LV3",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 1002788,
@@ -31344,63 +31330,63 @@
       "name": "Insight I",
       "category": "Misc",
       "internalName": "Item_Stat_AbyssGear_CriticalRate_LV1",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 1002792,
       "name": "Insight II",
       "category": "Misc",
       "internalName": "Item_Stat_AbyssGear_CriticalRate_LV2",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 1002793,
       "name": "Insight III",
       "category": "Misc",
       "internalName": "Item_Stat_AbyssGear_CriticalRate_LV3",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 1002794,
       "name": "Fortification I",
       "category": "Misc",
       "internalName": "Item_Stat_AbyssGear_DPV_LV1",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 1002795,
       "name": "Fortification II",
       "category": "Misc",
       "internalName": "Item_Stat_AbyssGear_DPV_LV2",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 1002796,
       "name": "Fortification III",
       "category": "Misc",
       "internalName": "Item_Stat_AbyssGear_DPV_LV3",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 1002797,
       "name": "Aegis I",
       "category": "Misc",
       "internalName": "Item_Stat_AbyssGear_ADR_LV1",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 1002798,
       "name": "Aegis II",
       "category": "Misc",
       "internalName": "Item_Stat_AbyssGear_ADR_LV2",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 1002799,
       "name": "Aegis III",
       "category": "Misc",
       "internalName": "Item_Stat_AbyssGear_ADR_LV3",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 1002800,
@@ -31442,7 +31428,7 @@
       "name": "Tempest of Destruction",
       "category": "Misc",
       "internalName": "Item_Skill_AbyssGear_SmashStorm_LV1",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 1002806,
@@ -31456,84 +31442,84 @@
       "name": "Fortitude I",
       "category": "Misc",
       "internalName": "Item_Stat_AbyssGear_GuardPVRate_LV1",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 1002808,
       "name": "Fortitude II",
       "category": "Misc",
       "internalName": "Item_Stat_AbyssGear_GuardPVRate_LV2",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 1002809,
       "name": "Fortitude III",
       "category": "Misc",
       "internalName": "Item_Stat_AbyssGear_GuardPVRate_LV3",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 1002810,
       "name": "Swift I",
       "category": "Misc",
       "internalName": "Item_Stat_AbyssGear_AttackSpeedRate_LV1",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 1002811,
       "name": "Swift II",
       "category": "Misc",
       "internalName": "Item_Stat_AbyssGear_AttackSpeedRate_LV2",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 1002812,
       "name": "Swift III",
       "category": "Misc",
       "internalName": "Item_Stat_AbyssGear_AttackSpeedRate_LV3",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 1002813,
       "name": "Haste I",
       "category": "Misc",
       "internalName": "Item_Stat_AbyssGear_MoveSpeedRate_LV1",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 1002814,
       "name": "Haste II",
       "category": "Misc",
       "internalName": "Item_Stat_AbyssGear_MoveSpeedRate_LV2",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 1002815,
       "name": "Haste III",
       "category": "Misc",
       "internalName": "Item_Stat_AbyssGear_MoveSpeedRate_LV3",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 1002816,
       "name": "Ascent I",
       "category": "Misc",
       "internalName": "Item_Stat_AbyssGear_ClimbSpeedRate_LV1",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 1002817,
       "name": "Ascent II",
       "category": "Misc",
       "internalName": "Item_Stat_AbyssGear_ClimbSpeedRate_LV2",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 1002818,
       "name": "Ascent III",
       "category": "Misc",
       "internalName": "Item_Stat_AbyssGear_ClimbSpeedRate_LV3",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 1002819,
@@ -31561,21 +31547,21 @@
       "name": "Vitality I",
       "category": "Misc",
       "internalName": "Item_Stat_AbyssGear_HpRegen_LV1",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 1002823,
       "name": "Vitality II",
       "category": "Misc",
       "internalName": "Item_Stat_AbyssGear_HpRegen_LV2",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 1002824,
       "name": "Vitality III",
       "category": "Misc",
       "internalName": "Item_Stat_AbyssGear_HpRegen_LV3",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 1002825,
@@ -31666,21 +31652,21 @@
       "name": "Surge I",
       "category": "Misc",
       "internalName": "Item_Stat_AbyssGear_SwimSpeedRate_LV1",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 1002838,
       "name": "Surge II",
       "category": "Misc",
       "internalName": "Item_Stat_AbyssGear_SwimSpeedRate_LV2",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 1002839,
       "name": "Surge III",
       "category": "Misc",
       "internalName": "Item_Stat_AbyssGear_SwimSpeedRate_LV3",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 1002840,
@@ -31694,7 +31680,7 @@
       "name": "Greysoul Howling",
       "category": "Misc",
       "internalName": "Item_Skill_AbyssGear_DarkChase_LV1",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 1002842,
@@ -31708,7 +31694,7 @@
       "name": "Frost Spike",
       "category": "Misc",
       "internalName": "Item_Skill_AbyssGear_FrostSpike_LV1",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 1002844,
@@ -31722,7 +31708,7 @@
       "name": "Shattering Frost",
       "category": "Misc",
       "internalName": "Item_Skill_AbyssGear_FrostDeath_LV1",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 1002846,
@@ -31743,14 +31729,14 @@
       "name": "Orbs of Lightning",
       "category": "Misc",
       "internalName": "Item_Skill_AbyssGear_LightningBreath_LV1",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 1002849,
       "name": "Piercing Bloom",
       "category": "Misc",
       "internalName": "Item_Skill_AbyssGear_AbsoluteDefense_LV1",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 1002850,
@@ -31771,14 +31757,14 @@
       "name": "Arrow Rain",
       "category": "Ammo",
       "internalName": "Item_Skill_AbyssGear_ArrowRain_LV1",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 1002853,
       "name": "Long-Tailed Tit",
       "category": "Misc",
       "internalName": "Item_Longtailedtit",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 1002854,
@@ -31792,7 +31778,7 @@
       "name": "Kinetic Burst",
       "category": "Misc",
       "internalName": "Item_Skill_AbyssGear_EnergyBurst_LV1",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 1002856,
@@ -31813,7 +31799,7 @@
       "name": "Ator's Orb",
       "category": "Misc",
       "internalName": "Item_Skill_AbyssGear_AtorDrone_LV1",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 1002859,
@@ -31848,7 +31834,7 @@
       "name": "Abyssal Assimilation",
       "category": "Misc",
       "internalName": "Item_Skill_AbyssGear_AbyssGrass_Immune",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 1002864,
@@ -31862,21 +31848,21 @@
       "name": "Heart of the Serpent",
       "category": "Misc",
       "internalName": "Item_Skill_AbyssGear_Hyena_PoisonImmune",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 1002866,
       "name": "Heart of Stone",
       "category": "Misc",
       "internalName": "Item_Skill_AbyssGear_Immune_Bismuth",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 1002867,
       "name": "Momentum",
       "category": "Misc",
       "internalName": "Item_Skill_AbyssGear_DAM_UP_RotationBash",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 1002868,
@@ -32009,7 +31995,7 @@
       "name": "Earthrending Strike",
       "category": "Misc",
       "internalName": "Item_Skill_AbyssGear_TarandusWarrior_WarHammer",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 1002888,
@@ -32072,147 +32058,147 @@
       "name": "Steelbane I",
       "category": "Misc",
       "internalName": "Item_Skill_AbyssGear_Machine_AdditionalDamage_LV1",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 1002897,
       "name": "Steelbane II",
       "category": "Misc",
       "internalName": "Item_Skill_AbyssGear_Machine_AdditionalDamage_LV2",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 1002898,
       "name": "Steelbane III",
       "category": "Misc",
       "internalName": "Item_Skill_AbyssGear_Machine_AdditionalDamage_LV3",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 1002899,
       "name": "Hexebane I",
       "category": "Misc",
       "internalName": "Item_Skill_AbyssGear_CommonHexe_AdditionalDamage_LV1",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 1002900,
       "name": "Hexebane II",
       "category": "Misc",
       "internalName": "Item_Skill_AbyssGear_CommonHexe_AdditionalDamage_LV2",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 1002901,
       "name": "Hexebane III",
       "category": "Misc",
       "internalName": "Item_Skill_AbyssGear_CommonHexe_AdditionalDamage_LV3",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 1002902,
       "name": "Bloodbane I",
       "category": "Misc",
       "internalName": "Item_Skill_AbyssGear_CommonHumanoid_AdditionalDamage_LV1",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 1002903,
       "name": "Bloodbane II",
       "category": "Misc",
       "internalName": "Item_Skill_AbyssGear_CommonHumanoid_AdditionalDamage_LV2",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 1002904,
       "name": "Bloodbane III",
       "category": "Misc",
       "internalName": "Item_Skill_AbyssGear_CommonHumanoid_AdditionalDamage_LV3",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 1002905,
       "name": "Primalbane I",
       "category": "Misc",
       "internalName": "Item_Skill_AbyssGear_CommonGolem_AdditionalDamage_LV1",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 1002906,
       "name": "Primalbane II",
       "category": "Misc",
       "internalName": "Item_Skill_AbyssGear_CommonGolem_AdditionalDamage_LV2",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 1002907,
       "name": "Primalbane III",
       "category": "Misc",
       "internalName": "Item_Skill_AbyssGear_CommonGolem_AdditionalDamage_LV3",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 1002908,
       "name": "Malicebane I",
       "category": "Misc",
       "internalName": "Item_Skill_AbyssGear_Boss_AdditionalDamage_LV1",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 1002909,
       "name": "Malicebane II",
       "category": "Misc",
       "internalName": "Item_Skill_AbyssGear_Boss_AdditionalDamage_LV2",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 1002910,
       "name": "Malicebane III",
       "category": "Misc",
       "internalName": "Item_Skill_AbyssGear_Boss_AdditionalDamage_LV3",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 1002911,
       "name": "Beastbane I",
       "category": "Misc",
       "internalName": "Item_Skill_AbyssGear_CommonAnimal_AdditionalDamage_LV1",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 1002912,
       "name": "Beastbane II",
       "category": "Misc",
       "internalName": "Item_Skill_AbyssGear_CommonAnimal_AdditionalDamage_LV2",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 1002913,
       "name": "Beastbane III",
       "category": "Misc",
       "internalName": "Item_Skill_AbyssGear_CommonAnimal_AdditionalDamage_LV3",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 1002914,
       "name": "Abyssbane I",
       "category": "Misc",
       "internalName": "Item_Skill_AbyssGear_Creature_AdditionalDamage_LV1",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 1002915,
       "name": "Abyssbane II",
       "category": "Misc",
       "internalName": "Item_Skill_AbyssGear_Creature_AdditionalDamage_LV2",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 1002916,
       "name": "Abyssbane III",
       "category": "Misc",
       "internalName": "Item_Skill_AbyssGear_Creature_AdditionalDamage_LV3",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 1002917,
@@ -32240,252 +32226,252 @@
       "name": "Fortune I",
       "category": "Misc",
       "internalName": "Item_Skill_AbyssGear_AddMoneyDropRate_LV1",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 1002921,
       "name": "Fortune II",
       "category": "Misc",
       "internalName": "Item_Skill_AbyssGear_AddMoneyDropRate_LV2",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 1002922,
       "name": "Fortune III",
       "category": "Misc",
       "internalName": "Item_Skill_AbyssGear_AddMoneyDropRate_LV3",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 1002923,
       "name": "Infinite Arrows I",
       "category": "Ammo",
       "internalName": "Item_Skill_AbyssGear_BlockAmmoConsume_LV1",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 1002924,
       "name": "Infinite Arrows II",
       "category": "Ammo",
       "internalName": "Item_Skill_AbyssGear_BlockAmmoConsume_LV2",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 1002925,
       "name": "Infinite Arrows III",
       "category": "Ammo",
       "internalName": "Item_Skill_AbyssGear_BlockAmmoConsume_LV3",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 1002926,
       "name": "Gourmet I",
       "category": "Misc",
       "internalName": "Item_Skill_AbyssGear_FoodSkillLevelUp_LV1",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 1002927,
       "name": "Gourmet II",
       "category": "Misc",
       "internalName": "Item_Skill_AbyssGear_FoodSkillLevelUp_LV2",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 1002928,
       "name": "Gourmet III",
       "category": "Misc",
       "internalName": "Item_Skill_AbyssGear_FoodSkillLevelUp_LV3",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 1002929,
       "name": "Efficiency I",
       "category": "Material",
       "internalName": "Item_Skill_AbyssGear_ReduceCraftMaterial_LV1",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 1002930,
       "name": "Efficiency II",
       "category": "Material",
       "internalName": "Item_Skill_AbyssGear_ReduceCraftMaterial_LV2",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 1002931,
       "name": "Efficiency III",
       "category": "Material",
       "internalName": "Item_Skill_AbyssGear_ReduceCraftMaterial_LV3",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 1002932,
       "name": "Ledgermain I",
       "category": "Misc",
       "internalName": "Item_Skill_AbyssGear_AdditionalThief_LV1",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 1002933,
       "name": "Ledgermain II",
       "category": "Misc",
       "internalName": "Item_Skill_AbyssGear_AdditionalThief_LV2",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 1002934,
       "name": "Ledgermain III",
       "category": "Misc",
       "internalName": "Item_Skill_AbyssGear_AdditionalThief_LV3",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 1002935,
       "name": "Blessing of the Earth I",
       "category": "Material",
       "internalName": "Item_Skill_AbyssGear_CollectDrop_Ore_LV1",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 1002936,
       "name": "Blessing of the Earth II",
       "category": "Material",
       "internalName": "Item_Skill_AbyssGear_CollectDrop_Ore_LV2",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 1002937,
       "name": "Blessing of the Earth III",
       "category": "Material",
       "internalName": "Item_Skill_AbyssGear_CollectDrop_Ore_LV3",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 1002938,
       "name": "Blessing of Nature I",
       "category": "Misc",
       "internalName": "Item_Skill_AbyssGear_CollectDrop_Plant_LV1",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 1002939,
       "name": "Blessing of Nature II",
       "category": "Misc",
       "internalName": "Item_Skill_AbyssGear_CollectDrop_Plant_LV2",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 1002940,
       "name": "Blessing of Nature III",
       "category": "Misc",
       "internalName": "Item_Skill_AbyssGear_CollectDrop_Plant_LV3",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 1002941,
       "name": "Blessing of the Beast I",
       "category": "Misc",
       "internalName": "Item_Skill_AbyssGear_CollectDrop_Animal_LV1",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 1002942,
       "name": "Blessing of the Beast II",
       "category": "Misc",
       "internalName": "Item_Skill_AbyssGear_CollectDrop_Animal_LV2",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 1002943,
       "name": "Blessing of the Beast III",
       "category": "Misc",
       "internalName": "Item_Skill_AbyssGear_CollectDrop_Animal_LV3",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 1002944,
       "name": "Blessing of the Forest I",
       "category": "Misc",
       "internalName": "Item_Skill_AbyssGear_CollectDrop_Log_LV1",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 1002945,
       "name": "Blessing of the Forest II",
       "category": "Misc",
       "internalName": "Item_Skill_AbyssGear_CollectDrop_Log_LV2",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 1002946,
       "name": "Blessing of the Forest III",
       "category": "Misc",
       "internalName": "Item_Skill_AbyssGear_CollectDrop_Log_LV3",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 1002947,
       "name": "Service I",
       "category": "Misc",
       "internalName": "Item_Skill_AbyssGear_ContributionExp_LV1",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 1002948,
       "name": "Service II",
       "category": "Misc",
       "internalName": "Item_Skill_AbyssGear_ContributionExp_LV2",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 1002949,
       "name": "Service III",
       "category": "Misc",
       "internalName": "Item_Skill_AbyssGear_ContributionExp_LV3",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 1002950,
       "name": "Aptitude I",
       "category": "Misc",
       "internalName": "Item_Skill_AbyssGear_SkillPointExp_LV1",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 1002951,
       "name": "Aptitude II",
       "category": "Misc",
       "internalName": "Item_Skill_AbyssGear_SkillPointExp_LV2",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 1002952,
       "name": "Aptitude III",
       "category": "Misc",
       "internalName": "Item_Skill_AbyssGear_SkillPointExp_LV3",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 1002953,
       "name": "Energy Drain I",
       "category": "Misc",
       "internalName": "Item_Skill_AbyssGear_AddKillSkillLevel_LV1",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 1002954,
       "name": "Energy Drain II",
       "category": "Misc",
       "internalName": "Item_Skill_AbyssGear_AddKillSkillLevel_LV2",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 1002955,
       "name": "Energy Drain III",
       "category": "Misc",
       "internalName": "Item_Skill_AbyssGear_AddKillSkillLevel_LV3",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 1002956,
@@ -34386,7 +34372,7 @@
     },
     {
       "itemKey": 1003227,
-      "name": "Ceremonial Bowl",
+      "name": "Large Ceremonial Bowl",
       "category": "Misc",
       "internalName": "Collection_Prop_Bowl_0027",
       "maxStack": 10
@@ -34403,21 +34389,21 @@
       "name": "Disarm I",
       "category": "Misc",
       "internalName": "Item_Skill_AbyssGear_EquipDropRate_LV1",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 1003230,
       "name": "Disarm II",
       "category": "Misc",
       "internalName": "Item_Skill_AbyssGear_EquipDropRate_LV2",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 1003231,
       "name": "Disarm III",
       "category": "Misc",
       "internalName": "Item_Skill_AbyssGear_EquipDropRate_LV3",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 1003232,
@@ -34760,7 +34746,7 @@
       "name": "Life Transference",
       "category": "Misc",
       "internalName": "Item_Skill_AbyssGear_Attack_HPRecover_LV1",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 1003282,
@@ -34823,14 +34809,14 @@
       "name": "Spirit Transference",
       "category": "Misc",
       "internalName": "Item_Skill_AbyssGear_Attack_MPRecover_LV1",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 1003291,
       "name": "Stamina Transference",
       "category": "Misc",
       "internalName": "Item_Skill_AbyssGear_Attack_SPRecover_LV1",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 1003292,
@@ -36689,532 +36675,532 @@
     },
     {
       "itemKey": 1003557,
-      "name": "Fusion Reactor Core: I",
+      "name": "Sanctum of Penitence Fusion Reactor Core",
       "category": "Misc",
       "internalName": "Item_gimmick_puzzle_antumbra_tokamak_parts01",
       "maxStack": 1
     },
     {
       "itemKey": 1003558,
-      "name": "Fusion Reactor Core: II",
+      "name": "Sanctum of Temperance Fusion Reactor Core",
       "category": "Misc",
       "internalName": "Item_gimmick_puzzle_antumbra_tokamak_parts02",
       "maxStack": 1
     },
     {
       "itemKey": 1003559,
-      "name": "Fusion Reactor Core: III",
+      "name": "Sanctum of Atonement Fusion Reactor Core",
       "category": "Misc",
       "internalName": "Item_gimmick_puzzle_antumbra_tokamak_parts03",
       "maxStack": 1
     },
     {
       "itemKey": 1003560,
-      "name": "Fusion Reactor Core: IV",
+      "name": "Sanctum of Deliverance Fusion Reactor Core",
       "category": "Misc",
       "internalName": "Item_gimmick_puzzle_antumbra_tokamak_parts04",
       "maxStack": 1
     },
     {
       "itemKey": 1003561,
-      "name": "Fusion Reactor Core: V",
+      "name": "Sanctum of Benediction Fusion Reactor Core",
       "category": "Misc",
       "internalName": "Item_gimmick_puzzle_antumbra_tokamak_parts05",
       "maxStack": 1
     },
     {
       "itemKey": 1003562,
-      "name": "Fusion Reactor Core: VI",
+      "name": "Sanctum of Absolution Fusion Reactor Core",
       "category": "Misc",
       "internalName": "Item_gimmick_puzzle_antumbra_tokamak_parts06",
       "maxStack": 1
     },
     {
       "itemKey": 1003563,
-      "name": "Fusion Reactor Core: VII",
+      "name": "Sanctum of Expiation Fusion Reactor Core",
       "category": "Misc",
       "internalName": "Item_gimmick_puzzle_antumbra_tokamak_parts07",
       "maxStack": 1
     },
     {
       "itemKey": 1003564,
-      "name": "Fusion Reactor Core: VIII",
+      "name": "Sanctum of Mortification Fusion Reactor Core",
       "category": "Misc",
       "internalName": "Item_gimmick_puzzle_antumbra_tokamak_parts08",
       "maxStack": 1
     },
     {
       "itemKey": 1003565,
-      "name": "Fusion Reactor Core: IX",
+      "name": "Sanctum of Revelation Fusion Reactor Core",
       "category": "Misc",
       "internalName": "Item_gimmick_puzzle_antumbra_tokamak_parts09",
       "maxStack": 1
     },
     {
       "itemKey": 1003566,
-      "name": "Fusion Reactor Core: X",
+      "name": "Sanctum of Renunciation Fusion Reactor Core",
       "category": "Misc",
       "internalName": "Item_gimmick_puzzle_antumbra_tokamak_parts10",
       "maxStack": 1
     },
     {
       "itemKey": 1003567,
-      "name": "Fusion Reactor Core: XI",
+      "name": "Sanctum of Faith Fusion Reactor Core",
       "category": "Misc",
       "internalName": "Item_gimmick_puzzle_antumbra_tokamak_parts11",
       "maxStack": 1
     },
     {
       "itemKey": 1003568,
-      "name": "Fusion Reactor Core: XII",
+      "name": "Sanctum of Oblation Fusion Reactor Core",
       "category": "Misc",
       "internalName": "Item_gimmick_puzzle_antumbra_tokamak_parts12",
       "maxStack": 1
     },
     {
       "itemKey": 1003569,
-      "name": "Fusion Reactor Core: XIII",
+      "name": "Sanctum of Veneration Fusion Reactor Core",
       "category": "Misc",
       "internalName": "Item_gimmick_puzzle_antumbra_tokamak_parts13",
       "maxStack": 1
     },
     {
       "itemKey": 1003570,
-      "name": "Fusion Reactor Core: XIV",
+      "name": "Sanctum of Devotion Fusion Reactor Core",
       "category": "Misc",
       "internalName": "Item_gimmick_puzzle_antumbra_tokamak_parts14",
       "maxStack": 1
     },
     {
       "itemKey": 1003571,
-      "name": "Fusion Reactor Core: XV",
+      "name": "Sanctum of Solace Fusion Reactor Core",
       "category": "Misc",
       "internalName": "Item_gimmick_puzzle_antumbra_tokamak_parts15",
       "maxStack": 1
     },
     {
       "itemKey": 1003572,
-      "name": "Fusion Reactor Core: XVI",
+      "name": "Sanctum of Exaltation Fusion Reactor Core",
       "category": "Misc",
       "internalName": "Item_gimmick_puzzle_antumbra_tokamak_parts16",
       "maxStack": 1
     },
     {
       "itemKey": 1003573,
-      "name": "Fusion Reactor Core: I-I",
+      "name": "Sanctum of Penitence Fusion Reactor Core",
       "category": "Misc",
       "internalName": "Item_gimmick_puzzle_antumbra_tokamak_01_parts01",
       "maxStack": 1
     },
     {
       "itemKey": 1003574,
-      "name": "Fusion Reactor Core: I-II",
+      "name": "Sanctum of Penitence Fusion Reactor Core",
       "category": "Misc",
       "internalName": "Item_gimmick_puzzle_antumbra_tokamak_01_parts02",
       "maxStack": 1
     },
     {
       "itemKey": 1003575,
-      "name": "Fusion Reactor Core: I-III",
+      "name": "Sanctum of Penitence Fusion Reactor Core",
       "category": "Misc",
       "internalName": "Item_gimmick_puzzle_antumbra_tokamak_01_parts03",
       "maxStack": 1
     },
     {
       "itemKey": 1003576,
-      "name": "Fusion Reactor Core: I-IV",
+      "name": "Sanctum of Penitence Fusion Reactor Core",
       "category": "Misc",
       "internalName": "Item_gimmick_puzzle_antumbra_tokamak_01_parts04",
       "maxStack": 1
     },
     {
       "itemKey": 1003577,
-      "name": "Fusion Reactor Core: XI-I",
+      "name": "Sanctum of Expiation Fusion Reactor Core",
       "category": "Misc",
       "internalName": "Item_gimmick_puzzle_antumbra_tokamak_01_parts01_index01",
       "maxStack": 1
     },
     {
       "itemKey": 1003578,
-      "name": "Fusion Reactor Core: XII-I",
+      "name": "Sanctum of Expiation Fusion Reactor Core",
       "category": "Misc",
       "internalName": "Item_gimmick_puzzle_antumbra_tokamak_01_parts02_index01",
       "maxStack": 1
     },
     {
       "itemKey": 1003579,
-      "name": "Fusion Reactor Core: XIII-I",
+      "name": "Sanctum of Expiation Fusion Reactor Core",
       "category": "Misc",
       "internalName": "Item_gimmick_puzzle_antumbra_tokamak_01_parts03_index01",
       "maxStack": 1
     },
     {
       "itemKey": 1003580,
-      "name": "Fusion Reactor Core: XIV-I",
+      "name": "Sanctum of Expiation Fusion Reactor Core",
       "category": "Misc",
       "internalName": "Item_gimmick_puzzle_antumbra_tokamak_01_parts04_index01",
       "maxStack": 1
     },
     {
       "itemKey": 1003581,
-      "name": "Fusion Reactor Core: XI-III",
+      "name": "Sanctum of Renunciation Fusion Reactor Core",
       "category": "Misc",
       "internalName": "Item_gimmick_puzzle_antumbra_tokamak_01_parts01_index03",
       "maxStack": 1
     },
     {
       "itemKey": 1003582,
-      "name": "Fusion Reactor Core: XII-III",
+      "name": "Sanctum of Renunciation Fusion Reactor Core",
       "category": "Misc",
       "internalName": "Item_gimmick_puzzle_antumbra_tokamak_01_parts02_index03",
       "maxStack": 1
     },
     {
       "itemKey": 1003583,
-      "name": "Fusion Reactor Core: XIII-III",
+      "name": "Sanctum of Renunciation Fusion Reactor Core",
       "category": "Misc",
       "internalName": "Item_gimmick_puzzle_antumbra_tokamak_01_parts03_index03",
       "maxStack": 1
     },
     {
       "itemKey": 1003584,
-      "name": "Fusion Reactor Core: XIV-III",
+      "name": "Sanctum of Renunciation Fusion Reactor Core",
       "category": "Misc",
       "internalName": "Item_gimmick_puzzle_antumbra_tokamak_01_parts04_index03",
       "maxStack": 1
     },
     {
       "itemKey": 1003585,
-      "name": "Fusion Reactor Core: XI-IV",
+      "name": "Sanctum of Oblation Fusion Reactor Core",
       "category": "Misc",
       "internalName": "Item_gimmick_puzzle_antumbra_tokamak_01_parts01_index04",
       "maxStack": 1
     },
     {
       "itemKey": 1003586,
-      "name": "Fusion Reactor Core: XII-IV",
+      "name": "Sanctum of Oblation Fusion Reactor Core",
       "category": "Misc",
       "internalName": "Item_gimmick_puzzle_antumbra_tokamak_01_parts02_index04",
       "maxStack": 1
     },
     {
       "itemKey": 1003587,
-      "name": "Fusion Reactor Core: XIII-IV",
+      "name": "Sanctum of Oblation Fusion Reactor Core",
       "category": "Misc",
       "internalName": "Item_gimmick_puzzle_antumbra_tokamak_01_parts03_index04",
       "maxStack": 1
     },
     {
       "itemKey": 1003588,
-      "name": "Fusion Reactor Core: XIV-IV",
+      "name": "Sanctum of Oblation Fusion Reactor Core",
       "category": "Misc",
       "internalName": "Item_gimmick_puzzle_antumbra_tokamak_01_parts04_index04",
       "maxStack": 1
     },
     {
       "itemKey": 1003589,
-      "name": "Fusion Reactor Core: XXI-I",
+      "name": "Sanctum of Benediction Fusion Reactor Core",
       "category": "Misc",
       "internalName": "Item_gimmick_puzzle_antumbra_tokamak_02_parts01_index01",
       "maxStack": 1
     },
     {
       "itemKey": 1003590,
-      "name": "Fusion Reactor Core: XXII-I",
+      "name": "Sanctum of Benediction Fusion Reactor Core",
       "category": "Misc",
       "internalName": "Item_gimmick_puzzle_antumbra_tokamak_02_parts02_index01",
       "maxStack": 1
     },
     {
       "itemKey": 1003591,
-      "name": "Fusion Reactor Core: XXIII-I",
+      "name": "Sanctum of Benediction Fusion Reactor Core",
       "category": "Misc",
       "internalName": "Item_gimmick_puzzle_antumbra_tokamak_02_parts03_index01",
       "maxStack": 1
     },
     {
       "itemKey": 1003592,
-      "name": "Fusion Reactor Core: XXIV-I",
+      "name": "Sanctum of Benediction Fusion Reactor Core",
       "category": "Misc",
       "internalName": "Item_gimmick_puzzle_antumbra_tokamak_02_parts04_index01",
       "maxStack": 1
     },
     {
       "itemKey": 1003593,
-      "name": "Fusion Reactor Core: XXI-III",
+      "name": "Sanctum of Absolution Fusion Reactor Core",
       "category": "Misc",
       "internalName": "Item_gimmick_puzzle_antumbra_tokamak_02_parts01_index03",
       "maxStack": 1
     },
     {
       "itemKey": 1003594,
-      "name": "Fusion Reactor Core: XXII-III",
+      "name": "Sanctum of Absolution Fusion Reactor Core",
       "category": "Misc",
       "internalName": "Item_gimmick_puzzle_antumbra_tokamak_02_parts02_index03",
       "maxStack": 1
     },
     {
       "itemKey": 1003595,
-      "name": "Fusion Reactor Core: XXIII-III",
+      "name": "Sanctum of Absolution Fusion Reactor Core",
       "category": "Misc",
       "internalName": "Item_gimmick_puzzle_antumbra_tokamak_02_parts03_index03",
       "maxStack": 1
     },
     {
       "itemKey": 1003596,
-      "name": "Fusion Reactor Core: XXIV-III",
+      "name": "Sanctum of Absolution Fusion Reactor Core",
       "category": "Misc",
       "internalName": "Item_gimmick_puzzle_antumbra_tokamak_02_parts04_index03",
       "maxStack": 1
     },
     {
       "itemKey": 1003597,
-      "name": "Fusion Reactor Core: XXI-IV",
+      "name": "Sanctum of Mortification Fusion Reactor Core",
       "category": "Misc",
       "internalName": "Item_gimmick_puzzle_antumbra_tokamak_02_parts01_index04",
       "maxStack": 1
     },
     {
       "itemKey": 1003598,
-      "name": "Fusion Reactor Core: XXII-IV",
+      "name": "Sanctum of Mortification Fusion Reactor Core",
       "category": "Misc",
       "internalName": "Item_gimmick_puzzle_antumbra_tokamak_02_parts02_index04",
       "maxStack": 1
     },
     {
       "itemKey": 1003599,
-      "name": "Fusion Reactor Core: XXIII-IV",
+      "name": "Sanctum of Mortification Fusion Reactor Core",
       "category": "Misc",
       "internalName": "Item_gimmick_puzzle_antumbra_tokamak_02_parts03_index04",
       "maxStack": 1
     },
     {
       "itemKey": 1003600,
-      "name": "Fusion Reactor Core: XXIV-IV",
+      "name": "Sanctum of Mortification Fusion Reactor Core",
       "category": "Misc",
       "internalName": "Item_gimmick_puzzle_antumbra_tokamak_02_parts04_index04",
       "maxStack": 1
     },
     {
       "itemKey": 1003601,
-      "name": "Fusion Reactor Core: III-I",
+      "name": "Sanctum of Temperance Fusion Reactor Core",
       "category": "Misc",
       "internalName": "Item_gimmick_puzzle_antumbra_tokamak_03_parts01",
       "maxStack": 1
     },
     {
       "itemKey": 1003602,
-      "name": "Fusion Reactor Core: III-II",
+      "name": "Sanctum of Temperance Fusion Reactor Core",
       "category": "Misc",
       "internalName": "Item_gimmick_puzzle_antumbra_tokamak_03_parts02",
       "maxStack": 1
     },
     {
       "itemKey": 1003603,
-      "name": "Fusion Reactor Core: III-III",
+      "name": "Sanctum of Temperance Fusion Reactor Core",
       "category": "Misc",
       "internalName": "Item_gimmick_puzzle_antumbra_tokamak_03_parts03",
       "maxStack": 1
     },
     {
       "itemKey": 1003604,
-      "name": "Fusion Reactor Core: III-IV",
+      "name": "Sanctum of Temperance Fusion Reactor Core",
       "category": "Misc",
       "internalName": "Item_gimmick_puzzle_antumbra_tokamak_03_parts04",
       "maxStack": 1
     },
     {
       "itemKey": 1003605,
-      "name": "Fusion Reactor Core: XXXI-II",
+      "name": "Sanctum of Solace Fusion Reactor Core",
       "category": "Misc",
       "internalName": "Item_gimmick_puzzle_antumbra_tokamak_03_parts01_index02",
       "maxStack": 1
     },
     {
       "itemKey": 1003606,
-      "name": "Fusion Reactor Core: XXXII-II",
+      "name": "Sanctum of Solace Fusion Reactor Core",
       "category": "Misc",
       "internalName": "Item_gimmick_puzzle_antumbra_tokamak_03_parts02_index02",
       "maxStack": 1
     },
     {
       "itemKey": 1003607,
-      "name": "Fusion Reactor Core: XXXIII-II",
+      "name": "Sanctum of Solace Fusion Reactor Core",
       "category": "Misc",
       "internalName": "Item_gimmick_puzzle_antumbra_tokamak_03_parts03_index02",
       "maxStack": 1
     },
     {
       "itemKey": 1003608,
-      "name": "Fusion Reactor Core: XXXIV-II",
+      "name": "Sanctum of Solace Fusion Reactor Core",
       "category": "Misc",
       "internalName": "Item_gimmick_puzzle_antumbra_tokamak_03_parts04_index02",
       "maxStack": 1
     },
     {
       "itemKey": 1003609,
-      "name": "Fusion Reactor Core: XXXI-IV",
+      "name": "Sanctum of Faith Fusion Reactor Core",
       "category": "Misc",
       "internalName": "Item_gimmick_puzzle_antumbra_tokamak_03_parts01_index04",
       "maxStack": 1
     },
     {
       "itemKey": 1003610,
-      "name": "Fusion Reactor Core: XXXII-IV",
+      "name": "Sanctum of Faith Fusion Reactor Core",
       "category": "Misc",
       "internalName": "Item_gimmick_puzzle_antumbra_tokamak_03_parts02_index04",
       "maxStack": 1
     },
     {
       "itemKey": 1003611,
-      "name": "Fusion Reactor Core: XXXIII-IV",
+      "name": "Sanctum of Faith Fusion Reactor Core",
       "category": "Misc",
       "internalName": "Item_gimmick_puzzle_antumbra_tokamak_03_parts03_index04",
       "maxStack": 1
     },
     {
       "itemKey": 1003612,
-      "name": "Fusion Reactor Core: XXXIV-IV",
+      "name": "Sanctum of Faith Fusion Reactor Core",
       "category": "Misc",
       "internalName": "Item_gimmick_puzzle_antumbra_tokamak_03_parts04_index04",
       "maxStack": 1
     },
     {
       "itemKey": 1003613,
-      "name": "Fusion Reactor Core: XXXI-VI",
+      "name": "Sanctum of Revelation Fusion Reactor Core",
       "category": "Misc",
       "internalName": "Item_gimmick_puzzle_antumbra_tokamak_03_parts01_index06",
       "maxStack": 1
     },
     {
       "itemKey": 1003614,
-      "name": "Fusion Reactor Core: XXXII-VI",
+      "name": "Sanctum of Revelation Fusion Reactor Core",
       "category": "Misc",
       "internalName": "Item_gimmick_puzzle_antumbra_tokamak_03_parts02_index06",
       "maxStack": 1
     },
     {
       "itemKey": 1003615,
-      "name": "Fusion Reactor Core: XXXIII-VI",
+      "name": "Sanctum of Revelation Fusion Reactor Core",
       "category": "Misc",
       "internalName": "Item_gimmick_puzzle_antumbra_tokamak_03_parts03_index06",
       "maxStack": 1
     },
     {
       "itemKey": 1003616,
-      "name": "Fusion Reactor Core: XXXIV-VI",
+      "name": "Sanctum of Revelation Fusion Reactor Core",
       "category": "Misc",
       "internalName": "Item_gimmick_puzzle_antumbra_tokamak_03_parts04_index06",
       "maxStack": 1
     },
     {
       "itemKey": 1003617,
-      "name": "Fusion Reactor Core: LI-I",
+      "name": "Sanctum of Atonement Fusion Reactor Core",
       "category": "Misc",
       "internalName": "Item_gimmick_puzzle_antumbra_tokamak_05_parts01_index01",
       "maxStack": 1
     },
     {
       "itemKey": 1003618,
-      "name": "Fusion Reactor Core: LII-I",
+      "name": "Sanctum of Atonement Fusion Reactor Core",
       "category": "Misc",
       "internalName": "Item_gimmick_puzzle_antumbra_tokamak_05_parts02_index01",
       "maxStack": 1
     },
     {
       "itemKey": 1003619,
-      "name": "Fusion Reactor Core: LIII-I",
+      "name": "Sanctum of Atonement Fusion Reactor Core",
       "category": "Misc",
       "internalName": "Item_gimmick_puzzle_antumbra_tokamak_05_parts03_index01",
       "maxStack": 1
     },
     {
       "itemKey": 1003620,
-      "name": "Fusion Reactor Core: LIV-I",
+      "name": "Sanctum of Atonement Fusion Reactor Core",
       "category": "Misc",
       "internalName": "Item_gimmick_puzzle_antumbra_tokamak_05_parts04_index01",
       "maxStack": 1
     },
     {
       "itemKey": 1003621,
-      "name": "Fusion Reactor Core: LI-II",
+      "name": "Sanctum of Exaltation Fusion Reactor Core",
       "category": "Misc",
       "internalName": "Item_gimmick_puzzle_antumbra_tokamak_05_parts01_index02",
       "maxStack": 1
     },
     {
       "itemKey": 1003622,
-      "name": "Fusion Reactor Core: LII-II",
+      "name": "Sanctum of Exaltation Fusion Reactor Core",
       "category": "Misc",
       "internalName": "Item_gimmick_puzzle_antumbra_tokamak_05_parts02_index02",
       "maxStack": 1
     },
     {
       "itemKey": 1003623,
-      "name": "Fusion Reactor Core: LIII-II",
+      "name": "Sanctum of Exaltation Fusion Reactor Core",
       "category": "Misc",
       "internalName": "Item_gimmick_puzzle_antumbra_tokamak_05_parts03_index02",
       "maxStack": 1
     },
     {
       "itemKey": 1003624,
-      "name": "Fusion Reactor Core: LIV-II",
+      "name": "Sanctum of Exaltation Fusion Reactor Core",
       "category": "Misc",
       "internalName": "Item_gimmick_puzzle_antumbra_tokamak_05_parts04_index02",
       "maxStack": 1
     },
     {
       "itemKey": 1003625,
-      "name": "Fusion Reactor Core: LI-IV",
+      "name": "Sanctum of Devotion Fusion Reactor Core",
       "category": "Misc",
       "internalName": "Item_gimmick_puzzle_antumbra_tokamak_05_parts01_index04",
       "maxStack": 1
     },
     {
       "itemKey": 1003626,
-      "name": "Fusion Reactor Core: LII-IV",
+      "name": "Sanctum of Devotion Fusion Reactor Core",
       "category": "Misc",
       "internalName": "Item_gimmick_puzzle_antumbra_tokamak_05_parts02_index04",
       "maxStack": 1
     },
     {
       "itemKey": 1003627,
-      "name": "Fusion Reactor Core: LIII-IV",
+      "name": "Sanctum of Devotion Fusion Reactor Core",
       "category": "Misc",
       "internalName": "Item_gimmick_puzzle_antumbra_tokamak_05_parts03_index04",
       "maxStack": 1
     },
     {
       "itemKey": 1003628,
-      "name": "Fusion Reactor Core: LIV-IV",
+      "name": "Sanctum of Devotion Fusion Reactor Core",
       "category": "Misc",
       "internalName": "Item_gimmick_puzzle_antumbra_tokamak_05_parts04_index04",
       "maxStack": 1
     },
     {
       "itemKey": 1003629,
-      "name": "Fusion Reactor Core: LI-VI",
+      "name": "Sanctum of Deliverance Fusion Reactor Core",
       "category": "Misc",
       "internalName": "Item_gimmick_puzzle_antumbra_tokamak_05_parts01_index05",
       "maxStack": 1
     },
     {
       "itemKey": 1003630,
-      "name": "Fusion Reactor Core: LII-VI",
+      "name": "Sanctum of Deliverance Fusion Reactor Core",
       "category": "Misc",
       "internalName": "Item_gimmick_puzzle_antumbra_tokamak_05_parts02_index05",
       "maxStack": 1
     },
     {
       "itemKey": 1003631,
-      "name": "Fusion Reactor Core: LIII-VI",
+      "name": "Sanctum of Deliverance Fusion Reactor Core",
       "category": "Misc",
       "internalName": "Item_gimmick_puzzle_antumbra_tokamak_05_parts03_index05",
       "maxStack": 1
     },
     {
       "itemKey": 1003632,
-      "name": "Fusion Reactor Core: LIV-VI",
+      "name": "Sanctum of Deliverance Fusion Reactor Core",
       "category": "Misc",
       "internalName": "Item_gimmick_puzzle_antumbra_tokamak_05_parts04_index05",
       "maxStack": 1
@@ -37298,7 +37284,7 @@
     },
     {
       "itemKey": 1003644,
-      "name": "Wisdom between Donation and Fruition",
+      "name": "Wisdom Between Donation and Fruition",
       "category": "Quest",
       "internalName": "Quest_Paper_Propagation",
       "maxStack": 1
@@ -37410,7 +37396,7 @@
     },
     {
       "itemKey": 1003660,
-      "name": "Memory of Byron Manor",
+      "name": "Memory of Byron's Manor",
       "category": "Misc",
       "internalName": "Visione_Chip_Mansion_Byron_Memory",
       "maxStack": 5
@@ -37469,7 +37455,7 @@
       "name": "Colossal Might",
       "category": "Misc",
       "internalName": "Item_Skill_AbyssGear_Ogre",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 1003669,
@@ -37588,14 +37574,14 @@
       "name": "Order from Above",
       "category": "Misc",
       "internalName": "Item_Skill_AbyssGear_Merrick",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 1003686,
       "name": "Dark Crescent",
       "category": "Misc",
       "internalName": "Item_Skill_AbyssGear_Antumbra_TwoHandRod",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 1003687,
@@ -37630,14 +37616,14 @@
       "name": "Queen's Fangs",
       "category": "Misc",
       "internalName": "Item_Skill_AbyssGear_QueenSpider",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 1003692,
       "name": "Putrid Touch",
       "category": "Misc",
       "internalName": "Item_Skill_AbyssGear_Skevald",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 1003693,
@@ -37686,14 +37672,14 @@
       "name": "Shadow Claw",
       "category": "Misc",
       "internalName": "Item_Skill_AbyssGear_Leebur",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 1003700,
       "name": "Parting Gift",
       "category": "Misc",
       "internalName": "Item_Skill_AbyssGear_LanFord",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 1003701,
@@ -37707,7 +37693,7 @@
       "name": "Ancient Retribution",
       "category": "Misc",
       "internalName": "Item_Skill_AbyssGear_Priscus",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 1003703,
@@ -37791,14 +37777,14 @@
       "name": "Howling of Chaos",
       "category": "Misc",
       "internalName": "Item_Skill_AbyssGear_ImpBoss",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 1003715,
       "name": "Judgment of the Soul",
       "category": "Misc",
       "internalName": "Item_Skill_AbyssGear_Forgotten_General",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 1003716,
@@ -37819,7 +37805,7 @@
       "name": "Ancient Wrath",
       "category": "Misc",
       "internalName": "Item_Skill_AbyssGear_Praevus",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 1003719,
@@ -38106,63 +38092,63 @@
       "name": "Shatter I",
       "category": "Material",
       "internalName": "Item_Skill_AbyssGear_AddCriticalRateByMaterialKey_PlateArmor_LV1",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 1003760,
       "name": "Shatter II",
       "category": "Material",
       "internalName": "Item_Skill_AbyssGear_AddCriticalRateByMaterialKey_PlateArmor_LV2",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 1003761,
       "name": "Shatter III",
       "category": "Material",
       "internalName": "Item_Skill_AbyssGear_AddCriticalRateByMaterialKey_PlateArmor_LV3",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 1003762,
       "name": "Rend I",
       "category": "Material",
       "internalName": "Item_Skill_AbyssGear_AddCriticalRateByMaterialKey_LeatherArmor_LV1",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 1003763,
       "name": "Rend II",
       "category": "Material",
       "internalName": "Item_Skill_AbyssGear_AddCriticalRateByMaterialKey_LeatherArmor_LV2",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 1003764,
       "name": "Rend III",
       "category": "Material",
       "internalName": "Item_Skill_AbyssGear_AddCriticalRateByMaterialKey_LeatherArmor_LV3",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 1003765,
       "name": "Shred I",
       "category": "Material",
       "internalName": "Item_Skill_AbyssGear_AddCriticalRateByMaterialKey_FabricArmor_LV1",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 1003766,
       "name": "Shred II",
       "category": "Material",
       "internalName": "Item_Skill_AbyssGear_AddCriticalRateByMaterialKey_FabricArmor_LV2",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 1003767,
       "name": "Shred III",
       "category": "Material",
       "internalName": "Item_Skill_AbyssGear_AddCriticalRateByMaterialKey_FabricArmor_LV3",
-      "maxStack": 1
+      "maxStack": 10
     },
     {
       "itemKey": 1003768,
@@ -38207,10 +38193,367 @@
       "maxStack": 20
     },
     {
+      "itemKey": 1003774,
+      "name": "Enhanced Kuku Cooler",
+      "category": "Misc",
+      "internalName": "Item_gimmick_foodstorage_0002",
+      "maxStack": 1
+    },
+    {
       "itemKey": 1003775,
       "name": "Greymane's Token",
       "category": "Misc",
       "internalName": "Graymane_Token",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1003776,
+      "name": "Sword of Starlight",
+      "category": "Misc",
+      "internalName": "Star_OneHandRapier",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1003777,
+      "name": "Hernand Constabulary Warning Notice No. 66",
+      "category": "Misc",
+      "internalName": "NoticePaper_Skill_LungeCombination",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1003778,
+      "name": "Hernand Anonymous Jottings No. 27",
+      "category": "Misc",
+      "internalName": "NoticePaper_Skill_TurnBash_II",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1003779,
+      "name": "Hernand Anonymous Jottings No. 32",
+      "category": "Misc",
+      "internalName": "NoticePaper_Skill_MoveCutting_II",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1003780,
+      "name": "Hernand Constabulary Warning Notice No. 84",
+      "category": "Misc",
+      "internalName": "NoticePaper_Skill_RotationBash_II",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1003781,
+      "name": "Kailok's Request",
+      "category": "Misc",
+      "internalName": "NoticePaper_Skill_SwordRush",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1003782,
+      "name": "Hernand Anonymous Jottings No. 34",
+      "category": "Misc",
+      "internalName": "NoticePaper_Skill_Charge_Shot",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1003783,
+      "name": "Random Note No. 1",
+      "category": "Misc",
+      "internalName": "NoticePaper_Skill_MultiShot",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1003784,
+      "name": "Pailune Warning Notice No. 66",
+      "category": "Misc",
+      "internalName": "NoticePaper_Skill_EvadeShot",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1003785,
+      "name": "Hernand Constabulary Warning Notice No. 77",
+      "category": "Misc",
+      "internalName": "NoticePaper_Skill_EvadeExplosionShot",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1003786,
+      "name": "Request from the Communal Training Grounds",
+      "category": "Misc",
+      "internalName": "NoticePaper_Skill_UnArmedCombination",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1003787,
+      "name": "Anonymous Note No. 1",
+      "category": "Misc",
+      "internalName": "NoticePaper_Skill_SkyKick",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1003788,
+      "name": "Hernand Anonymous Jottings No. 42",
+      "category": "Misc",
+      "internalName": "NoticePaper_Skill_DoubleKick_I",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1003789,
+      "name": "Hernand Anonymous Jottings No. 45",
+      "category": "Misc",
+      "internalName": "NoticePaper_Skill_DropKick",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1003790,
+      "name": "Request from the Merchant Guild",
+      "category": "Misc",
+      "internalName": "NoticePaper_Skill_JumpStep",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1003791,
+      "name": "Call for Challengers: Black Bear",
+      "category": "Misc",
+      "internalName": "NoticePaper_Skill_Wrestle_Lariat",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1003792,
+      "name": "Hernand Constabulary Warning Notice No. 103",
+      "category": "Misc",
+      "internalName": "NoticePaper_Skill_Wrestle_AirBodySlam",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1003793,
+      "name": "An old man's request",
+      "category": "Misc",
+      "internalName": "NoticePaper_Skill_ShieldJustGuard_Attack",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1003794,
+      "name": "Random Note No. 2",
+      "category": "Misc",
+      "internalName": "NoticePaper_Skill_DoubleJump",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1003795,
+      "name": "Hernand Anonymous Jottings No. 48",
+      "category": "Misc",
+      "internalName": "NoticePaper_Skill_RollCancel",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1003796,
+      "name": "Anonymous Note No. 2",
+      "category": "Misc",
+      "internalName": "NoticePaper_Skill_Greywolf_Detect",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1003797,
+      "name": "Hernand Anonymous Jottings No. 52",
+      "category": "Misc",
+      "internalName": "NoticePaper_Skill_Lift",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1003798,
+      "name": "Hernand Anonymous Jottings No. 57",
+      "category": "Misc",
+      "internalName": "NoticePaper_Skill_Mabongpa",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1003799,
+      "name": "Anonymous Note No. 3",
+      "category": "Misc",
+      "internalName": "NoticePaper_Skill_JiJeongTa_I",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1003800,
+      "name": "Anonymous Note No. 4",
+      "category": "Misc",
+      "internalName": "NoticePaper_Skill_JiJeongTa_Deep",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1003801,
+      "name": "Anonymous Note No. 5",
+      "category": "Misc",
+      "internalName": "NoticePaper_Skill_Tathagata_mini",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1003802,
+      "name": "Random Note No. 3",
+      "category": "Misc",
+      "internalName": "NoticePaper_Skill_Greywolf_Detect_Unleash",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1003803,
+      "name": "Hernand Anonymous Jottings No. 61",
+      "category": "Misc",
+      "internalName": "NoticePaper_Skill_CrowWing_Dash",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1003804,
+      "name": "Tribunal Warning Notice No. 52367",
+      "category": "Misc",
+      "internalName": "NoticePaper_Skill_CloneAttack",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1003805,
+      "name": "White Crow's Letter",
+      "category": "Misc",
+      "internalName": "NoticePaper_Skill_MpFire",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1003806,
+      "name": "White Crow's Letter",
+      "category": "Misc",
+      "internalName": "NoticePaper_Skill_MpIce",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1003807,
+      "name": "White Crow's Letter",
+      "category": "Misc",
+      "internalName": "NoticePaper_Skill_MpLightning",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1003808,
+      "name": "White Crow's Letter",
+      "category": "Misc",
+      "internalName": "NoticePaper_Skill_MpWind",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1003809,
+      "name": "Hernand Anonymous Jottings No. 23",
+      "category": "Misc",
+      "internalName": "NoticePaper_Skill_Oongka_Dash",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1003810,
+      "name": "A man's plea",
+      "category": "Misc",
+      "internalName": "NoticePaper_Skill_Oongka_RotationBash_II",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1003811,
+      "name": "Random Note No. 4",
+      "category": "Misc",
+      "internalName": "NoticePaper_Skill_Oongka_GroundSmash_II",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1003812,
+      "name": "Troll Wrestling Invitation",
+      "category": "Misc",
+      "internalName": "NoticePaper_Skill_Oongka_Wrestle_Combo",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1003813,
+      "name": "Anonymous Note No. 6",
+      "category": "Misc",
+      "internalName": "NoticePaper_Skill_Oongka_AimExplosionShot",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1003814,
+      "name": "Hernand Anonymous Jottings No. 63",
+      "category": "Misc",
+      "internalName": "NoticePaper_Skill_Damian_LungeCatch",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1003815,
+      "name": "Circus Invitation",
+      "category": "Misc",
+      "internalName": "NoticePaper_Skill_Damian_TurnBash_II",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1003816,
+      "name": "Hernand Anonymous Jottings No. 72",
+      "category": "Misc",
+      "internalName": "NoticePaper_Skill_Damian_QuickReload",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1003817,
+      "name": "Call for Challengers: Master of Kicks",
+      "category": "Misc",
+      "internalName": "NoticePaper_Skill_Damian_SpinningKick",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1003818,
+      "name": "Pailune Anonymous Jottings No. 77",
+      "category": "Misc",
+      "internalName": "NoticePaper_Skill_Wrestle_GrabSpinThrow",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1003819,
+      "name": "Blue Gilded Handle Ceramic",
+      "category": "Misc",
+      "internalName": "Collection_Prop_Ceramic_0057",
+      "maxStack": 10
+    },
+    {
+      "itemKey": 1003820,
+      "name": "Blue Ceramic Container",
+      "category": "Misc",
+      "internalName": "Collection_Prop_Ceramic_0058",
+      "maxStack": 10
+    },
+    {
+      "itemKey": 1003821,
+      "name": "The Blue Mirage",
+      "category": "Misc",
+      "internalName": "Collection_Prop_Ceramic_0059",
+      "maxStack": 10
+    },
+    {
+      "itemKey": 1003822,
+      "name": "Flower Bird Glass Pottery",
+      "category": "Misc",
+      "internalName": "Collection_Prop_Ceramic_0056",
+      "maxStack": 10
+    },
+    {
+      "itemKey": 1003823,
+      "name": "Sturdy Gatherables Chest",
+      "category": "Misc",
+      "internalName": "Item_gimmick_resourcestorage_0001",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1003824,
+      "name": "Collectibles Chest",
+      "category": "Misc",
+      "internalName": "Item_gimmick_collectionstorage_0001",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1003825,
+      "name": "Kuku Cooler",
+      "category": "Misc",
+      "internalName": "Item_gimmick_foodstorage_0001",
       "maxStack": 1
     },
     {
@@ -38284,8 +38627,22 @@
       "maxStack": 20
     },
     {
+      "itemKey": 1003836,
+      "name": "Kuku Cooler Blueprint",
+      "category": "Quest",
+      "internalName": "Quest_Paper_Foodstorage",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1003837,
+      "name": "Enhanced Kuku Cooler Blueprint",
+      "category": "Quest",
+      "internalName": "Quest_Paper_HeavyFoodstorage",
+      "maxStack": 1
+    },
+    {
       "itemKey": 1003838,
-      "name": "White Bear Claws",
+      "name": "White Bear's Claws",
       "category": "Misc",
       "internalName": "Riding_Bear_Claw",
       "maxStack": 1
@@ -38299,7 +38656,7 @@
     },
     {
       "itemKey": 1003840,
-      "name": "Snowwhite Deer Antlers",
+      "name": "Snowwhite Deer's Antlers",
       "category": "Misc",
       "internalName": "Riding_Deer_Horn",
       "maxStack": 1
@@ -38313,7 +38670,7 @@
     },
     {
       "itemKey": 1003842,
-      "name": "Rock Tusk Warthog Molar",
+      "name": "Rock Tusk Warthog's Tusk",
       "category": "Misc",
       "internalName": "Riding_Warthog_Tooth",
       "maxStack": 1
@@ -38354,6 +38711,27 @@
       "maxStack": 1
     },
     {
+      "itemKey": 1003848,
+      "name": "Sturdy Broom",
+      "category": "Misc",
+      "internalName": "Equip_Sturdy_Broom",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1003849,
+      "name": "Tree Branch",
+      "category": "Misc",
+      "internalName": "Wood_Branch_01",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1003850,
+      "name": "Sturdy Tree Branch",
+      "category": "Misc",
+      "internalName": "Wood_Branch_02",
+      "maxStack": 1
+    },
+    {
       "itemKey": 1003851,
       "name": "Varnia Refinement Token",
       "category": "Misc",
@@ -38382,60 +38760,1873 @@
       "maxStack": 20
     },
     {
+      "itemKey": 1003855,
+      "name": "Bruna's Note",
+      "category": "Misc",
+      "internalName": "Paper_Bruna_1",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1003856,
+      "name": "Saddler's Note",
+      "category": "Misc",
+      "internalName": "Paper_Bruna_I_1",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1003857,
+      "name": "Royal Trading Post Note",
+      "category": "Misc",
+      "internalName": "Paper_Bruna_II_1",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1003858,
+      "name": "Forrex's Note",
+      "category": "Misc",
+      "internalName": "Paper_Forex_1",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1003859,
+      "name": "Arms Scholar's Note",
+      "category": "Misc",
+      "internalName": "Paper_Forex_I_1",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1003860,
+      "name": "Windrose Farm Note",
+      "category": "Misc",
+      "internalName": "Paper_Forex_II_1",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1003861,
+      "name": "Merchant's Note",
+      "category": "Misc",
+      "internalName": "Paper_FriendNews_1",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1003862,
+      "name": "Duskway Camp Note",
+      "category": "Misc",
+      "internalName": "Paper_FriendNews_I_1",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1003863,
+      "name": "Note Found at the Fence",
+      "category": "Misc",
+      "internalName": "Paper_FriendNews_II_1",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1003864,
+      "name": "Fiona's Note",
+      "category": "Misc",
+      "internalName": "Paper_Fiona_1",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1003865,
+      "name": "Chief Trainer's Journal",
+      "category": "Misc",
+      "internalName": "Paper_Fiona_I_1",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1003866,
+      "name": "Excavation Site Manager's Note",
+      "category": "Misc",
+      "internalName": "Paper_FieldVoice_1",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1003867,
+      "name": "Foreman's Note",
+      "category": "Misc",
+      "internalName": "Paper_FieldVoice_I_1",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1003868,
+      "name": "Eldred's Note",
+      "category": "Misc",
+      "internalName": "Paper_Aldred_1",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1003869,
+      "name": "Farmer's Note",
+      "category": "Misc",
+      "internalName": "Paper_Aldred_I_1",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1003870,
+      "name": "Provisioner's Shop Note",
+      "category": "Misc",
+      "internalName": "Paper_Aldred_II_1",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1003871,
+      "name": "Wronged Man's Note",
+      "category": "Misc",
+      "internalName": "Paper_BoundbyLies_1",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1003872,
+      "name": "Note at a Man's House",
+      "category": "Misc",
+      "internalName": "Paper_BoundbyLies_I_1",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1003873,
+      "name": "Leonard's Note",
+      "category": "Misc",
+      "internalName": "Paper_Lenard_1",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1003874,
+      "name": "Assistant's Note",
+      "category": "Misc",
+      "internalName": "Paper_Lenard_I_1",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1003875,
+      "name": "Adrina's Note",
+      "category": "Misc",
+      "internalName": "Paper_Adelina_1",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1003876,
+      "name": "Carpenter's Note",
+      "category": "Misc",
+      "internalName": "Paper_Adelina_I_1",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1003877,
+      "name": "Training Field Note",
+      "category": "Misc",
+      "internalName": "Paper_Adelina_II_1",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1003878,
+      "name": "Maidon's Note",
+      "category": "Misc",
+      "internalName": "Paper_Maiden_1",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1003879,
+      "name": "Harbor Manager's Note",
+      "category": "Misc",
+      "internalName": "Paper_Maiden_I_1",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1003880,
+      "name": "Note from the Bank",
+      "category": "Misc",
+      "internalName": "Paper_Maiden_II_1",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1003881,
+      "name": "Haverson's Note",
+      "category": "Misc",
+      "internalName": "Paper_Harveston_1",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1003882,
+      "name": "Baker's Note",
+      "category": "Misc",
+      "internalName": "Paper_Harveston_I_1",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1003883,
+      "name": "Church Note",
+      "category": "Misc",
+      "internalName": "Paper_Harveston_II_1",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1003884,
+      "name": "Flint's Note",
+      "category": "Misc",
+      "internalName": "Paper_Flint_1",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1003885,
+      "name": "Potter's Journal",
+      "category": "Misc",
+      "internalName": "Paper_Flint_I_1",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1003886,
+      "name": "Castiel's Note",
+      "category": "Misc",
+      "internalName": "Paper_Castiel_1",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1003887,
+      "name": "Stained Work Log",
+      "category": "Misc",
+      "internalName": "Paper_Castiel_I_1",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1003888,
+      "name": "Produce Order Form",
+      "category": "Misc",
+      "internalName": "Paper_VegetableBox_1",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1003889,
+      "name": "Bea's Note",
+      "category": "Misc",
+      "internalName": "Paper_Beatrice_1",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1003890,
+      "name": "Elise's Note",
+      "category": "Misc",
+      "internalName": "Paper_Eliza_1",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1003891,
+      "name": "Note from the Shopping Street",
+      "category": "Misc",
+      "internalName": "Paper_Eliza_I_1",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1003892,
+      "name": "Omar's Note",
+      "category": "Misc",
+      "internalName": "Paper_Omar_1",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1003893,
+      "name": "Varnia Entrance Note",
+      "category": "Misc",
+      "internalName": "Paper_Omar_I_1",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1003894,
+      "name": "A Man's Note",
+      "category": "Misc",
+      "internalName": "Paper_BraveToLove_1",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1003895,
+      "name": "Ugmon's Note",
+      "category": "Misc",
+      "internalName": "Paper_Ugmum_1",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1003896,
+      "name": "Driana's Note",
+      "category": "Misc",
+      "internalName": "Paper_Drianna_1",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1003897,
+      "name": "Watchtower Note",
+      "category": "Misc",
+      "internalName": "Paper_Drianna_I_1",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1003898,
+      "name": "Randelle's Note",
+      "category": "Misc",
+      "internalName": "Paper_Randel_1",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1003899,
+      "name": "Engineer's Research Log",
+      "category": "Misc",
+      "internalName": "Paper_Randel_I_1",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1003900,
+      "name": "Donny's Note",
+      "category": "Misc",
+      "internalName": "Paper_Doni_1",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1003901,
+      "name": "Flower Shop Customer's Note",
+      "category": "Misc",
+      "internalName": "Paper_Doni_I_1",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1003902,
+      "name": "Trainee's Note",
+      "category": "Misc",
+      "internalName": "Paper_SecretSip_1",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1003903,
+      "name": "Note from Point of Contact",
+      "category": "Misc",
+      "internalName": "Paper_SecretSip_I_1",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1003904,
+      "name": "Researcher's Note",
+      "category": "Misc",
+      "internalName": "Paper_RacingStage_1",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1003905,
+      "name": "Racecourse Owner's Note",
+      "category": "Misc",
+      "internalName": "Paper_RacingStage_I_1",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1003906,
+      "name": "Nix's Note",
+      "category": "Misc",
+      "internalName": "Paper_Sniks_1",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1003907,
+      "name": "Note from the Freesword Barracks",
+      "category": "Misc",
+      "internalName": "Paper_Sniks_I_1",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1003908,
+      "name": "Bamboo Stalk",
+      "category": "Misc",
+      "internalName": "Bamboo_Branch_01",
+      "maxStack": 1
+    },
+    {
       "itemKey": 1003909,
-      "name": "Archive Record: Ch. 1",
+      "name": "Archive Records: Vol. I",
       "category": "Misc",
       "internalName": "Alustin_Journal_Book_I",
       "maxStack": 1
     },
     {
       "itemKey": 1003910,
-      "name": "Archive Record: Ch. 2",
+      "name": "Archive Records: Vol. II",
       "category": "Misc",
       "internalName": "Alustin_Journal_Book_II",
       "maxStack": 1
     },
     {
       "itemKey": 1003911,
-      "name": "Archive Record: Ch. 3",
+      "name": "Archive Records: Vol. III",
       "category": "Misc",
       "internalName": "Alustin_Journal_Book_III",
       "maxStack": 1
     },
     {
       "itemKey": 1003912,
-      "name": "Archive Record: Ch. 4",
+      "name": "Archive Records: Vol. IV",
       "category": "Misc",
       "internalName": "Alustin_Journal_Book_IV",
       "maxStack": 1
     },
     {
       "itemKey": 1003913,
-      "name": "Archive Record: Ch. 5",
+      "name": "Archive Records: Vol. V",
       "category": "Misc",
       "internalName": "Alustin_Journal_Book_V",
       "maxStack": 1
     },
     {
       "itemKey": 1003914,
-      "name": "Archive Record: Final Chapter",
+      "name": "Archive Records: Vol. VI",
       "category": "Misc",
       "internalName": "Alustin_Journal_Book_VI",
       "maxStack": 1
     },
     {
+      "itemKey": 1003915,
+      "name": "Sotdae of Bond",
+      "category": "Misc",
+      "internalName": "Item_gimmick_birdfeeder_0001",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1003916,
+      "name": "Greymane Cloth Armor",
+      "category": "Material",
+      "internalName": "Greyfur_Fabric_Armor_CI",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1003918,
+      "name": "Sage's Eye",
+      "category": "Misc",
+      "internalName": "Boss_Reward_QuickLearner_Charm",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1003919,
+      "name": "Golden Beer",
+      "category": "Misc",
+      "internalName": "Boss_Reward_Efficiency_Charm",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1003920,
+      "name": "Phoenix Feather",
+      "category": "Misc",
+      "internalName": "Pet_Phoenix_Feather",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1003921,
+      "name": "Sigil of Solidarity (Phoenix)",
+      "category": "Misc",
+      "internalName": "Pet_Phoenix_Amulet",
+      "maxStack": 1
+    },
+    {
       "itemKey": 1003924,
-      "name": "PetArmor Marni Helm",
+      "name": "Visionette",
       "category": "Misc",
       "internalName": "PetArmor_Marni_Helm",
       "maxStack": 1
     },
     {
       "itemKey": 1003925,
-      "name": "PetArmor Marni Armor",
+      "name": "Visionette Neckerchief",
       "category": "Misc",
       "internalName": "PetArmor_Marni_Armor",
       "maxStack": 1
+    },
+    {
+      "itemKey": 1003927,
+      "name": "Pailunese Chalice of Oaths",
+      "category": "Misc",
+      "internalName": "Pail_Cup_Oath",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1003928,
+      "name": "Greymane Cloth Cloak",
+      "category": "Material",
+      "internalName": "Demian_Greyfur_Fabric_Cloak_I",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1003929,
+      "name": "Sigil of Bonding",
+      "category": "Misc",
+      "internalName": "Pet_Bond_Amulet",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1003930,
+      "name": "Ocher Jar",
+      "category": "Misc",
+      "internalName": "Item_gimmick_collection_prop_Ceramic_0021",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1003931,
+      "name": "Milky White Jar",
+      "category": "Misc",
+      "internalName": "Item_gimmick_collection_prop_Ceramic_0023",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1003932,
+      "name": "Patterned Long-Necked Jar",
+      "category": "Misc",
+      "internalName": "Item_gimmick_collection_prop_Ceramic_0033",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1003933,
+      "name": "Dark Earthen Jar",
+      "category": "Misc",
+      "internalName": "Item_gimmick_collection_prop_Ceramic_0034",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1003934,
+      "name": "Patterned Jar",
+      "category": "Misc",
+      "internalName": "Item_gimmick_collection_prop_Ceramic_0036",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1003935,
+      "name": "String-Wrapped Jar",
+      "category": "Misc",
+      "internalName": "Item_gimmick_collection_prop_Ceramic_0040",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1003936,
+      "name": "Bright Flat Jar",
+      "category": "Misc",
+      "internalName": "Item_gimmick_collection_prop_Ceramic_0042",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1003937,
+      "name": "Dark Flat Jar",
+      "category": "Misc",
+      "internalName": "Item_gimmick_collection_prop_Ceramic_0043",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1003938,
+      "name": "Round-Handled Jar",
+      "category": "Misc",
+      "internalName": "Item_gimmick_collection_prop_Ceramic_0044",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1003939,
+      "name": "Reddish-Brown Jar",
+      "category": "Misc",
+      "internalName": "Item_gimmick_collection_prop_Ceramic_0048",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1003940,
+      "name": "Earth-Colored Jar",
+      "category": "Misc",
+      "internalName": "Item_gimmick_collection_prop_Ceramic_0049",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1003941,
+      "name": "Book",
+      "category": "Misc",
+      "internalName": "Item_gimmick_item_tool_book_0001",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1003942,
+      "name": "Intricate Floral Vine Cabinet",
+      "category": "Misc",
+      "internalName": "Item_gimmick_dff_luxuryfurniture_cabinet_01",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1003943,
+      "name": "Brave Warrior's Storage",
+      "category": "Misc",
+      "internalName": "Item_gimmick_dff_luxuryfurniture_cabinet_02",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1003944,
+      "name": "Whitesand Storage",
+      "category": "Misc",
+      "internalName": "Item_gimmick_dff_luxuryfurniture_cabinet_0001",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1003945,
+      "name": "Dark Crest Triangular Cabinet",
+      "category": "Misc",
+      "internalName": "Item_cabinet_02",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1003946,
+      "name": "Bright Crest Triangular Cabinet",
+      "category": "Misc",
+      "internalName": "Item_cabinet_02_index01",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1003947,
+      "name": "Dark Crest Display Cabinet",
+      "category": "Misc",
+      "internalName": "Item_cabinet_03",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1003948,
+      "name": "Bright Crest Display Cabinet",
+      "category": "Misc",
+      "internalName": "Item_cabinet_03_index01",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1003949,
+      "name": "Whitesand Display Cabinet",
+      "category": "Misc",
+      "internalName": "Item_cabinet_0003",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1003950,
+      "name": "Small Dark Timberton Cabinet",
+      "category": "Misc",
+      "internalName": "Item_cabinet_05",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1003951,
+      "name": "Small Bright Timberton Cabinet",
+      "category": "Misc",
+      "internalName": "Item_cabinet_05_index01",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1003952,
+      "name": "Small Dark Crest Cabinet",
+      "category": "Misc",
+      "internalName": "Item_cabinet_11",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1003953,
+      "name": "Small Bright Crest Cabinet",
+      "category": "Misc",
+      "internalName": "Item_cabinet_11_index01",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1003954,
+      "name": "Small Whitesand Cabinet",
+      "category": "Misc",
+      "internalName": "Item_cabinet_0002",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1003955,
+      "name": "Full Bloom Cabinet",
+      "category": "Misc",
+      "internalName": "Item_cabinet_12",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1003956,
+      "name": "Delesyian Metal Lock Cabinet",
+      "category": "Misc",
+      "internalName": "Item_cabinet_15",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1003957,
+      "name": "Royal Gold Display Cabinet",
+      "category": "Misc",
+      "internalName": "Item_cabinet_19",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1003958,
+      "name": "Sacred Gold Display Cabinet",
+      "category": "Misc",
+      "internalName": "Item_cabinet_19_index01",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1003959,
+      "name": "Whitesand Gold Display Cabinet",
+      "category": "Misc",
+      "internalName": "Item_cabinet_0001",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1003960,
+      "name": "Small Crest Drawer",
+      "category": "Misc",
+      "internalName": "Item_cabinet_23",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1003961,
+      "name": "Crest Drawer",
+      "category": "Misc",
+      "internalName": "Item_dresser_01",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1003962,
+      "name": "Timberton Drawer",
+      "category": "Misc",
+      "internalName": "Item_dresser_01_index01",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1003963,
+      "name": "Whitesand Drawer",
+      "category": "Misc",
+      "internalName": "Item_dresser_0001",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1003964,
+      "name": "Dark Timberton Cabinet",
+      "category": "Misc",
+      "internalName": "Item_dresser_03",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1003965,
+      "name": "Bright Timberton Cabinet",
+      "category": "Misc",
+      "internalName": "Item_dresser_03_index01",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1003966,
+      "name": "Timberham Drawer",
+      "category": "Misc",
+      "internalName": "Item_dresser_04",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1003967,
+      "name": "Dark Timberton Bookshelf",
+      "category": "Misc",
+      "internalName": "Item_bookcase_02",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1003968,
+      "name": "Bright Timberton Bookshelf",
+      "category": "Misc",
+      "internalName": "Item_bookcase_02_index01",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1003969,
+      "name": "Whitesand Bookshelf",
+      "category": "Misc",
+      "internalName": "Item_bookcase_0001",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1003970,
+      "name": "Crimson Bed",
+      "category": "Misc",
+      "internalName": "Item_dff_luxuryfurniture_bed_02",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1003971,
+      "name": "White Bed",
+      "category": "Misc",
+      "internalName": "Item_dff_luxuryfurniture_bed_03",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1003972,
+      "name": "Lord's Bed",
+      "category": "Misc",
+      "internalName": "Item_dff_luxuryfurniture_bed_04",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1003973,
+      "name": "Dark Timberham Bed",
+      "category": "Misc",
+      "internalName": "Item_in_dff_bed_06",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1003974,
+      "name": "Bright Timberham Bed",
+      "category": "Misc",
+      "internalName": "Item_in_dff_bed_06_dem",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1003975,
+      "name": "Cozy Bed",
+      "category": "Misc",
+      "internalName": "Item_dff_luxuryfurniture_bed_01",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1003976,
+      "name": "Large Dark Timberton Wardrobe",
+      "category": "Misc",
+      "internalName": "Item_closet_01",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1003977,
+      "name": "Large Bright Timberton Wardrobe",
+      "category": "Misc",
+      "internalName": "Item_closet_01_index01",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1003978,
+      "name": "Large Timberton Wardrobe",
+      "category": "Misc",
+      "internalName": "Item_cabinet_14",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1003979,
+      "name": "Timberham Wardrobe",
+      "category": "Misc",
+      "internalName": "Item_closet_02",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1003980,
+      "name": "Icy White Lampshade",
+      "category": "Misc",
+      "internalName": "Item_gimmick_hanger_top_lamp_0001",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1003981,
+      "name": "Twilight Lampshade",
+      "category": "Misc",
+      "internalName": "Item_gimmick_hanger_top_lamp_0001_index01",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1003982,
+      "name": "Lilac Lampshade",
+      "category": "Misc",
+      "internalName": "Item_gimmick_hanger_top_lamp_0001_index02",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1003983,
+      "name": "Icy White Drop Light",
+      "category": "Misc",
+      "internalName": "Item_gimmick_hanger_top_lamp_0003",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1003984,
+      "name": "Twilight Drop Light",
+      "category": "Misc",
+      "internalName": "Item_gimmick_hanger_top_lamp_0003_index01",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1003985,
+      "name": "Lilac Drop Light",
+      "category": "Misc",
+      "internalName": "Item_gimmick_hanger_top_lamp_0003_index02",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1003986,
+      "name": "Icy White Wall Lantern",
+      "category": "Misc",
+      "internalName": "Item_gimmick_hanger_side_lamp_0001",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1003987,
+      "name": "Twilight Wall Lantern",
+      "category": "Misc",
+      "internalName": "Item_gimmick_hanger_side_lamp_0001_index01",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1003988,
+      "name": "Lilac Wall Lantern",
+      "category": "Misc",
+      "internalName": "Item_gimmick_hanger_side_lamp_0001_index02",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1003989,
+      "name": "Icy White Chandelier",
+      "category": "Misc",
+      "internalName": "Item_gimmick_gemstone_hanger_top_chandelier_0103",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1003990,
+      "name": "Twilight Chandelier",
+      "category": "Misc",
+      "internalName": "Item_gimmick_gemstone_hanger_top_chandelier_0103_index01",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1003991,
+      "name": "Lilac Chandelier",
+      "category": "Misc",
+      "internalName": "Item_gimmick_gemstone_hanger_top_chandelier_0103_index02",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1003992,
+      "name": "Twisted Nightmare Lamp",
+      "category": "Misc",
+      "internalName": "Item_cd_lamp_hanger_legendanimal_0002",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1003993,
+      "name": "Mechanical Clockwork Chair",
+      "category": "Misc",
+      "internalName": "Item_Background_Breakable_Wood_280",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1003994,
+      "name": "Luxury Gilded Sofa",
+      "category": "Misc",
+      "internalName": "Item_gimmick_dff_luxuryfurniture_sofa_02",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1003995,
+      "name": "Luxurious Gilded Side Chair",
+      "category": "Misc",
+      "internalName": "Item_gimmick_dff_luxuryfurniture_stool_01",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1003996,
+      "name": "Lion-Crested Chair",
+      "category": "Misc",
+      "internalName": "Item_gimmick_dff_luxuryfurniture_chair_02",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1003997,
+      "name": "Large Arched Chair",
+      "category": "Misc",
+      "internalName": "Item_gimmick_dff_luxuryfurniture_chair_troll_03",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1003998,
+      "name": "Antler Chair",
+      "category": "Misc",
+      "internalName": "Item_Background_Breakable_Wood_281",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1003999,
+      "name": "Palm Tree Pot",
+      "category": "Misc",
+      "internalName": "Item_cd_ex_dpf_flowerpot_16_housing",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1004000,
+      "name": "Large Alocasia Pot",
+      "category": "Misc",
+      "internalName": "Item_cd_ex_dpf_flowerpot_24_housing",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1004001,
+      "name": "Apple Tree Pot",
+      "category": "Misc",
+      "internalName": "Item_cd_ex_dpf_flowerpot_61_housing",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1004002,
+      "name": "Small Wooden Flower Pot",
+      "category": "Misc",
+      "internalName": "Item_cd_ex_dpf_flowerpot_21_housing",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1004003,
+      "name": "Desert Cactus Pot",
+      "category": "Misc",
+      "internalName": "Item_cd_ex_dpf_flowerpot_37_housing",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1004004,
+      "name": "Laurel Pot",
+      "category": "Misc",
+      "internalName": "Item_cd_ex_dpf_flowerpot_23_housing",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1004005,
+      "name": "Luxurious Red Leather Sofa",
+      "category": "Misc",
+      "internalName": "Item_gimmick_dff_luxuryfurniture_sofa_01",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1004006,
+      "name": "Gilded Red Fabric Chair",
+      "category": "Misc",
+      "internalName": "Item_gimmick_dff_luxuryfurniture_chair_04",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1004007,
+      "name": "Arched Chair",
+      "category": "Misc",
+      "internalName": "Item_gimmick_dff_luxuryfurniture_chair_03",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1004008,
+      "name": "Decorative Spire Chair",
+      "category": "Misc",
+      "internalName": "Item_gimmick_dff_luxuryfurniture_chair_01",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1004009,
+      "name": "Double-Patterned Chair",
+      "category": "Misc",
+      "internalName": "Item_Background_Breakable_Wood_285",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1004010,
+      "name": "Double-Patterned Whitesand Chair",
+      "category": "Misc",
+      "internalName": "Item_gimmick_in_dff_chair_0002",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1004011,
+      "name": "Crown-Adorned Chair",
+      "category": "Misc",
+      "internalName": "Item_Background_Breakable_Wood_294",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1004012,
+      "name": "Blue Fabric Chair",
+      "category": "Misc",
+      "internalName": "Item_Background_Breakable_Wood_290",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1004013,
+      "name": "Round-Legged Chair",
+      "category": "Misc",
+      "internalName": "Item_Background_Breakable_Wood_293",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1004014,
+      "name": "Red Fabric Chair",
+      "category": "Misc",
+      "internalName": "Item_Background_Breakable_Wood_295",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1004015,
+      "name": "Medium Rotating Globe",
+      "category": "Misc",
+      "internalName": "Item_gimmick_alchemy_globe_0001",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1004016,
+      "name": "Large Rotating Globe",
+      "category": "Misc",
+      "internalName": "Item_gimmick_alchemy_globe_0002",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1004017,
+      "name": "Small Timberton Table",
+      "category": "Misc",
+      "internalName": "Item_Background_Breakable_Wood_323",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1004018,
+      "name": "Small Bright Timberton Table",
+      "category": "Misc",
+      "internalName": "Item_Background_Breakable_Wood_323_index01",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1004019,
+      "name": "Book Stand",
+      "category": "Misc",
+      "internalName": "Item_gimmick_item_tool_bookstand_0001",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1004020,
+      "name": "Whitesand Fabric Chair",
+      "category": "Misc",
+      "internalName": "Item_gimmick_in_dff_set_chair_0001",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1004021,
+      "name": "Whitesand Fabric Chair",
+      "category": "Misc",
+      "internalName": "Item_gimmick_in_dff_chair_0003",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1004022,
+      "name": "Small Whitesand Table",
+      "category": "Misc",
+      "internalName": "Item_gimmick_in_dff_stand_0001",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1004023,
+      "name": "Adorned Storage Chest",
+      "category": "Misc",
+      "internalName": "Item_Background_Breakable_Wood_297",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1004024,
+      "name": "Arched Corridor Table",
+      "category": "Misc",
+      "internalName": "Item_gimmick_dff_luxuryfurniture_table_01",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1004025,
+      "name": "Whitesand Arched Corridor Decorative Table",
+      "category": "Misc",
+      "internalName": "Item_gimmick_dff_luxuryfurniture_table_0001",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1004026,
+      "name": "Dark Lion Head Table",
+      "category": "Misc",
+      "internalName": "Item_gimmick_dff_luxuryfurniture_table_02",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1004027,
+      "name": "Mirrored Wooden Dresser",
+      "category": "Misc",
+      "internalName": "Item_Background_Breakable_Wood_302",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1004028,
+      "name": "Mirrored Whitesand Dresser",
+      "category": "Misc",
+      "internalName": "Item_gimmick_in_dff_dressingtable_0001",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1004029,
+      "name": "Luxurious Gilded Table",
+      "category": "Misc",
+      "internalName": "Item_Background_Breakable_Wood_303",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1004030,
+      "name": "Round Red Fabric Table",
+      "category": "Misc",
+      "internalName": "Item_Background_Breakable_Wood_310",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1004031,
+      "name": "Large Round Red Fabric Table",
+      "category": "Misc",
+      "internalName": "Item_Background_Breakable_Wood_311",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1004032,
+      "name": "Side Table",
+      "category": "Misc",
+      "internalName": "Item_Background_Breakable_Wood_313",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1004033,
+      "name": "Whitesand Side Table",
+      "category": "Misc",
+      "internalName": "Item_gimmick_in_dff_desk_0001",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1004034,
+      "name": "Dark Pillared Side Table",
+      "category": "Misc",
+      "internalName": "Item_Background_Breakable_Wood_257",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1004035,
+      "name": "Timber Nightstand",
+      "category": "Misc",
+      "internalName": "Item_Background_Breakable_Wood_320",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1004036,
+      "name": "Large Whitesand Fabric Table",
+      "category": "Misc",
+      "internalName": "Item_gimmick_in_dff_table_0002",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1004037,
+      "name": "Arched Whitesand Table",
+      "category": "Misc",
+      "internalName": "Item_gimmick_in_dpf_stool_0001",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1004038,
+      "name": "Large Bright Table",
+      "category": "Misc",
+      "internalName": "Item_Background_Breakable_Wood_230",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1004039,
+      "name": "Luxurious Whitesand Table",
+      "category": "Misc",
+      "internalName": "Item_Background_Breakable_Wood_308",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1004040,
+      "name": "Bright Pillared Side Table",
+      "category": "Misc",
+      "internalName": "Item_Background_Breakable_Wood_304",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1004041,
+      "name": "Bright Lion Head Table",
+      "category": "Misc",
+      "internalName": "Item_Background_Breakable_Wood_309",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1004042,
+      "name": "Round Table",
+      "category": "Misc",
+      "internalName": "Item_Background_Breakable_Wood_363",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1004043,
+      "name": "Cooking Pot",
+      "category": "Misc",
+      "internalName": "Item_gimmick_craft_cook_oven_03_housing",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1004044,
+      "name": "Cooking Griddle",
+      "category": "Misc",
+      "internalName": "Item_gimmick_craft_cook_oven_04_housing",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1004045,
+      "name": "Cauldron",
+      "category": "Misc",
+      "internalName": "Item_craft_medicine_01_housing",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1004046,
+      "name": "Warthog Beldrak Armor",
+      "category": "Misc",
+      "internalName": "Beldrak_WarthogArmor_Armor",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1004047,
+      "name": "Baltheon Plate Armor",
+      "category": "Misc",
+      "internalName": "Valteon_PlateArmor_Armor",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1004048,
+      "name": "Baltheon Plate Gloves",
+      "category": "Misc",
+      "internalName": "Valteon_PlateArmor_Gloves",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1004049,
+      "name": "The Sitting Lion",
+      "category": "Misc",
+      "internalName": "Item_Collection_Prop_Statue_0002",
+      "maxStack": 10
+    },
+    {
+      "itemKey": 1004050,
+      "name": "Whitesand Bed",
+      "category": "Misc",
+      "internalName": "Item_dff_luxuryfurniture_bed_0001",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1004051,
+      "name": "Soldier Recruitment Post",
+      "category": "Quest",
+      "internalName": "Quest_Paper_Military_Notice",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1004052,
+      "name": "Fort Askelund Written Judgment",
+      "category": "Quest",
+      "internalName": "Quest_Paper_Askelund_Judgment",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1004053,
+      "name": "Missing Child Poster",
+      "category": "Quest",
+      "internalName": "Quest_Paper_Child_Notice",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1004054,
+      "name": "Beighen Poster",
+      "category": "Quest",
+      "internalName": "Quest_Paper_Beighen_Notice",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1004055,
+      "name": "Bounty Notice - The Masked Liberator",
+      "category": "Quest",
+      "internalName": "Quest_WantedPaper_Arsonist_TheFaceless",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1004056,
+      "name": "Octavius's Research Log",
+      "category": "Misc",
+      "internalName": "Book_Octabus_Research_Diary",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1004057,
+      "name": "Azerian's Journal",
+      "category": "Misc",
+      "internalName": "Book_Azerian_Diary",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1004058,
+      "name": "Goyen's Journal",
+      "category": "Misc",
+      "internalName": "Book_Old_Kliff_Diary",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1004059,
+      "name": "Tax Collection Ledger",
+      "category": "Misc",
+      "internalName": "Book_Tax_Collection_Ledger",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1004060,
+      "name": "Urdavah Book",
+      "category": "Misc",
+      "internalName": "Book_Urdavah_Research_Book",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1004061,
+      "name": "Dusty Journal",
+      "category": "Misc",
+      "internalName": "Book_Dusty_Diary",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1004062,
+      "name": "Bordis's Research Log",
+      "category": "Misc",
+      "internalName": "Book_Vordis_Research_Diary",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1004063,
+      "name": "A book of Marni's skills passed down from Marshell.",
+      "category": "Misc",
+      "internalName": "Book_Marni_Tech_Book",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1004064,
+      "name": "Traitor Hit List",
+      "category": "Misc",
+      "internalName": "Book_Traitor_Hit_List",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1004066,
+      "name": "Crow Eyepatch",
+      "category": "Misc",
+      "internalName": "Crowman_Eyepatch",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1004067,
+      "name": "Doll or Toy made by Hexe Marie",
+      "category": "Misc",
+      "internalName": "Hexe_Marie_Boy_Toy",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1004068,
+      "name": "Hexe Marie's Ring",
+      "category": "Misc",
+      "internalName": "Hexe_Ring",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1004069,
+      "name": "The Mask of Liberation",
+      "category": "Misc",
+      "internalName": "TheFaceless_Mask",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1004070,
+      "name": "A Surcoat Embroidered with a Family Crest",
+      "category": "Misc",
+      "internalName": "Family_Crest_Surcoat",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1004071,
+      "name": "Wildlife Park Ticket",
+      "category": "Misc",
+      "internalName": "Zoo_Entry_Ticket",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1004072,
+      "name": "Adoption Form",
+      "category": "Quest",
+      "internalName": "Quest_Paper_Crowman_Adoptation",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1004073,
+      "name": "Bastier's Secret Letter",
+      "category": "Quest",
+      "internalName": "Quest_Paper_Bastion_Secret",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1004074,
+      "name": "Jian's Letter",
+      "category": "Quest",
+      "internalName": "Quest_Paper_Letter",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1004075,
+      "name": "Pact of Antumbra",
+      "category": "Quest",
+      "internalName": "Quest_Paper_Antumbra_Contract",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1004076,
+      "name": "Tributes to Gregor",
+      "category": "Quest",
+      "internalName": "Quest_Paper_Gregor_Letter",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1004077,
+      "name": "Demeniss Tribunal",
+      "category": "Quest",
+      "internalName": "Quest_Paper_DemenissPolice",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1004078,
+      "name": "Bastier Journal",
+      "category": "Quest",
+      "internalName": "Quest_Paper_Bastier_Journal",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1004079,
+      "name": "Test Subject Log",
+      "category": "Quest",
+      "internalName": "Quest_Paper_Biological_Journal",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1004080,
+      "name": "Master Doo's Beliefs",
+      "category": "Quest",
+      "internalName": "Quest_Paper_MasterDoo_Ideology",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1004081,
+      "name": "Storm Crusher Blueprint",
+      "category": "Quest",
+      "internalName": "Quest_Paper_MineFortress_Blueprint",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1004082,
+      "name": "Thunder Crusher Blueprint",
+      "category": "Quest",
+      "internalName": "Quest_Paper_LaserTank_Blueprint",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1004083,
+      "name": "Biopod Blueprint found at Marni Mansion",
+      "category": "Quest",
+      "internalName": "Quest_Paper_Marnihouse_Blueprint",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1004084,
+      "name": "Biopod Blueprint found at Marni Laboratorium",
+      "category": "Quest",
+      "internalName": "Quest_Paper_BioExperiment_Blueprint",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1004085,
+      "name": "Marni's Invention Journal",
+      "category": "Quest",
+      "internalName": "Quest_Paper_Marni_CtrafingJournal",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1004086,
+      "name": "Research Log on Living Subjects",
+      "category": "Quest",
+      "internalName": "Quest_Paper_BiologicalResearch_Journal",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1004087,
+      "name": "Tristan's Journal",
+      "category": "Quest",
+      "internalName": "Quest_Paper_Tristan_Journal",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1004088,
+      "name": "Fort Askelund Slave's Journal",
+      "category": "Quest",
+      "internalName": "Quest_Paper_Askelund_SlaveJournal",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1004089,
+      "name": "List of Bankruptcy",
+      "category": "Quest",
+      "internalName": "Quest_Paper_Bankruptcy_Document",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1004090,
+      "name": "Discharge Order",
+      "category": "Quest",
+      "internalName": "Quest_Paper_Dismissal_Document",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1004091,
+      "name": "Duel Journal",
+      "category": "Quest",
+      "internalName": "Quest_Paper_Sparring_Journal",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1004092,
+      "name": "Tracker's Torn Journal",
+      "category": "Quest",
+      "internalName": "Quest_Paper_Chaser_Journal",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1004093,
+      "name": "Treason Verdict",
+      "category": "Quest",
+      "internalName": "Quest_Paper_Verdict_Treason",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1004094,
+      "name": "Torn Subjugation Order",
+      "category": "Quest",
+      "internalName": "Quest_Paper_Torn_Order",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1004095,
+      "name": "Wildlife Park Flyer",
+      "category": "Quest",
+      "internalName": "Quest_Paper_Zoo_Flyer",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1004096,
+      "name": "Balthazar's Note",
+      "category": "Quest",
+      "internalName": "Quest_Paper_Balthazar_Memo",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1004097,
+      "name": "Wyvern Traits",
+      "category": "Quest",
+      "internalName": "Quest_Paper_Wyvern_Species_Memo",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1004098,
+      "name": "Warning from the Merchant Guild",
+      "category": "Quest",
+      "internalName": "Quest_Paper_Merchant_Warning",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1004099,
+      "name": "Dead Hunter's Journal",
+      "category": "Quest",
+      "internalName": "Quest_Paper_DeadHunter_Journal",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1004100,
+      "name": "Kidnapped Engineer's Journal",
+      "category": "Quest",
+      "internalName": "Quest_Paper_Technician_Journal",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1004101,
+      "name": "Marni Airship Journal",
+      "category": "Quest",
+      "internalName": "Quest_Paper_MarniAirship_Journal",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1004102,
+      "name": "Sky Galleon Vargon Journal",
+      "category": "Quest",
+      "internalName": "Quest_Paper_Airship_Journal",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1004103,
+      "name": "Longleaf Forest Patrol Report",
+      "category": "Quest",
+      "internalName": "Quest_Paper_LongleafForest_PatrolRecord",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1004104,
+      "name": "Walter's Research Journal",
+      "category": "Quest",
+      "internalName": "Quest_Paper_Walter_Document",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1004105,
+      "name": "Order Directive",
+      "category": "Quest",
+      "internalName": "Quest_Paper_Cult_Order",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1004106,
+      "name": "Tarivian Fairytale",
+      "category": "Quest",
+      "internalName": "Quest_Paper_Tariv_Storybook",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1004108,
+      "name": "Sturdy Bamboo Stalk",
+      "category": "Misc",
+      "internalName": "Bamboo_Branch_02",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1004109,
+      "name": "Private Storage",
+      "category": "Misc",
+      "internalName": "Item_gimmick_basecamp_warehouse_box_0002",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1004110,
+      "name": "Pumpkin Head Crafting Manual",
+      "category": "Misc",
+      "internalName": "Recipe_Book_Pumpkin_Helm",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1004112,
+      "name": "Tumbleweed",
+      "category": "Misc",
+      "internalName": "Item_gimmick_tumbleweed_0001",
+      "maxStack": 20
+    },
+    {
+      "itemKey": 1004114,
+      "name": "Acclaimed - Stefan Lanford",
+      "category": "Misc",
+      "internalName": "Collection_Prop_Picture_0070",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1004115,
+      "name": "Icy White Octagonal Lantern",
+      "category": "Misc",
+      "internalName": "Itemgimmick_lamp_side_candle_0003",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1004116,
+      "name": "Twilight Octagonal Lantern",
+      "category": "Misc",
+      "internalName": "Itemgimmick_lamp_side_candle_0003_index01",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1004117,
+      "name": "Lilac Octagonal Lantern",
+      "category": "Misc",
+      "internalName": "Itemgimmick_lamp_side_candle_0003_index02",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1004118,
+      "name": "Icy White Twin Wall Lamp",
+      "category": "Misc",
+      "internalName": "Itemgimmick_lamp_side_candle_0001",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1004119,
+      "name": "Twilight Twin Wall Lamp",
+      "category": "Misc",
+      "internalName": "Itemgimmick_lamp_side_candle_0001_index01",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1004120,
+      "name": "Lilac Twin Wall Lamp",
+      "category": "Misc",
+      "internalName": "Itemgimmick_lamp_side_candle_0001_index02",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1004121,
+      "name": "Icy White Twin Octagonal Lanterns",
+      "category": "Misc",
+      "internalName": "Itemgimmick_lamp_side_candle_0002",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1004122,
+      "name": "Twilight Twin Octagonal Lantern",
+      "category": "Misc",
+      "internalName": "Itemgimmick_lamp_side_candle_0002_index01",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1004123,
+      "name": "Lilac Twin Octagonal Lanterns",
+      "category": "Misc",
+      "internalName": "Itemgimmick_lamp_side_candle_0002_index02",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1004124,
+      "name": "Icy White Candlestick Lamp",
+      "category": "Misc",
+      "internalName": "Itemgimmick_lamp_stand_candlestick_0001",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1004125,
+      "name": "Twilight Candlestick Lamp",
+      "category": "Misc",
+      "internalName": "Itemgimmick_lamp_stand_candlestick_0001_index01",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1004126,
+      "name": "Lilac Candlestick Lamp",
+      "category": "Misc",
+      "internalName": "Itemgimmick_lamp_stand_candlestick_0001_index02",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 1004203,
+      "name": "Sanguine Transference",
+      "category": "Misc",
+      "internalName": "Item_Skill_AbyssGear_Attack_HPRecover_LV2",
+      "maxStack": 10
+    },
+    {
+      "itemKey": 1004204,
+      "name": "Verdant Transference",
+      "category": "Misc",
+      "internalName": "Item_Skill_AbyssGear_Attack_MPRecover_LV2",
+      "maxStack": 10
+    },
+    {
+      "itemKey": 1004205,
+      "name": "Celestial Transference",
+      "category": "Misc",
+      "internalName": "Item_Skill_AbyssGear_Attack_SPRecover_LV2",
+      "maxStack": 10
     },
     {
       "itemKey": 1163002,
@@ -40609,7 +42800,7 @@
     },
     {
       "itemKey": 2133030,
-      "name": "Dumas Leather Boots",
+      "name": "Dumenis Leather Boots",
       "category": "Material",
       "internalName": "Duemeniss_Leather_Boots",
       "maxStack": 1
@@ -40994,7 +43185,7 @@
     },
     {
       "itemKey": 2133093,
-      "name": "Blinding Arrows Scout's Cloth Armor",
+      "name": "Blinding Arrow Scout's Cloth Armor",
       "category": "Material",
       "internalName": "Light_Arrowhead_Fabric_Armor_I",
       "maxStack": 1
@@ -41008,7 +43199,7 @@
     },
     {
       "itemKey": 2133095,
-      "name": "Blinding Arrows Scout's Cloth Armor",
+      "name": "Blinding Arrow Scout's Cloth Armor",
       "category": "Material",
       "internalName": "Light_Arrowhead_Fabric_Armor_II",
       "maxStack": 1
@@ -41022,14 +43213,14 @@
     },
     {
       "itemKey": 2133097,
-      "name": "Blinding Arrows Scout's Cloth Armor",
+      "name": "Blinding Arrow Scout's Cloth Armor",
       "category": "Material",
       "internalName": "Light_Arrowhead_Fabric_Armor_III",
       "maxStack": 1
     },
     {
       "itemKey": 2133098,
-      "name": "Blinding Arrows Rider's Cloth Armor",
+      "name": "Blinding Arrow Rider's Cloth Armor",
       "category": "Material",
       "internalName": "Light_Arrowhead_Fabric_Armor_IV",
       "maxStack": 1
@@ -41064,35 +43255,35 @@
     },
     {
       "itemKey": 2133103,
-      "name": "Blinding Arrows Scout's Leather Armor",
+      "name": "Blinding Arrow Scout's Leather Armor",
       "category": "Material",
       "internalName": "Light_Arrowhead_Leather_Armor_VII",
       "maxStack": 1
     },
     {
       "itemKey": 2133104,
-      "name": "Blinding Arrows Scout's Cloth Armor",
+      "name": "Blinding Arrow Scout's Cloth Armor",
       "category": "Material",
       "internalName": "Light_Arrowhead_Fabric_Armor_V",
       "maxStack": 1
     },
     {
       "itemKey": 2133105,
-      "name": "Blinding Arrows Scout's Cloth Armor",
+      "name": "Blinding Arrow Scout's Cloth Armor",
       "category": "Material",
       "internalName": "Light_Arrowhead_Fabric_Armor_VI",
       "maxStack": 1
     },
     {
       "itemKey": 2133106,
-      "name": "Blinding Arrows Scout's Cloth Armor",
+      "name": "Blinding Arrow Scout's Cloth Armor",
       "category": "Material",
       "internalName": "Light_Arrowhead_Fabric_Armor_VII",
       "maxStack": 1
     },
     {
       "itemKey": 2133107,
-      "name": "Blinding Arrows Scout's Leather Armor",
+      "name": "Blinding Arrow Scout's Leather Armor",
       "category": "Material",
       "internalName": "Light_Arrowhead_Leather_Armor_VIII",
       "maxStack": 1
@@ -41113,7 +43304,7 @@
     },
     {
       "itemKey": 2133115,
-      "name": "Blinding Arrows' Cloth Cap",
+      "name": "Blinding Arrow's Cloth Cap",
       "category": "Material",
       "internalName": "Light_Arrowhead_Fabric_Helm_V",
       "maxStack": 1
@@ -41148,7 +43339,7 @@
     },
     {
       "itemKey": 2133131,
-      "name": "Bandit Leather Gloves",
+      "name": "Bandit's Leather Gloves",
       "category": "Material",
       "internalName": "Bandit_Leather_Gloves_I",
       "maxStack": 1
@@ -41372,7 +43563,7 @@
     },
     {
       "itemKey": 2133200,
-      "name": "Goldleaves' Cone Leather Helm",
+      "name": "Goldleaves' Cone Leather Cap",
       "category": "Material",
       "internalName": "Goblin_Merchant_Soldier_Leather_Helm_I",
       "maxStack": 1
@@ -41386,7 +43577,7 @@
     },
     {
       "itemKey": 2133202,
-      "name": "Goldleaves' Leather Helm",
+      "name": "Goldleaves' Leather Cap",
       "category": "Material",
       "internalName": "Goblin_Merchant_Soldier_Leather_Helm_II",
       "maxStack": 1
@@ -41516,6 +43707,20 @@
       "category": "Material",
       "internalName": "Raging_Tempests_Leader_Leather_Gloves",
       "maxStack": 1
+    },
+    {
+      "itemKey": 10021700,
+      "name": "Woldo",
+      "category": "Misc",
+      "internalName": "Moon_Blade_TwoHandSword",
+      "maxStack": 1
+    },
+    {
+      "itemKey": 10021720,
+      "name": "Crude Gold Bar",
+      "category": "Misc",
+      "internalName": "GoldBar_Fake",
+      "maxStack": 100
     },
     {
       "itemKey": 15724234,
@@ -41862,7 +44067,7 @@
     },
     {
       "itemKey": 1345841793,
-      "name": "Jar Lid",
+      "name": "Jar",
       "category": "Misc",
       "internalName": "Pot_Head",
       "maxStack": 1
