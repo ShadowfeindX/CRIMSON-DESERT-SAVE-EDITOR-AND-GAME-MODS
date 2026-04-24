@@ -33,3 +33,7 @@ venv/
 *.tmp
 *.bak
 *.orig
+
+# Gamefiles
+*.pabgb
+*.pabgh
