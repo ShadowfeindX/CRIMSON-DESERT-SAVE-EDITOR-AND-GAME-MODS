@@ -1,5 +1,5 @@
 {
-  "version": "1.0.9",
-  "url": "https://github.com/NattKh/CRIMSON-DESERT-SAVE-EDITOR-AND-GAME-MODS/releases/download/gamemods-v1.0.9/CrimsonGameMods.exe",
-  "notes": "v1.0.9 — Stacker Field JSON export/import, legacy mod translator, validated serialize, ItemBuffs mirror sync + rebuild fix"
+  "version": "1.1.0",
+  "url": "https://github.com/NattKh/CRIMSON-DESERT-SAVE-EDITOR-AND-GAME-MODS/releases/download/gamemods-v1.1.0/CrimsonGameMods.exe",
+  "notes": "Crimson Game Mods v1.1.0 - Field JSON v3, Skill Editor with stamina presets, multi-version baseline support"
 }
