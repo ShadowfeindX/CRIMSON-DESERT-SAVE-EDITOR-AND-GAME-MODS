@@ -927,6 +927,15 @@ class StackerTab(QWidget):
         self._export_field_btn.clicked.connect(self._export_field_json)
         bl.addWidget(self._export_field_btn)
 
+        self._export_legacy_btn = _size_button(QPushButton("📄 EXPORT LEGACY JSON"))
+        self._export_legacy_btn.setObjectName("btnExport")
+        self._export_legacy_btn.setToolTip(
+            "Export the merged result as a Format 2 byte-diff JSON.\n"
+            "Compatible with legacy mod loaders (CrimsonWings style).\n"
+            "Run PREVIEW first, then click this to export the diff.")
+        self._export_legacy_btn.clicked.connect(self._export_legacy_json)
+        bl.addWidget(self._export_legacy_btn)
+
         bl.addStretch(1)
 
         self._uninstall_btn = _size_button(QPushButton("✖ REMOVE STACK"))
@@ -937,8 +946,10 @@ class StackerTab(QWidget):
         self._uninstall_btn.clicked.connect(self._uninstall_stack)
         bl.addWidget(self._uninstall_btn)
 
-        self._send_buffs_btn = _size_button(QPushButton("→ HAND OFF"))
+        self._send_buffs_btn = _size_button(QPushButton("→ Push to ItemBuff"))
         self._send_buffs_btn.setObjectName("flatBtn")
+        self._send_buffs_btn.setStyleSheet(
+            "QPushButton { background-color: #2E7D32; color: white; font-weight: bold; }")
         self._send_buffs_btn.setToolTip(
             "Load the merged dict list into ItemBuffs for hand-tuning.")
         self._send_buffs_btn.clicked.connect(self._send_to_buffs)
@@ -1141,13 +1152,17 @@ class StackerTab(QWidget):
         blay.setContentsMargins(6, 6, 6, 6)
         blay.setSpacing(4)
 
-        add_btn = _size_button(QPushButton("+ Add"))
-        add_btn.setObjectName("flatBtn")
+        add_btn = _size_button(QPushButton("+ Add"), extra_px=44)
+        add_btn.setStyleSheet(
+            "QPushButton { background-color: #2E7D32; color: white; "
+            "font-weight: bold; font-size: 14px; padding: 6px 18px; }")
         add_btn.clicked.connect(self._pick_files)
         blay.addWidget(add_btn)
 
-        pull_btn = _size_button(QPushButton("⇅ Pull Buffs"))
+        pull_btn = _size_button(QPushButton("⇅ Pull ItemBuffs Edit"))
         pull_btn.setObjectName("flatBtn")
+        pull_btn.setStyleSheet(
+            "QPushButton { background-color: #B71C1C; color: white; font-weight: bold; }")
         pull_btn.setToolTip(
             "Snapshot the current ItemBuffs tab edits (dict edits, Max Stacks, "
             "Inf Durability, cooldowns, transmog, VFX, staged skill/equipslot "
@@ -1163,7 +1178,7 @@ class StackerTab(QWidget):
             "field-level edits, then adds them as stack sources for "
             "unified merging.")
         pull_dmm_btn.clicked.connect(self._pull_from_dmm)
-        blay.addWidget(pull_dmm_btn)
+        pull_dmm_btn.setVisible(False)
 
         blay.addStretch(1)
 
@@ -1756,7 +1771,7 @@ class StackerTab(QWidget):
         try:
             for b in (self._preview_btn, self._install_btn,
                       self._install_single_btn, self._uninstall_btn,
-                      self._export_btn, self._export_field_btn):
+                      self._export_btn, self._export_field_btn, self._export_legacy_btn):
                 b.setEnabled(False)
             if export:
                 self.status_message.emit("Stacker: building folder mod…")
@@ -1773,7 +1788,7 @@ class StackerTab(QWidget):
         finally:
             for b in (self._preview_btn, self._install_btn,
                       self._install_single_btn, self._uninstall_btn,
-                      self._export_btn, self._export_field_btn):
+                      self._export_btn, self._export_field_btn, self._export_legacy_btn):
                 b.setEnabled(True)
 
     def _run_inner(self, install: bool, game: str, ok_mods: list,
@@ -3251,6 +3266,167 @@ class StackerTab(QWidget):
                 f"File: {path}")
         except Exception as e:
             QMessageBox.critical(self, "Export Failed", str(e))
+
+    def _export_legacy_json(self):
+        """Export merged result as Format 2 byte-diff JSON (CrimsonWings style)."""
+        if not hasattr(self, '_merged_items') or not self._merged_items:
+            QMessageBox.information(self, "Export Legacy JSON",
+                "Run PREVIEW first to build the merged result.")
+            return
+        if not hasattr(self, '_vanilla_items') or not self._vanilla_items:
+            QMessageBox.warning(self, "Export Legacy JSON",
+                "No vanilla baseline — run PREVIEW first.")
+            return
+
+        import crimson_rs
+
+        game = self._game_edit.text().strip()
+        try:
+            vanilla_bytes = bytes(crimson_rs.extract_file(
+                game, "0008", INTERNAL_DIR, ITEMINFO_PABGB))
+        except Exception as e:
+            QMessageBox.critical(self, "Export Legacy JSON",
+                f"Could not extract vanilla iteminfo:\n{e}")
+            return
+
+        van_pabgh = bytes(crimson_rs.extract_file(
+            game, '0008', INTERNAL_DIR, ITEMINFO_PABGH))
+
+        merged_by_key = {it['key']: it for it in self._merged_items}
+        van_by_key = {it['key']: it for it in self._vanilla_items}
+
+        merged_full = self._serialize_merged_iteminfo(
+            vanilla_bytes, van_pabgh, self._merged_items)
+        if merged_full is None:
+            QMessageBox.critical(self, "Export Legacy JSON",
+                "Serialization failed.")
+            return
+
+        van_count = struct.unpack_from('<H', van_pabgh, 0)[0]
+        van_rs = (len(van_pabgh) - 2) // van_count if van_count else 8
+
+        changes = []
+        for pi in range(van_count):
+            prec = 2 + pi * van_rs
+            if prec + van_rs > len(van_pabgh):
+                break
+            off = struct.unpack_from('<I', van_pabgh, prec + (van_rs - 4))[0]
+            nxt = len(vanilla_bytes)
+            if pi + 1 < van_count:
+                nrec = 2 + (pi + 1) * van_rs
+                if nrec + van_rs <= len(van_pabgh):
+                    nxt = struct.unpack_from('<I', van_pabgh, nrec + (van_rs - 4))[0]
+            size = nxt - off
+            if off + size > len(vanilla_bytes) or off + size > len(merged_full):
+                continue
+
+            van_chunk = vanilla_bytes[off:off + size]
+            mod_chunk = merged_full[off:off + size]
+            if van_chunk == mod_chunk:
+                continue
+
+            pk = struct.unpack_from('<I', vanilla_bytes, off)[0]
+            nl = struct.unpack_from('<I', vanilla_bytes, off + 4)[0]
+            entry_name = vanilla_bytes[off + 8:off + 8 + min(nl, 200)].decode(
+                'ascii', errors='replace')
+
+            j = 0
+            while j < len(van_chunk):
+                if j < len(mod_chunk) and van_chunk[j] != mod_chunk[j]:
+                    run_start = j
+                    while j < min(len(van_chunk), len(mod_chunk)) and van_chunk[j] != mod_chunk[j]:
+                        j += 1
+                    changes.append({
+                        'entry': entry_name,
+                        'rel_offset': run_start,
+                        'offset': off + run_start,
+                        'original': van_chunk[run_start:j].hex(),
+                        'patched': mod_chunk[run_start:j].hex(),
+                    })
+                else:
+                    j += 1
+
+        if not changes:
+            QMessageBox.information(self, "Export Legacy JSON",
+                "No differences from vanilla to export.")
+            return
+
+        from PySide6.QtWidgets import QInputDialog
+        title, ok = QInputDialog.getText(
+            self, "Mod title", "Title for this legacy JSON mod:",
+            text="Stacker Merged Mod")
+        if not ok or not title.strip():
+            return
+
+        path, _ = QFileDialog.getSaveFileName(
+            self, "Export Legacy JSON", "stacker_mod.json",
+            "JSON Files (*.json);;All Files (*)")
+        if not path:
+            return
+
+        doc = {
+            'modinfo': {
+                'title': title.strip(),
+                'version': '1.0',
+                'author': 'CrimsonGameMods Stacker',
+                'description': f'{len(changes)} byte patch(es)',
+            },
+            'format': 2,
+            'patches': [{
+                'game_file': 'gamedata/iteminfo.pabgb',
+                'source_group': '0008',
+                'changes': changes,
+            }],
+        }
+
+        try:
+            with open(path, 'w', encoding='utf-8') as f:
+                json.dump(doc, f, indent=2, ensure_ascii=False)
+            self._log_line(f"✔ Exported {len(changes)} legacy patches to {path}")
+            QMessageBox.information(self, "Export Legacy JSON",
+                f"Exported {len(changes)} byte-level patches.\n\nFile: {path}")
+        except Exception as e:
+            QMessageBox.critical(self, "Export Failed", str(e))
+
+    def _serialize_merged_iteminfo(self, vanilla_bytes, van_pabgh, merged_items):
+        """Serialize merged items back into a pabgb blob matching vanilla layout."""
+        try:
+            import crimson_rs
+            van_count = struct.unpack_from('<H', van_pabgh, 0)[0]
+            van_rs = (len(van_pabgh) - 2) // van_count if van_count else 8
+            merged_by_key = {it['key']: it for it in merged_items}
+            unparsed = getattr(self, '_stacker_unparsed_raw', []) or []
+            unparsed_map = {}
+            for raw in unparsed:
+                uk = struct.unpack_from('<I', raw, 0)[0]
+                unparsed_map[uk] = raw
+
+            order = []
+            for pi in range(van_count):
+                prec = 2 + pi * van_rs
+                if prec + van_rs > len(van_pabgh):
+                    break
+                psoff = struct.unpack_from('<I', van_pabgh, prec + (van_rs - 4))[0]
+                pnxt = len(vanilla_bytes)
+                if pi + 1 < van_count:
+                    nrec = 2 + (pi + 1) * van_rs
+                    if nrec + van_rs <= len(van_pabgh):
+                        pnxt = struct.unpack_from('<I', van_pabgh, nrec + (van_rs - 4))[0]
+                pk = struct.unpack_from('<I', vanilla_bytes, psoff)[0]
+                order.append((pk, psoff, pnxt - psoff))
+
+            final = bytearray()
+            for pk, psoff, psize in order:
+                if pk in merged_by_key:
+                    final.extend(crimson_rs.serialize_iteminfo([merged_by_key[pk]]))
+                elif pk in unparsed_map:
+                    final.extend(unparsed_map[pk])
+                else:
+                    final.extend(vanilla_bytes[psoff:psoff + psize])
+            return bytes(final)
+        except Exception:
+            import traceback; traceback.print_exc()
+            return None
 
     def _translate_legacy_to_field(self, legacy_sources: list
                                    ) -> tuple[list | None, str]:

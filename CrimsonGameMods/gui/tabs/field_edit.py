@@ -12,7 +12,7 @@ from typing import Callable, Optional
 
 from PySide6.QtCore import Qt, Signal
 from PySide6.QtGui import QColor
-from PySide6.QtWidgets import (
+from PySide6.QtWidgets import (QSpinBox,
     QApplication, QCheckBox, QComboBox, QDialog, QDoubleSpinBox, QFileDialog,
     QHBoxLayout, QInputDialog, QLabel, QLineEdit, QListWidget, QListWidgetItem,
     QMessageBox, QPushButton, QScrollArea, QSplitter, QTableWidget,
@@ -68,7 +68,11 @@ class FieldEditTab(QWidget):
         self._charinfo_original = None
         self._charinfo_schema = None
         self._charinfo_mount_entries: list = []
+        self._charinfo_player_entries: list = []
         self._charinfo_editing = False
+        self._weapon_pkg_editing = False
+        self._string_resolver = None  # lazy-loaded StringResolver
+        self._actionchart_index = None  # cached PAZ 0010 file list
         self._wantedinfo_data = None
         self._wantedinfo_original = None
         self._wantedinfo_schema = None
@@ -184,6 +188,22 @@ class FieldEditTab(QWidget):
         apply_btn.setToolTip(tr("Deploy modified fieldinfo to the game"))
         apply_btn.clicked.connect(self._field_edit_apply)
         top_row.addWidget(apply_btn)
+
+        # Overlay group number — user-configurable so it doesn't collide
+        # with whatever slot another mod owns.
+        top_row.addWidget(QLabel(tr("Overlay:")))
+        self._fieldedit_overlay_spin = QSpinBox()
+        self._fieldedit_overlay_spin.setRange(1, 9999)
+        self._fieldedit_overlay_spin.setValue(
+            self._config.get("fieldedit_overlay_dir", 39))
+        self._fieldedit_overlay_spin.setFixedWidth(70)
+        self._fieldedit_overlay_spin.setToolTip(
+            "Overlay group number (0039 = default). Change if another mod\n"
+            "already uses this slot. Apply to Game writes to <game>/NNNN/;\n"
+            "Restore removes the same NNNN/.")
+        self._fieldedit_overlay_spin.valueChanged.connect(
+            lambda v: self._config.update({"fieldedit_overlay_dir": int(v)}))
+        top_row.addWidget(self._fieldedit_overlay_spin)
 
         # Export buttons — only visible in Advanced/Dev mode (unsupported)
         export_mod_btn = QPushButton(tr("Export as Mod"))
@@ -341,16 +361,216 @@ class FieldEditTab(QWidget):
         self._mount_table.cellChanged.connect(self._mount_cell_changed)
         layout.addWidget(self._mount_table, 1)
 
+        wlabel = QLabel(tr(
+            "Cross-Character Runtime Packages (characterinfo.pabgb) — "
+            "swap how the player chars LOAD combat behavior at runtime. "
+            "Double-click any cell to pick a source character. Hover the column "
+            "headers for a per-field explanation."
+        ))
+        wlabel.setWordWrap(True)
+        wlabel.setStyleSheet(
+            f"color: {COLORS['accent']}; font-weight: bold; padding: 4px 0;"
+        )
+        wlabel.setToolTip(tr(
+            "ANIMATION ARCHITECTURE\n"
+            "Each character's animation is split into two simultaneous layers:\n"
+            "  • LOWER body — locomotion (walk, run, dodge, jump, fall)\n"
+            "  • UPPER body — combat (swing, shoot, combo, parry, grab)\n"
+            "A 'GamePlay' XML wires them together — input map (button → action),\n"
+            "sheath positions, camera presets, combat timings.\n\n"
+            "EACH FIELD IS A 4-BYTE NAME HASH pointing at a package in PAZ 0010.\n"
+            "Swap a field = the character LOADS that package at runtime.\n"
+            "Example: Kliff._upperAC ← Damian's value → Kliff fires guns.\n"
+            "Example: Kliff._upperAC ← Boss_Myurdin's value → Kliff swings sword combos.\n\n"
+            "ALL 6 FIELDS CAN BE SWAPPED INDEPENDENTLY but cross-package interactions\n"
+            "may break things — the input map (in GamePlay) decides which buttons can\n"
+            "actually trigger which actions in the upper package."
+        ))
+        layout.addWidget(wlabel)
+
+        wpreset_row = QHBoxLayout()
+        self._weapon_kliff_gun_btn = QPushButton(tr("Apply Kliff Gun Fix"))
+        self._weapon_kliff_gun_btn.setToolTip(tr(
+            "ONE-CLICK PRESET — make Kliff hold and fire muskets/pistols.\n\n"
+            "Patches two fields:\n"
+            "  • Kliff._upperActionChartPackageGroupName ← Damian's value\n"
+            "      (gives Kliff Damian's combat package — has gun fire animations)\n"
+            "  • Kliff._characterGamePlayDataName ← Oongka's value\n"
+            "      (gives Kliff Oongka's input map — fixes sheath/stow position so\n"
+            "       muskets attach to back instead of dropping at his feet)\n\n"
+            "After clicking, hit 'Apply to Game' (top button row) to deploy."
+        ))
+        self._weapon_kliff_gun_btn.clicked.connect(self._weapon_apply_kliff_gun_preset)
+        wpreset_row.addWidget(self._weapon_kliff_gun_btn)
+
+        self._weapon_reset_btn = QPushButton(tr("Reset to Vanilla"))
+        self._weapon_reset_btn.setToolTip(tr(
+            "Restores all 6 runtime-package fields on Kliff/Damian/Oongka to their\n"
+            "vanilla values. Doesn't touch other char edits in the table above\n"
+            "(mounts, NPCs, etc.)."
+        ))
+        self._weapon_reset_btn.clicked.connect(self._weapon_reset_vanilla)
+        wpreset_row.addWidget(self._weapon_reset_btn)
+
+        self._weapon_save_preset_btn = QPushButton(tr("Save Preset..."))
+        self._weapon_save_preset_btn.setToolTip(tr(
+            "Export current Kliff/Damian/Oongka 6-field configuration as a JSON\n"
+            "preset. Includes vanilla baselines so you can roll back per-field.\n"
+            "Share these with the community to ship character-behavior mods."
+        ))
+        self._weapon_save_preset_btn.clicked.connect(self._weapon_save_preset)
+        wpreset_row.addWidget(self._weapon_save_preset_btn)
+
+        self._weapon_load_preset_btn = QPushButton(tr("Load Preset..."))
+        self._weapon_load_preset_btn.setToolTip(tr(
+            "Apply a previously-saved JSON preset. Overwrites the current values in\n"
+            "the table for any field the preset touches; remember to click 'Apply to\n"
+            "Game' afterward to actually deploy."
+        ))
+        self._weapon_load_preset_btn.clicked.connect(self._weapon_load_preset)
+        wpreset_row.addWidget(self._weapon_load_preset_btn)
+
+        self._weapon_siblings_btn = QPushButton(tr("Find Package Siblings..."))
+        self._weapon_siblings_btn.setToolTip(tr(
+            "RESEARCH TOOL — discover 'package families'.\n\n"
+            "Pick any of the 6 fields + a hash value (or copy from a player char) →\n"
+            "lists every character (out of 6,872) that uses the same package.\n\n"
+            "Example: query Kliff's _upperAC (Player_Kliff) → see only Kliff's variants\n"
+            "use it. Query Damian's _gamePlay → discover which other chars share her\n"
+            "input map. Useful before swapping to know what side-effects to expect."
+        ))
+        self._weapon_siblings_btn.clicked.connect(self._weapon_open_siblings_dialog)
+        wpreset_row.addWidget(self._weapon_siblings_btn)
+
+        self._weapon_slot_inspector_btn = QPushButton(tr("Slot Inspector / Patch..."))
+        self._weapon_slot_inspector_btn.setStyleSheet(
+            "background-color: #1B5E20; color: white; font-weight: bold;")
+        self._weapon_slot_inspector_btn.setToolTip(tr(
+            "SURGICAL XML PATCH for action-chart packages.\n\n"
+            "The runtime-package SWAP above replaces the whole package — that\n"
+            "breaks Kliff's skills/inventory and hits the 'compression ceiling'\n"
+            "on the PHW descriptor when you stack too many weapons.\n\n"
+            "This tool extends Kliff's EXISTING package by injecting individual\n"
+            "<SubPackage> slots from other packages (Pistol from Damian, Sword1H\n"
+            "from Boss_Myurdin, etc). One-line additions, no whole-package swap,\n"
+            "skills/inventory survive.\n\n"
+            "Generates a patched characteractionpackagedescription.xml ready to\n"
+            "deploy as a PAZ 0010 overlay."
+        ))
+        self._weapon_slot_inspector_btn.clicked.connect(self._weapon_open_slot_inspector)
+        wpreset_row.addWidget(self._weapon_slot_inspector_btn)
+
+        self._weapon_actionchart_btn = QPushButton(tr("Action Chart Browser..."))
+        self._weapon_actionchart_btn.setStyleSheet(
+            "background-color: #4A148C; color: white; font-weight: bold;")
+        self._weapon_actionchart_btn.setToolTip(tr(
+            "Browse the .paa_metabin ANIMATION files in PAZ 0010 (the layer BELOW\n"
+            "the runtime packages above — actual per-action animation metadata).\n\n"
+            "Pick a character → category (Combo / Dodge / Grab / Link / Rage / etc.)\n"
+            "→ extract or inspect any single .paa_metabin file.\n\n"
+            "575 files for Myurdin alone. Useful for figuring out which specific\n"
+            "actions a boss has before deciding what to swap at the package level."
+        ))
+        self._weapon_actionchart_btn.clicked.connect(self._weapon_open_action_chart_browser)
+        wpreset_row.addWidget(self._weapon_actionchart_btn)
+
+        wpreset_row.addStretch()
+        layout.addLayout(wpreset_row)
+
+        self._weapon_pkg_table = QTableWidget()
+        self._WEAPON_COLS = (
+            ('_upperActionChartPackageGroupName', 'Upper (fire/attack)',
+             "UPPER-BODY COMBAT PACKAGE\n\n"
+             "Holds attack animations: combos, swings, shots, charges, grabs, parries.\n"
+             "Internally has multiple weapon-class slots (Bow, Musket, Pistol, Sword, Cannon, etc.)\n"
+             "— a single package can serve every weapon the original character actually uses.\n\n"
+             "Examples:\n"
+             "  Player_Kliff       — bow + utility actions (no swords or guns)\n"
+             "  Player_PHW (Damian) — swords, shields, muskets, pistols\n"
+             "  Player_Oongka      — hammers, axes, fists\n"
+             "  Boss_Myurdin_Intro_UpperAction — boss sword combos + slamneck/slamspin links\n\n"
+             "Swap this to give the target char another character's attack animations.\n"
+             "Caveat: only weapons the source package supports will work — Kliff with\n"
+             "Myurdin's package needs to actually equip a sword first."),
+
+            ('_lowerActionChartPackageGroupName', 'Lower (locomotion)',
+             "LOWER-BODY LOCOMOTION PACKAGE\n\n"
+             "Holds movement animations: walk, run, sprint, jump, fall, dodge, swim, climb.\n"
+             "Plays UNDERNEATH the upper-body layer, so you can run forward (lower) while\n"
+             "swinging a sword (upper) at the same time.\n\n"
+             "Weapon-independent — your run cycle is the same whether you're holding a bow\n"
+             "or a sword. Swap this to change how the character MOVES around the world.\n\n"
+             "Examples:\n"
+             "  Player_Kliff_Lower — Kliff's standard locomotion\n"
+             "  CD_NHM_Lower       — generic male NPC locomotion (most bosses use this)"),
+
+            ('_characterGamePlayDataName', 'GamePlay (sheath/attach)',
+             "GAMEPLAY-DATA XML\n\n"
+             "The wiring layer that ties everything together. Defines:\n"
+             "  • Input map — which button triggers which action in the upper package\n"
+             "  • Sheath positions — where weapons sit on the body when stowed\n"
+             "  • Camera presets per weapon\n"
+             "  • Combat timings (i-frames, recovery windows, grab rules)\n"
+             "  • Routes 'Attack pressed while holding Musket' → 'fire Musket.Attack1'\n\n"
+             "Examples:\n"
+             "  phm_description_player_kliff   — Kliff's input map + camera config\n"
+             "  phw_description_player_001     — Damian's (gun handling, dodge timings)\n"
+             "  phm_description_player_001     — Oongka's\n"
+             "  mon_myurdin                    — Myurdin's boss-side rules\n\n"
+             "Swapping this is what unlocks attacks that the upper package contains but\n"
+             "the original char's input map didn't bind. The dev's report flagged that\n"
+             "the Kliff Gun Fix sets _gamePlay ← Oongka so Kliff can fire muskets."),
+
+            ('_appearanceName', 'Appearance',
+             "VISUAL APPEARANCE PACKAGE\n\n"
+             "Points at the model + texture + material set used to RENDER the character.\n"
+             "Independent of skeleton — you can swap appearance without changing the rig.\n\n"
+             "Swap this for cosmetic mesh changes (similar to the Mesh Swap dialog above,\n"
+             "but at the runtime-routing level rather than file-level patching)."),
+
+            ('_skeletonName', 'Skeleton',
+             "SKELETON .pab REFERENCE\n\n"
+             "Hash → path of the rigged skeleton file. All animations play on top of this.\n"
+             "All three player chars + Myurdin variants use 'phm_01.pab' (player-male humanoid),\n"
+             "which is why animation swaps between them work without breaking the rig.\n\n"
+             "Don't swap to a non-PHM skeleton (dragon, machine, etc.) unless you also\n"
+             "swap appearance and prefab — the rig sockets won't match."),
+
+            ('_skeletonVariationName', 'Skeleton Variation',
+             "SKELETON VARIATION OVERRIDE\n\n"
+             "Optional override for skeleton variant (size scaling, bone tweaks).\n"
+             "Most chars leave this at the null-hash sentinel (0xeac5e173 = empty)."),
+        )
+        self._weapon_pkg_table.setColumnCount(1 + len(self._WEAPON_COLS))
+        self._weapon_pkg_table.horizontalHeader().setStretchLastSection(True)
+        self._weapon_pkg_table.setSelectionBehavior(QTableWidget.SelectItems)
+        self._weapon_pkg_table.setAlternatingRowColors(True)
+        self._weapon_pkg_table.verticalHeader().setVisible(False)
+
+        # Header items with hover tooltips per column
+        char_hdr = QTableWidgetItem(tr("Character"))
+        char_hdr.setToolTip(tr(
+            "The three player-controllable characters.\n"
+            "Edits here only affect the player chars, not NPCs/bosses."
+        ))
+        self._weapon_pkg_table.setHorizontalHeaderItem(0, char_hdr)
+        for i, (_field, label, tip) in enumerate(self._WEAPON_COLS, start=1):
+            hdr = QTableWidgetItem(label)
+            hdr.setToolTip(tip)
+            self._weapon_pkg_table.setHorizontalHeaderItem(i, hdr)
+        self._weapon_pkg_table.cellDoubleClicked.connect(self._weapon_cell_double_clicked)
+        layout.addWidget(self._weapon_pkg_table)
+
         credit = QLabel(
             "FieldInfo: sub_1410403F0 | VehicleInfo: sub_14105D470 | "
             "Triggers: sub_141044180 | RegionInfo: sub_141053790 | "
-            "CharacterInfo: sub_141037900")
+            "CharacterInfo: sub_141045620")
         credit.setStyleSheet(f"color: {COLORS['text_dim']}; padding: 2px;")
         layout.addWidget(credit)
 
 
     def _check_stale_field_overlay(self, game_path: str) -> None:
-        mod_group = "0039"
+        mod_group = f"{self._fieldedit_overlay_spin.value():04d}"
         overlay_dir = os.path.join(game_path, mod_group)
         if not os.path.isdir(overlay_dir):
             return
@@ -551,9 +771,27 @@ class FieldEditTab(QWidget):
                 self._charinfo_mount_entries = mount_entries
                 self._mount_populate()
                 log.info("Loaded %d mount entries from characterinfo", len(mount_entries))
+
+                player_names = ('Kliff', 'Damian', 'Oongka')
+                self._charinfo_player_entries = [
+                    e for e in all_ci if e.get('name') in player_names
+                ]
+                # Lazy-load name resolver so weapon-table cells show readable names
+                try:
+                    from stringinfo_resolver import StringResolver
+                    self._string_resolver = StringResolver()
+                    n = self._string_resolver.load_from_game(game_path)
+                    log.info("StringResolver loaded %d hash→string entries", n)
+                except Exception:
+                    log.exception("StringResolver load failed (cells will show hex only)")
+                    self._string_resolver = None
+                self._weapon_pkg_populate()
+                log.info("Loaded %d player chars for runtime weapon edits",
+                         len(self._charinfo_player_entries))
             except Exception:
                 log.exception("Could not load characterinfo mounts")
                 self._charinfo_mount_entries = []
+                self._charinfo_player_entries = []
 
             try:
                 wi_body = crimson_rs.extract_file(game_path, "0008", dp, "wantedinfo.pabgb")
@@ -904,6 +1142,1192 @@ class FieldEditTab(QWidget):
             label = f"cooldown={new_val}s"
         self._field_edit_modified = True
         self._field_edit_status.setText(f"Modified {e.get('name', '?')} {label}")
+
+
+    def _weapon_player_order(self):
+        order = ('Kliff', 'Damian', 'Oongka')
+        return sorted(
+            self._charinfo_player_entries or [],
+            key=lambda e: order.index(e['name']) if e.get('name') in order else 99,
+        )
+
+    def _weapon_pkg_populate(self):
+        self._weapon_pkg_editing = True
+        try:
+            entries = self._weapon_player_order()
+            self._weapon_pkg_table.setRowCount(len(entries))
+
+            for row, e in enumerate(entries):
+                name_item = QTableWidgetItem(e.get('name', '?'))
+                name_item.setFlags(name_item.flags() & ~Qt.ItemIsEditable)
+                name_item.setData(Qt.UserRole, e)
+                self._weapon_pkg_table.setItem(row, 0, name_item)
+                for col_idx, col in enumerate(self._WEAPON_COLS, start=1):
+                    self._weapon_refresh_cell(row, col_idx, e, col[0])
+            self._weapon_pkg_table.resizeColumnsToContents()
+        finally:
+            self._weapon_pkg_editing = False
+
+    def _weapon_refresh_cell(self, row: int, col: int, entry: dict, field: str) -> None:
+        off = entry[field + '_offset']
+        cur = struct.unpack_from('<I', self._charinfo_data, off)[0]
+        orig = struct.unpack_from('<I', self._charinfo_original, off)[0]
+        cur_name = self._weapon_resolve_hash(cur)
+        orig_name = self._weapon_resolve_hash(orig)
+        text = cur_name if cur_name else f'0x{cur:08x}'
+        item = QTableWidgetItem(text)
+        item.setFlags(item.flags() & ~Qt.ItemIsEditable)
+        item.setData(Qt.UserRole, field)
+        cur_display = f'{cur_name} (0x{cur:08x})' if cur_name else f'0x{cur:08x}'
+        orig_display = f'{orig_name} (0x{orig:08x})' if orig_name else f'0x{orig:08x}'
+        if cur != orig:
+            item.setBackground(QColor(60, 40, 20))
+            item.setForeground(QColor(255, 180, 80))
+            item.setToolTip(
+                f'{field}\nVanilla: {orig_display}\nCurrent: {cur_display} (modified)\n'
+                f'Double-click to pick a new source character.'
+            )
+        else:
+            item.setToolTip(
+                f'{field}\nValue: {cur_display}\nDouble-click to pick a source character.'
+            )
+        self._weapon_pkg_table.setItem(row, col, item)
+
+    def _weapon_resolve_hash(self, h: int):
+        if self._string_resolver is None:
+            return None
+        return self._string_resolver.resolve(h)
+
+    def _weapon_cell_double_clicked(self, row: int, col: int) -> None:
+        if col == 0:
+            return
+        if not self._charinfo_data or not self._charinfo_player_entries:
+            return
+        name_item = self._weapon_pkg_table.item(row, 0)
+        cell_item = self._weapon_pkg_table.item(row, col)
+        if not name_item or not cell_item:
+            return
+        target = name_item.data(Qt.UserRole)
+        field = cell_item.data(Qt.UserRole)
+        if not target or not field:
+            return
+
+        from PySide6.QtWidgets import QListWidget, QListWidgetItem, QLineEdit, QComboBox
+
+        dlg = QDialog(self)
+        dlg.setWindowTitle(tr(f"Pick source for {target['name']}.{field}"))
+        dlg.resize(720, 600)
+        v = QVBoxLayout(dlg)
+
+        info = QLabel(tr(
+            f"Source value will be written into {target['name']}'s {field}.\n"
+            f"Filter to narrow the list of candidates. Bosses/dragons/NPCs may "
+            f"crash the game when used as source — experiment carefully."
+        ))
+        info.setWordWrap(True)
+        v.addWidget(info)
+
+        catalog_by_key = self._weapon_get_catalog()
+        all_entries = self._weapon_get_all_entries()
+
+        ctrl_row = QHBoxLayout()
+        ctrl_row.addWidget(QLabel(tr("Category:")))
+        cat_combo = QComboBox()
+        CATEGORY_ORDER = ['All', 'Hero', 'Boss', 'MiddleBoss', 'Dragon',
+                          'Mount', 'NPC', 'Pet', 'Other']
+        for c in CATEGORY_ORDER:
+            cat_combo.addItem(c)
+        ctrl_row.addWidget(cat_combo)
+        ctrl_row.addWidget(QLabel(tr("Search:")))
+        search_edit = QLineEdit()
+        search_edit.setPlaceholderText(tr("name or display..."))
+        ctrl_row.addWidget(search_edit, 1)
+        v.addLayout(ctrl_row)
+
+        list_widget = QListWidget()
+        v.addWidget(list_widget, 1)
+
+        sample_label = QLabel(tr("(no selection)"))
+        sample_label.setStyleSheet(f"color: {COLORS['text_dim']}; padding: 4px;")
+        v.addWidget(sample_label)
+
+        btn_row = QHBoxLayout()
+        btn_row.addStretch()
+        ok_btn = QPushButton(tr("Apply"))
+        ok_btn.setEnabled(False)
+        cancel_btn = QPushButton(tr("Cancel"))
+        btn_row.addWidget(ok_btn)
+        btn_row.addWidget(cancel_btn)
+        v.addLayout(btn_row)
+        cancel_btn.clicked.connect(dlg.reject)
+
+        def _category_for(entry):
+            ck = int(entry.get('entry_key', 0))
+            cat_info = catalog_by_key.get(ck)
+            if cat_info:
+                return cat_info.get('category', 'Other'), cat_info.get('display_name', '')
+            nm = (entry.get('name') or '').lower()
+            if nm in ('kliff', 'damian', 'oongka'):
+                return 'Hero', entry.get('name', '')
+            return 'Other', ''
+
+        def _refresh():
+            list_widget.clear()
+            cat = cat_combo.currentText()
+            q = search_edit.text().strip().lower()
+            shown = 0
+            for e in all_entries:
+                ec, disp = _category_for(e)
+                if cat != 'All' and ec != cat:
+                    continue
+                nm = e.get('name', '')
+                if q and q not in nm.lower() and q not in disp.lower():
+                    continue
+                off = e.get(field + '_offset')
+                if off is None:
+                    continue
+                val = struct.unpack_from('<I', self._charinfo_original, off)[0]
+                resolved = self._weapon_resolve_hash(val)
+                val_display = resolved if resolved else f'0x{val:08x}'
+                label = f"[{ec:<10}] {nm}  →  {val_display}"
+                if disp:
+                    label += f"   ({disp})"
+                item = QListWidgetItem(label)
+                item.setData(Qt.UserRole, (e, val))
+                list_widget.addItem(item)
+                shown += 1
+                if shown >= 800:
+                    list_widget.addItem(QListWidgetItem(
+                        f"  …{len(all_entries)-shown} more (refine the filter)"))
+                    break
+
+        cat_combo.currentIndexChanged.connect(_refresh)
+        search_edit.textChanged.connect(_refresh)
+
+        def _on_select():
+            it = list_widget.currentItem()
+            if not it:
+                ok_btn.setEnabled(False)
+                sample_label.setText("(no selection)")
+                return
+            data = it.data(Qt.UserRole)
+            if not data:
+                ok_btn.setEnabled(False)
+                return
+            src_e, val = data
+            ok_btn.setEnabled(True)
+            resolved = self._weapon_resolve_hash(val)
+            val_display = f'{resolved} (0x{val:08x})' if resolved else f'0x{val:08x}'
+            sample_label.setText(
+                f"Will write {val_display} into {target['name']}.{field} "
+                f"(source: {src_e.get('name', '?')})"
+            )
+        list_widget.currentItemChanged.connect(lambda *_: _on_select())
+        list_widget.itemDoubleClicked.connect(lambda *_: ok_btn.click())
+        ok_btn.clicked.connect(dlg.accept)
+
+        _refresh()
+
+        if dlg.exec() != QDialog.Accepted:
+            return
+        it = list_widget.currentItem()
+        if not it:
+            return
+        src_e, val = it.data(Qt.UserRole)
+        self._weapon_write_field(target, field, int(val), src_e.get('name', '?'))
+
+    def _weapon_write_field(self, target: dict, field: str, value: int,
+                            source_label: str) -> None:
+        off = target[field + '_offset']
+        struct.pack_into('<I', self._charinfo_data, off, value)
+        self._field_edit_modified = True
+        # Refresh just the row
+        for row in range(self._weapon_pkg_table.rowCount()):
+            ni = self._weapon_pkg_table.item(row, 0)
+            if ni and ni.data(Qt.UserRole) is target:
+                for col_idx, col in enumerate(self._WEAPON_COLS, start=1):
+                    if col[0] == field:
+                        self._weapon_refresh_cell(row, col_idx, target, field)
+                        break
+                break
+        self._field_edit_status.setText(
+            f"Set {target['name']}.{field} ← {source_label} (0x{value:08x})"
+        )
+
+    def _weapon_get_catalog(self) -> dict:
+        if hasattr(self, '_weapon_catalog_by_key'):
+            return self._weapon_catalog_by_key
+        result: dict = {}
+        for base in [
+            os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))),
+            os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(
+                os.path.abspath(__file__)))), 'data'),
+            getattr(sys, '_MEIPASS', '') or '',
+            os.path.join(getattr(sys, '_MEIPASS', '') or '', 'data'),
+            os.getcwd(),
+            os.path.join(os.getcwd(), 'data'),
+        ]:
+            p = os.path.join(base, 'character_catalog.json')
+            if os.path.isfile(p):
+                try:
+                    with open(p, 'r', encoding='utf-8') as f:
+                        data = json.load(f)
+                    for c in data.get('characters', []) or []:
+                        result[int(c.get('character_key', 0))] = c
+                    log.info("weapon catalog: loaded %d chars from %s",
+                             len(result), p)
+                    break
+                except Exception:
+                    log.exception("weapon catalog load failed: %s", p)
+        self._weapon_catalog_by_key = result
+        return result
+
+    def _weapon_get_all_entries(self) -> list:
+        if hasattr(self, '_weapon_all_entries') and self._weapon_all_entries:
+            return self._weapon_all_entries
+        try:
+            from characterinfo_full_parser import parse_all_entries
+            self._weapon_all_entries = parse_all_entries(
+                bytes(self._charinfo_data), self._charinfo_schema)
+        except Exception:
+            log.exception("weapon all-entries parse failed")
+            self._weapon_all_entries = list(self._charinfo_player_entries or [])
+        return self._weapon_all_entries
+
+    def _weapon_save_preset(self) -> None:
+        if not self._charinfo_data or not self._charinfo_player_entries:
+            QMessageBox.information(self, tr("Save Preset"),
+                tr("Load FieldInfo first."))
+            return
+        path, _ = QFileDialog.getSaveFileName(
+            self, tr("Save runtime-package preset"),
+            "", "JSON files (*.json)")
+        if not path:
+            return
+        if not path.lower().endswith('.json'):
+            path += '.json'
+        preset = {
+            'kind': 'crimson_runtime_package_preset',
+            'version': 1,
+            'characters': [],
+        }
+        for e in self._weapon_player_order():
+            char_data = {'name': e['name'], 'fields': {}}
+            for col in self._WEAPON_COLS:
+                field = col[0]
+                off = e[field + '_offset']
+                cur = struct.unpack_from('<I', self._charinfo_data, off)[0]
+                orig = struct.unpack_from('<I', self._charinfo_original, off)[0]
+                char_data['fields'][field] = {
+                    'value': cur,
+                    'vanilla': orig,
+                    'modified': cur != orig,
+                }
+            preset['characters'].append(char_data)
+        try:
+            with open(path, 'w', encoding='utf-8') as f:
+                json.dump(preset, f, indent=2)
+            self._field_edit_status.setText(
+                f"Saved preset → {os.path.basename(path)}"
+            )
+        except Exception as e:
+            QMessageBox.critical(self, tr("Save Preset"),
+                f"Could not save:\n{e}")
+
+    def _weapon_load_preset(self) -> None:
+        if not self._charinfo_data or not self._charinfo_player_entries:
+            QMessageBox.information(self, tr("Load Preset"),
+                tr("Load FieldInfo first."))
+            return
+        path, _ = QFileDialog.getOpenFileName(
+            self, tr("Load runtime-package preset"),
+            "", "JSON files (*.json)")
+        if not path:
+            return
+        try:
+            with open(path, 'r', encoding='utf-8') as f:
+                preset = json.load(f)
+        except Exception as e:
+            QMessageBox.critical(self, tr("Load Preset"),
+                f"Could not read:\n{e}")
+            return
+        if preset.get('kind') != 'crimson_runtime_package_preset':
+            QMessageBox.warning(self, tr("Load Preset"),
+                tr("File is not a runtime-package preset."))
+            return
+
+        by_name = {e['name']: e for e in self._charinfo_player_entries}
+        applied = 0
+        skipped = 0
+        for cd in preset.get('characters', []) or []:
+            target = by_name.get(cd.get('name'))
+            if not target:
+                skipped += 1
+                continue
+            for field, fdata in (cd.get('fields') or {}).items():
+                if field + '_offset' not in target:
+                    continue
+                value = int(fdata.get('value', 0))
+                struct.pack_into('<I', self._charinfo_data,
+                                 target[field + '_offset'], value)
+                applied += 1
+        self._field_edit_modified = True
+        self._weapon_pkg_populate()
+        self._field_edit_status.setText(
+            f"Loaded preset: {applied} field(s) applied"
+            + (f", {skipped} char(s) skipped (not present)" if skipped else "")
+        )
+
+    def _weapon_open_siblings_dialog(self) -> None:
+        if not self._charinfo_data:
+            QMessageBox.information(self, tr("Find Siblings"),
+                tr("Load FieldInfo first."))
+            return
+
+        from PySide6.QtWidgets import QListWidget, QListWidgetItem, QLineEdit, QComboBox
+
+        dlg = QDialog(self)
+        dlg.setWindowTitle(tr("Find Package Siblings"))
+        dlg.resize(820, 640)
+        v = QVBoxLayout(dlg)
+
+        info = QLabel(tr(
+            "Lists every character that shares a chosen Name-hash value. Useful for "
+            "discovering 'package families' — e.g. all chars with Damian's upper-action "
+            "package can fire guns, all chars with Kliff's gameplay-data behave like archers."
+        ))
+        info.setWordWrap(True)
+        v.addWidget(info)
+
+        all_entries = self._weapon_get_all_entries()
+        catalog = self._weapon_get_catalog()
+
+        # Field + value selection row
+        field_row = QHBoxLayout()
+        field_row.addWidget(QLabel(tr("Field:")))
+        field_combo = QComboBox()
+        for col in self._WEAPON_COLS:
+            field, label = col[0], col[1]
+            field_combo.addItem(label, field)
+        field_row.addWidget(field_combo)
+
+        field_row.addWidget(QLabel(tr("Value (hex):")))
+        value_edit = QLineEdit()
+        value_edit.setPlaceholderText("0x________ or pick a char below")
+        value_edit.setFixedWidth(180)
+        field_row.addWidget(value_edit)
+
+        field_row.addWidget(QLabel(tr("…or copy from:")))
+        copy_combo = QComboBox()
+        copy_combo.addItem('—', None)
+        for e in self._weapon_player_order():
+            copy_combo.addItem(e['name'], e['name'])
+        field_row.addWidget(copy_combo)
+        field_row.addStretch()
+        v.addLayout(field_row)
+
+        results = QListWidget()
+        v.addWidget(results, 1)
+
+        summary = QLabel("")
+        summary.setStyleSheet(f"color: {COLORS['accent']}; padding: 4px;")
+        v.addWidget(summary)
+
+        btns = QHBoxLayout()
+        btns.addStretch()
+        close_btn = QPushButton(tr("Close"))
+        close_btn.clicked.connect(dlg.accept)
+        btns.addWidget(close_btn)
+        v.addLayout(btns)
+
+        def _category_for(entry):
+            ck = int(entry.get('entry_key', 0))
+            cat_info = catalog.get(ck)
+            if cat_info:
+                return cat_info.get('category', 'Other'), cat_info.get('display_name', '')
+            nm = (entry.get('name') or '').lower()
+            if nm in ('kliff', 'damian', 'oongka'):
+                return 'Hero', entry.get('name', '')
+            return 'Other', ''
+
+        def _do_search():
+            results.clear()
+            field = field_combo.currentData()
+            txt = value_edit.text().strip()
+            if not field or not txt:
+                summary.setText("Enter a value (or pick a char from the dropdown).")
+                return
+            try:
+                target_val = int(txt, 16) if txt.startswith('0x') else int(txt, 16)
+            except ValueError:
+                summary.setText(f"Could not parse '{txt}' as hex.")
+                return
+            matches = []
+            for e in all_entries:
+                off = e.get(field + '_offset')
+                if off is None:
+                    continue
+                v_ = struct.unpack_from('<I', self._charinfo_original, off)[0]
+                if v_ == target_val:
+                    matches.append(e)
+            cat_counts: dict[str, int] = {}
+            for e in matches[:1000]:
+                ec, disp = _category_for(e)
+                cat_counts[ec] = cat_counts.get(ec, 0) + 1
+                label = f"[{ec:<10}] {e.get('name','?')}"
+                if disp:
+                    label += f"   ({disp})"
+                results.addItem(label)
+            cat_str = ", ".join(f"{k}:{v}" for k, v in
+                                sorted(cat_counts.items(), key=lambda kv: -kv[1]))
+            resolved = self._weapon_resolve_hash(target_val)
+            val_display = f'{resolved} (0x{target_val:08x})' if resolved else f'0x{target_val:08x}'
+            summary.setText(
+                f"{len(matches)} character(s) share {field} = {val_display} → {cat_str}"
+            )
+
+        def _on_copy(*_):
+            src_name = copy_combo.currentData()
+            if not src_name:
+                return
+            field = field_combo.currentData()
+            src = next((e for e in self._charinfo_player_entries
+                        if e.get('name') == src_name), None)
+            if not src or not field:
+                return
+            off = src.get(field + '_offset')
+            if off is None:
+                return
+            val = struct.unpack_from('<I', self._charinfo_original, off)[0]
+            value_edit.setText(f'0x{val:08x}')
+            _do_search()
+
+        copy_combo.currentIndexChanged.connect(_on_copy)
+        field_combo.currentIndexChanged.connect(
+            lambda *_: _on_copy() if copy_combo.currentData() else None)
+        value_edit.returnPressed.connect(_do_search)
+
+        # Auto-fill: pick Kliff + upper as starting suggestion
+        if copy_combo.count() > 1:
+            copy_combo.setCurrentIndex(1)
+            _on_copy()
+
+        dlg.exec()
+
+    def _weapon_open_slot_inspector(self) -> None:
+        from PySide6.QtWidgets import (QListWidget, QListWidgetItem, QSplitter,
+                                       QGroupBox, QPlainTextEdit, QComboBox,
+                                       QCheckBox, QFrame)
+
+        game_path = self._config.get("game_install_path", "")
+        if not game_path or not os.path.isdir(game_path):
+            QMessageBox.warning(self, tr("Slot Inspector"),
+                tr("Set the game install path first."))
+            return
+
+        try:
+            import crimson_rs
+            xml_bytes = crimson_rs.extract_file(
+                game_path, '0010', 'actionchart/xml/description',
+                'characteractionpackagedescription.xml')
+            xml_text = bytes(xml_bytes).decode('utf-8', errors='replace')
+        except Exception as e:
+            QMessageBox.critical(self, tr("Slot Inspector"),
+                f"Could not extract characteractionpackagedescription.xml:\n{e}")
+            return
+
+        try:
+            from actionchart_descriptor import (parse_descriptor, patch_descriptor,
+                                                diff_packages)
+        except Exception as e:
+            QMessageBox.critical(self, tr("Slot Inspector"),
+                f"actionchart_descriptor module not available:\n{e}")
+            return
+
+        packages = parse_descriptor(xml_text)
+        # Working copy — modifications stay in `working` until user saves
+        import copy as _copy
+        working = _copy.deepcopy(packages)
+
+        dlg = QDialog(self)
+        dlg.setWindowTitle(tr(
+            "Slot Inspector — extend an action-chart package surgically"))
+        dlg.resize(1300, 800)
+        v = QVBoxLayout(dlg)
+
+        info = QLabel(tr(
+            "Pick a TARGET package (left — usually Player_Kliff) and a SOURCE "
+            "package (right — Player_PHW for guns, Boss_Myurdin_Intro_UpperAction "
+            "for boss sword combos). Slots only present in SOURCE are shown in "
+            "yellow. Check the ones you want to inject, then click 'Apply Selected "
+            "Injections' to extend the target. Save the patched XML to deploy."
+        ))
+        info.setWordWrap(True)
+        info.setStyleSheet(f"color: {COLORS['text_dim']}; padding: 6px;")
+        v.addWidget(info)
+
+        # Top picker row
+        pick_row = QHBoxLayout()
+        pick_row.addWidget(QLabel(tr("Target (will be modified):")))
+        tgt_combo = QComboBox()
+        tgt_combo.setMaxVisibleItems(30)
+        for nm in sorted(packages.keys()):
+            tgt_combo.addItem(f"{nm}  ({len(packages[nm].subpackages)} slots)", nm)
+        # Default to Player_Kliff
+        for i in range(tgt_combo.count()):
+            if tgt_combo.itemData(i) == 'Player_Kliff':
+                tgt_combo.setCurrentIndex(i); break
+        pick_row.addWidget(tgt_combo, 1)
+
+        pick_row.addWidget(QLabel(tr("Source (donor):")))
+        src_combo = QComboBox()
+        src_combo.setMaxVisibleItems(30)
+        for nm in sorted(packages.keys()):
+            src_combo.addItem(f"{nm}  ({len(packages[nm].subpackages)} slots)", nm)
+        # Default to Player_PHW
+        for i in range(src_combo.count()):
+            if src_combo.itemData(i) == 'Player_PHW':
+                src_combo.setCurrentIndex(i); break
+        pick_row.addWidget(src_combo, 1)
+        v.addLayout(pick_row)
+
+        # Splitter: left = target slots, middle = diff/inject panel, right = source slots
+        splitter = QSplitter(Qt.Horizontal)
+
+        tgt_list = QListWidget()
+        tgt_list.setAlternatingRowColors(True)
+        tgt_box = QGroupBox(tr("Target slots (current)"))
+        tgt_layout = QVBoxLayout(tgt_box)
+        tgt_layout.addWidget(tgt_list)
+        splitter.addWidget(tgt_box)
+
+        diff_widget = QWidget()
+        diff_layout = QVBoxLayout(diff_widget)
+        diff_layout.addWidget(QLabel(tr("Source-only slots (injectable):")))
+        diff_list = QListWidget()
+        diff_list.setAlternatingRowColors(True)
+        diff_layout.addWidget(diff_list, 1)
+
+        check_all_btn = QPushButton(tr("Check all"))
+        uncheck_all_btn = QPushButton(tr("Uncheck all"))
+        check_row = QHBoxLayout()
+        check_row.addWidget(check_all_btn)
+        check_row.addWidget(uncheck_all_btn)
+        diff_layout.addLayout(check_row)
+
+        diff_summary = QLabel("")
+        diff_summary.setStyleSheet(f"color: {COLORS['accent']}; padding: 4px;")
+        diff_layout.addWidget(diff_summary)
+
+        inject_btn = QPushButton(tr("→ Apply Selected Injections to Target"))
+        inject_btn.setStyleSheet(
+            "background-color: #2E7D32; color: white; font-weight: bold; padding: 6px;")
+        inject_btn.setEnabled(False)
+        diff_layout.addWidget(inject_btn)
+
+        revert_btn = QPushButton(tr("⟲ Revert Target to Vanilla"))
+        diff_layout.addWidget(revert_btn)
+
+        splitter.addWidget(diff_widget)
+
+        src_list = QListWidget()
+        src_list.setAlternatingRowColors(True)
+        src_box = QGroupBox(tr("Source slots (donor)"))
+        src_layout = QVBoxLayout(src_box)
+        src_layout.addWidget(src_list)
+        splitter.addWidget(src_box)
+
+        splitter.setStretchFactor(0, 3)
+        splitter.setStretchFactor(1, 4)
+        splitter.setStretchFactor(2, 3)
+        v.addWidget(splitter, 1)
+
+        # Bottom action row: save / deploy
+        save_row = QHBoxLayout()
+        save_xml_btn = QPushButton(tr("Save Patched XML to disk..."))
+        save_xml_btn.setToolTip(tr(
+            "Save the modified characteractionpackagedescription.xml to a folder\n"
+            "of your choice. Deploy via CdModCreator or pack into a 0010 overlay."
+        ))
+        save_row.addWidget(save_xml_btn)
+
+        save_row.addWidget(QLabel(tr("PAZ 0010 overlay group:")))
+        ac_overlay_spin = QSpinBox()
+        ac_overlay_spin.setRange(40, 9999)
+        ac_overlay_spin.setValue(self._config.get('actionchart_overlay_dir', 40))
+        ac_overlay_spin.setFixedWidth(70)
+        ac_overlay_spin.setToolTip(tr(
+            "Overlay group number for PAZ 0010. Default 40. Must NOT collide\n"
+            "with FieldEdit's group (default 39) — different PAZ origins."
+        ))
+        ac_overlay_spin.valueChanged.connect(
+            lambda val: self._config.update({'actionchart_overlay_dir': int(val)}))
+        save_row.addWidget(ac_overlay_spin)
+
+        deploy_btn = QPushButton(tr("Deploy as 0010 Overlay"))
+        deploy_btn.setStyleSheet(
+            "background-color: #4A148C; color: white; font-weight: bold;")
+        deploy_btn.setToolTip(tr(
+            "Pack the modified XML into a PAZ overlay and deploy to the game.\n"
+            "Restart the game for the change to take effect.\n"
+            "Use 'Restore' below to remove."
+        ))
+        save_row.addWidget(deploy_btn)
+
+        restore_btn = QPushButton(tr("Restore (remove overlay)"))
+        save_row.addWidget(restore_btn)
+
+        save_row.addStretch()
+        close_btn = QPushButton(tr("Close"))
+        save_row.addWidget(close_btn)
+        v.addLayout(save_row)
+
+        status = QLabel("")
+        status.setStyleSheet(f"color: {COLORS['text_dim']}; padding: 4px;")
+        v.addWidget(status)
+
+        close_btn.clicked.connect(dlg.accept)
+
+        def _refresh_lists():
+            tgt_name = tgt_combo.currentData()
+            src_name = src_combo.currentData()
+            if not tgt_name or not src_name:
+                return
+            tgt = working[tgt_name]
+            src = working[src_name]
+            vanilla_tgt = packages[tgt_name]
+
+            # Target list — mark injected vs vanilla
+            vanilla_pairs = {(sp.slot, sp.file) for sp in vanilla_tgt.subpackages}
+            tgt_list.clear()
+            for sp in tgt.subpackages:
+                injected = (sp.slot, sp.file) not in vanilla_pairs
+                tag = ' [INJECTED]' if injected else ''
+                item = QListWidgetItem(f"{sp.slot:<14}  {sp.file}{tag}")
+                if injected:
+                    item.setForeground(QColor(120, 200, 120))
+                tgt_list.addItem(item)
+
+            # Source list
+            src_list.clear()
+            for sp in src.subpackages:
+                src_list.addItem(QListWidgetItem(f"{sp.slot:<14}  {sp.file}"))
+
+            # Diff (source-only slots)
+            d = diff_packages(tgt, src)
+            diff_list.clear()
+            for slot, fname in d['b_only']:
+                item = QListWidgetItem(f"{slot:<14}  {fname}")
+                item.setData(Qt.UserRole, (slot, fname))
+                item.setFlags(item.flags() | Qt.ItemIsUserCheckable)
+                item.setCheckState(Qt.Unchecked)
+                item.setForeground(QColor(255, 200, 80))
+                diff_list.addItem(item)
+
+            inject_btn.setEnabled(diff_list.count() > 0)
+            diff_summary.setText(
+                f"{tgt_name}: {len(tgt.subpackages)} slots  |  "
+                f"{src_name}: {len(src.subpackages)} slots  |  "
+                f"{len(d['b_only'])} injectable  |  "
+                f"{len(d['shared'])} shared"
+            )
+
+        def _check_all(state):
+            for i in range(diff_list.count()):
+                item = diff_list.item(i)
+                item.setCheckState(state)
+
+        def _do_inject():
+            tgt_name = tgt_combo.currentData()
+            tgt = working[tgt_name]
+            added = 0
+            for i in range(diff_list.count()):
+                item = diff_list.item(i)
+                if item.checkState() != Qt.Checked:
+                    continue
+                slot, fname = item.data(Qt.UserRole)
+                if tgt.add_subpackage(slot, fname):
+                    added += 1
+            status.setText(
+                f"Injected {added} slot(s) into {tgt_name}. "
+                f"Total: {len(tgt.subpackages)} slots. "
+                f"Save / Deploy to make it stick."
+            )
+            _refresh_lists()
+
+        def _do_revert():
+            tgt_name = tgt_combo.currentData()
+            working[tgt_name] = _copy.deepcopy(packages[tgt_name])
+            status.setText(f"Reverted {tgt_name} to vanilla.")
+            _refresh_lists()
+
+        def _do_save_xml():
+            modified = {nm: pk for nm, pk in working.items()
+                        if pk.subpackages != packages[nm].subpackages}
+            if not modified:
+                QMessageBox.information(dlg, tr("Save Patched XML"),
+                    tr("Nothing changed — make injections first."))
+                return
+            patched = patch_descriptor(xml_text, modified)
+            path, _ = QFileDialog.getSaveFileName(
+                dlg, tr("Save patched descriptor XML"),
+                "characteractionpackagedescription.xml",
+                "XML files (*.xml)")
+            if not path:
+                return
+            try:
+                with open(path, 'w', encoding='utf-8', newline='\n') as f:
+                    f.write(patched)
+                status.setText(
+                    f"Saved → {path}  "
+                    f"({len(patched.encode('utf-8')):,}B, +"
+                    f"{len(patched) - len(xml_text)} chars vs vanilla)"
+                )
+            except Exception as e:
+                QMessageBox.critical(dlg, tr("Save"), f"Failed:\n{e}")
+
+        def _do_deploy():
+            modified = {nm: pk for nm, pk in working.items()
+                        if pk.subpackages != packages[nm].subpackages}
+            if not modified:
+                QMessageBox.information(dlg, tr("Deploy"),
+                    tr("Nothing changed — make injections first."))
+                return
+            patched = patch_descriptor(xml_text, modified)
+            mod_group = f"{ac_overlay_spin.value():04d}"
+            reply = QMessageBox.question(dlg, tr("Deploy 0010 Overlay"),
+                f"Pack the modified XML into PAZ overlay group {mod_group}/?\n\n"
+                f"Modified packages: {', '.join(modified.keys())}\n"
+                f"Patched XML: +{len(patched) - len(xml_text)} chars\n\n"
+                f"Restart the game for changes to take effect.",
+                QMessageBox.Yes | QMessageBox.No, QMessageBox.Yes)
+            if reply != QMessageBox.Yes:
+                return
+            try:
+                import crimson_rs.pack_mod
+                from pathlib import Path
+                gp = Path(game_path)
+                with tempfile.TemporaryDirectory() as tmp_dir:
+                    inner = os.path.join(tmp_dir, 'actionchart', 'xml', 'description')
+                    os.makedirs(inner, exist_ok=True)
+                    out_xml = os.path.join(
+                        inner, 'characteractionpackagedescription.xml')
+                    with open(out_xml, 'w', encoding='utf-8', newline='\n') as f:
+                        f.write(patched)
+                    pack_out = os.path.join(tmp_dir, 'output')
+                    os.makedirs(pack_out, exist_ok=True)
+                    crimson_rs.pack_mod.pack_mod(
+                        game_dir=game_path,
+                        mod_folder=tmp_dir,
+                        output_dir=pack_out,
+                        group_name=mod_group,
+                    )
+                    # Backup PAPGT and copy overlay
+                    papgt = gp / 'meta' / '0.papgt'
+                    backup = papgt.with_suffix(f'.papgt.actionchart_{mod_group}_bak')
+                    if papgt.exists() and not backup.exists():
+                        shutil.copy2(papgt, backup)
+                    dest = gp / mod_group
+                    dest.mkdir(exist_ok=True)
+                    shutil.copyfile(
+                        os.path.join(pack_out, mod_group, '0.paz'),
+                        dest / '0.paz')
+                    shutil.copyfile(
+                        os.path.join(pack_out, mod_group, '0.pamt'),
+                        dest / '0.pamt')
+                    shutil.copyfile(
+                        os.path.join(pack_out, 'meta', '0.papgt'), papgt)
+                status.setText(
+                    f"Deployed PAZ 0010 overlay to {mod_group}/. Restart the game."
+                )
+            except Exception as e:
+                log.exception("Slot Inspector deploy failed")
+                QMessageBox.critical(dlg, tr("Deploy"), f"Failed:\n{e}")
+
+        def _do_restore():
+            mod_group = f"{ac_overlay_spin.value():04d}"
+            reply = QMessageBox.question(dlg, tr("Restore"),
+                f"Remove the {mod_group}/ overlay and restore vanilla PAPGT?",
+                QMessageBox.Yes | QMessageBox.No, QMessageBox.Yes)
+            if reply != QMessageBox.Yes:
+                return
+            try:
+                from pathlib import Path
+                gp = Path(game_path)
+                dest = gp / mod_group
+                if dest.exists():
+                    shutil.rmtree(dest)
+                papgt = gp / 'meta' / '0.papgt'
+                backup = papgt.with_suffix(f'.papgt.actionchart_{mod_group}_bak')
+                if backup.exists():
+                    shutil.copy2(backup, papgt)
+                status.setText(f"Removed {mod_group}/ overlay; restored PAPGT.")
+            except Exception as e:
+                QMessageBox.critical(dlg, tr("Restore"), f"Failed:\n{e}")
+
+        check_all_btn.clicked.connect(lambda: _check_all(Qt.Checked))
+        uncheck_all_btn.clicked.connect(lambda: _check_all(Qt.Unchecked))
+        inject_btn.clicked.connect(_do_inject)
+        revert_btn.clicked.connect(_do_revert)
+        save_xml_btn.clicked.connect(_do_save_xml)
+        deploy_btn.clicked.connect(_do_deploy)
+        restore_btn.clicked.connect(_do_restore)
+        tgt_combo.currentIndexChanged.connect(_refresh_lists)
+        src_combo.currentIndexChanged.connect(_refresh_lists)
+
+        _refresh_lists()
+        dlg.exec()
+
+
+    _ACTION_CATEGORIES = (
+        ('Combo (combo group)',  ('_att_comg_', '_att_nor_coma_', '_att_nor_jumpcom')),
+        ('Charge / Hard Dash',   ('_att_nor_move_harddash', '_att_nor_jumpatt')),
+        ('Grab / Catch',          ('_att_nor_grab', '_att_lk_catch', '_att_nor_grab_a')),
+        ('Link / Transition',     ('_link_',)),
+        ('Dodge / Avoid',         ('_nor_move_avoid_', '_nor_dodge', '_evade')),
+        ('Stance / Idle',         ('_nor_std_', '_nor_stance', '_stance_change')),
+        ('Rage / Special',        ('_rageatt_', '_rage_', '_special_')),
+        ('Movement',              ('_nor_move_', '_walk_', '_run_', '_dash_')),
+        ('Hit / Damage',          ('_hit_', '_damage_', '_dmg_')),
+        ('Death / Down',          ('_dead_', '_down_', '_facedown')),
+        ('Parry / Guard',         ('_parry_', '_parrying', '_guard_', '_syshield')),
+    )
+
+    def _weapon_open_action_chart_browser(self) -> None:
+        from PySide6.QtWidgets import (QListWidget, QListWidgetItem, QLineEdit,
+                                       QComboBox, QTreeWidget, QTreeWidgetItem,
+                                       QSplitter, QGroupBox, QPlainTextEdit)
+
+        game_path = self._config.get("game_install_path", "")
+        if not game_path or not os.path.isdir(game_path):
+            QMessageBox.warning(self, tr("Action Chart Browser"),
+                tr("Set the game install path first."))
+            return
+
+        # Cache the PAZ 0010 file list (one-time, ~580 dirs)
+        if not getattr(self, '_actionchart_index', None):
+            try:
+                import crimson_rs
+                pamt_path = os.path.join(game_path, '0010', '0.pamt')
+                if not os.path.isfile(pamt_path):
+                    QMessageBox.critical(self, tr("Action Chart Browser"),
+                        f"PAZ 0010 not found at {pamt_path}")
+                    return
+                pamt = crimson_rs.parse_pamt_file(pamt_path)
+                files = []
+                for d in pamt.get('directories', []):
+                    dpath = d.get('path', '')
+                    if 'animmeta' not in dpath.lower():
+                        continue
+                    for f in d.get('files', []):
+                        nm = f.get('name', '')
+                        if nm.endswith('.paa_metabin'):
+                            files.append({
+                                'dir': dpath,
+                                'name': nm,
+                                'size': f.get('uncompressed_size', 0),
+                            })
+                self._actionchart_index = files
+                log.info("Action Chart Browser: indexed %d .paa_metabin files",
+                         len(files))
+            except Exception as e:
+                log.exception("Action Chart Browser: PAZ 0010 enumeration failed")
+                QMessageBox.critical(self, tr("Action Chart Browser"),
+                    f"Could not enumerate PAZ 0010:\n{e}")
+                return
+
+        files = self._actionchart_index
+
+        # Build character→files map by extracting char tokens from filenames
+        # Filenames look like: cd_<charprefix>_<weapon>_NN_NN_<action>_..._NN.paa_metabin
+        # e.g.  cd_myurdin_swd_01_01_att_comg_1_move_f_swing_8_00.paa_metabin
+        # Or:   cd_phm_lk_myurdin_sword_01_01_att_lk_catch_00.paa_metabin
+        char_buckets: dict[str, list] = {}
+        for fi in files:
+            nm = fi['name']
+            # Bucket by the first 3-4 tokens so we group reasonably
+            stem = nm[:-len('.paa_metabin')] if nm.endswith('.paa_metabin') else nm
+            tokens = stem.split('_')
+            # Find the "subject" token — first non-cd_ token that isn't a letter prefix
+            subject = None
+            i = 0
+            if tokens and tokens[0] == 'cd':
+                i = 1
+            # Skip generic frame prefixes (phm/phw/nhm) when there's a more specific token
+            generic = {'phm', 'phw', 'nhm', 'nhw', 'pgm', 'pgw'}
+            cand_idx = i
+            while cand_idx < len(tokens) and tokens[cand_idx] in generic:
+                cand_idx += 1
+            if cand_idx < len(tokens):
+                # "lk" prefix means lock-on — skip it
+                if tokens[cand_idx] == 'lk' and cand_idx + 1 < len(tokens):
+                    cand_idx += 1
+                subject = tokens[cand_idx]
+            else:
+                subject = tokens[i] if i < len(tokens) else 'unknown'
+            char_buckets.setdefault(subject, []).append(fi)
+
+        # Build dialog
+        dlg = QDialog(self)
+        dlg.setWindowTitle(tr("Action Chart Browser — PAZ 0010 .paa_metabin files"))
+        dlg.resize(1200, 760)
+        v = QVBoxLayout(dlg)
+
+        info = QLabel(tr(
+            "Browse 575+ Myurdin animation files (and every other character's). "
+            "Each .paa_metabin is a single action node — a swing, a dodge, a grab, a stance change. "
+            "These live in PAZ 0010 separate from the runtime-package routing above. "
+            "Pick a character → category → action to extract or inspect it."
+        ))
+        info.setWordWrap(True)
+        info.setStyleSheet(f"color: {COLORS['text_dim']}; padding: 4px;")
+        v.addWidget(info)
+
+        # Top control row
+        ctrl = QHBoxLayout()
+        ctrl.addWidget(QLabel(tr("Character / subject:")))
+        char_combo = QComboBox()
+        char_combo.setEditable(True)
+        char_combo.setInsertPolicy(QComboBox.NoInsert)
+        char_combo.setMaxVisibleItems(30)
+        for subj in sorted(char_buckets.keys()):
+            char_combo.addItem(f"{subj}  ({len(char_buckets[subj])} files)", subj)
+        ctrl.addWidget(char_combo, 1)
+
+        ctrl.addWidget(QLabel(tr("Category:")))
+        cat_combo = QComboBox()
+        cat_combo.addItem('All', 'all')
+        for label, _ in self._ACTION_CATEGORIES:
+            cat_combo.addItem(label, label)
+        cat_combo.addItem('Other', 'other')
+        ctrl.addWidget(cat_combo)
+
+        ctrl.addWidget(QLabel(tr("Filter:")))
+        search_edit = QLineEdit()
+        search_edit.setPlaceholderText(tr("substring of filename..."))
+        ctrl.addWidget(search_edit, 1)
+        v.addLayout(ctrl)
+
+        # Splitter: file list on left, detail pane on right
+        splitter = QSplitter(Qt.Horizontal)
+
+        list_widget = QListWidget()
+        list_widget.setAlternatingRowColors(True)
+        splitter.addWidget(list_widget)
+
+        right = QWidget()
+        rv = QVBoxLayout(right)
+        rv.setContentsMargins(4, 4, 4, 4)
+        detail_label = QLabel(tr("(select a file to inspect)"))
+        detail_label.setStyleSheet(f"color: {COLORS['accent']}; font-weight: bold;")
+        rv.addWidget(detail_label)
+        detail_text = QPlainTextEdit()
+        detail_text.setReadOnly(True)
+        detail_text.setStyleSheet("font-family: Consolas, monospace;")
+        rv.addWidget(detail_text, 1)
+
+        action_row = QHBoxLayout()
+        extract_btn = QPushButton(tr("Extract to ./extracted_actionchart/"))
+        extract_btn.setEnabled(False)
+        action_row.addWidget(extract_btn)
+        find_similar_btn = QPushButton(tr("Find Similar in Other Characters"))
+        find_similar_btn.setEnabled(False)
+        action_row.addWidget(find_similar_btn)
+        action_row.addStretch()
+        rv.addLayout(action_row)
+
+        splitter.addWidget(right)
+        splitter.setStretchFactor(0, 2)
+        splitter.setStretchFactor(1, 3)
+        v.addWidget(splitter, 1)
+
+        status = QLabel("")
+        status.setStyleSheet(f"color: {COLORS['text_dim']}; padding: 4px;")
+        v.addWidget(status)
+
+        close_row = QHBoxLayout()
+        close_row.addStretch()
+        close_btn = QPushButton(tr("Close"))
+        close_btn.clicked.connect(dlg.accept)
+        close_row.addWidget(close_btn)
+        v.addLayout(close_row)
+
+        def _category_for_filename(name: str) -> str:
+            for label, prefixes in self._ACTION_CATEGORIES:
+                for p in prefixes:
+                    if p in name:
+                        return label
+            return 'Other'
+
+        def _refresh_list():
+            list_widget.clear()
+            subj = char_combo.currentData()
+            if not subj:
+                # Editable combo — try the text
+                subj = char_combo.currentText().strip().split()[0] if char_combo.currentText() else None
+            if subj not in char_buckets:
+                status.setText(f"No files for subject '{subj}'.")
+                return
+            cat_filter = cat_combo.currentData()
+            search_q = search_edit.text().strip().lower()
+            shown = 0
+            for fi in char_buckets[subj]:
+                cat = _category_for_filename(fi['name'])
+                if cat_filter != 'all':
+                    if cat_filter == 'other' and cat != 'Other':
+                        continue
+                    if cat_filter != 'other' and cat != cat_filter:
+                        continue
+                if search_q and search_q not in fi['name'].lower():
+                    continue
+                item = QListWidgetItem(f"[{cat[:18]:<18}] {fi['name']}  ({fi['size']}B)")
+                item.setData(Qt.UserRole, fi)
+                list_widget.addItem(item)
+                shown += 1
+                if shown >= 1500:
+                    list_widget.addItem(QListWidgetItem(
+                        f"  …refine the filter (>{shown} shown)"))
+                    break
+            status.setText(
+                f"{shown} of {len(char_buckets[subj])} files for '{subj}'"
+                + (f" matching '{search_q}'" if search_q else "")
+            )
+
+        def _on_select(*_):
+            it = list_widget.currentItem()
+            if not it:
+                detail_label.setText("(no selection)")
+                detail_text.clear()
+                extract_btn.setEnabled(False)
+                find_similar_btn.setEnabled(False)
+                return
+            fi = it.data(Qt.UserRole)
+            if not fi:
+                return
+            detail_label.setText(fi['name'])
+            lines = []
+            lines.append(f"PAZ:        0010")
+            lines.append(f"Directory:  {fi['dir']}")
+            lines.append(f"File:       {fi['name']}")
+            lines.append(f"Size:       {fi['size']:,} B")
+            lines.append("")
+            lines.append("Filename tokens (action breakdown):")
+            stem = fi['name'][:-len('.paa_metabin')]
+            for j, tok in enumerate(stem.split('_')):
+                lines.append(f"  [{j:2d}] {tok}")
+            lines.append("")
+            lines.append("Action category: " + _category_for_filename(fi['name']))
+            lines.append("")
+            lines.append("Format: PA Reflection (0xFFFF magic, AnimationMetaData object)")
+            lines.append("Editable via the same parser as save files (save_parser.py)")
+            detail_text.setPlainText('\n'.join(lines))
+            extract_btn.setEnabled(True)
+            find_similar_btn.setEnabled(True)
+
+        def _do_extract():
+            it = list_widget.currentItem()
+            if not it: return
+            fi = it.data(Qt.UserRole)
+            if not fi: return
+            try:
+                import crimson_rs
+                data = crimson_rs.extract_file(game_path, '0010',
+                                               fi['dir'], fi['name'])
+                out_dir = os.path.join(os.getcwd(), 'extracted_actionchart')
+                os.makedirs(out_dir, exist_ok=True)
+                out_path = os.path.join(out_dir, fi['name'])
+                with open(out_path, 'wb') as f:
+                    f.write(bytes(data))
+                status.setText(f"Extracted → {out_path} ({len(data):,}B)")
+            except Exception as e:
+                status.setText(f"Extract failed: {e}")
+                log.exception("Action Chart Browser extract failed")
+
+        def _do_find_similar():
+            it = list_widget.currentItem()
+            if not it: return
+            fi = it.data(Qt.UserRole)
+            if not fi: return
+            # Strip subject from filename, search for the action suffix in other chars
+            stem = fi['name'][:-len('.paa_metabin')]
+            tokens = stem.split('_')
+            # Take last 4 tokens as the "action signature"
+            sig = '_'.join(tokens[-4:]) if len(tokens) >= 4 else stem
+            matches = [f for f in files if sig in f['name'] and f['name'] != fi['name']]
+            list_widget.clear()
+            for fm in matches[:500]:
+                cat = _category_for_filename(fm['name'])
+                item = QListWidgetItem(f"[similar:{sig[:20]}] {fm['name']}")
+                item.setData(Qt.UserRole, fm)
+                list_widget.addItem(item)
+            status.setText(
+                f"Found {len(matches)} files containing '{sig}' (across all chars)"
+            )
+
+        char_combo.currentIndexChanged.connect(_refresh_list)
+        cat_combo.currentIndexChanged.connect(_refresh_list)
+        search_edit.textChanged.connect(_refresh_list)
+        list_widget.currentItemChanged.connect(_on_select)
+        extract_btn.clicked.connect(_do_extract)
+        find_similar_btn.clicked.connect(_do_find_similar)
+
+        # Default to "myurdin" if present so the user lands on the example
+        for i in range(char_combo.count()):
+            if char_combo.itemData(i) == 'myurdin':
+                char_combo.setCurrentIndex(i)
+                break
+        _refresh_list()
+        dlg.exec()
+
+
+    def _weapon_apply_kliff_gun_preset(self) -> None:
+        if not self._charinfo_data or not self._charinfo_player_entries:
+            QMessageBox.information(
+                self, tr("Kliff Gun Fix"),
+                tr("Load game data first (click Load FieldInfo).")
+            )
+            return
+        by_name = {e['name']: e for e in self._charinfo_player_entries}
+        if not all(n in by_name for n in ('Kliff', 'Damian', 'Oongka')):
+            QMessageBox.warning(
+                self, tr("Kliff Gun Fix"),
+                tr("Could not find all three player chars in characterinfo.pabgb.")
+            )
+            return
+        kliff = by_name['Kliff']
+        damian = by_name['Damian']
+        oongka = by_name['Oongka']
+
+        upper_off = kliff['_upperActionChartPackageGroupName_offset']
+        damian_upper_off = damian['_upperActionChartPackageGroupName_offset']
+        damian_upper = struct.unpack_from('<I', self._charinfo_original, damian_upper_off)[0]
+        struct.pack_into('<I', self._charinfo_data, upper_off, damian_upper)
+
+        gp_off = kliff['_characterGamePlayDataName_offset']
+        oongka_gp_off = oongka['_characterGamePlayDataName_offset']
+        oongka_gp = struct.unpack_from('<I', self._charinfo_original, oongka_gp_off)[0]
+        struct.pack_into('<I', self._charinfo_data, gp_off, oongka_gp)
+
+        self._field_edit_modified = True
+        self._weapon_pkg_populate()
+        self._field_edit_status.setText(
+            "Kliff gun fix staged: _upperAC ← Damian (0x%08x), _gamePlay ← Oongka (0x%08x). "
+            "Click Save & Pack to deploy." % (damian_upper, oongka_gp)
+        )
+
+    def _weapon_reset_vanilla(self) -> None:
+        if not self._charinfo_data or not self._charinfo_player_entries:
+            return
+        for e in self._charinfo_player_entries:
+            for col in self._WEAPON_COLS:
+                field = col[0]
+                off = e[field + '_offset']
+                vanilla = struct.unpack_from('<I', self._charinfo_original, off)[0]
+                struct.pack_into('<I', self._charinfo_data, off, vanilla)
+        self._weapon_pkg_populate()
+        self._field_edit_status.setText(
+            "Reset Kliff/Damian/Oongka runtime-package fields to vanilla."
+        )
 
 
     def _field_edit_make_killable(self):
@@ -1421,7 +2845,7 @@ class FieldEditTab(QWidget):
         if not self._mesh_swap_queue and saved:
             self._mesh_swap_queue = [
                 {'src': int(s['src']), 'tgt': int(s['tgt']),
-                 'scale': float(s.get('scale', 0) or 0),
+                 'scale': float(s.get('scale', 1.0) or 1.0),
                  'rideable': bool(s.get('rideable', False)),
                  'rider_y': float(s.get('rider_y', 8.0) or 8.0)}
                 for s in saved if isinstance(s, dict) and 'src' in s and 'tgt' in s
@@ -1672,16 +3096,18 @@ class FieldEditTab(QWidget):
         def refresh_queue():
             queue_list.clear()
             for sw in self._mesh_swap_queue:
-                sc = float(sw.get('scale') or 0)
+                sc = float(sw.get('scale') or 1.0)
                 tk, sk = sw['tgt'], sw['src']
                 tags = []
-                if sc > 0:
+                if sc != 1.0:
                     tags.append(f"scale {sc:g}")
                 if sw.get('rideable'):
                     tags.append(f"rideable Y={float(sw.get('rider_y', 8.0)):g}")
                 tag_str = "   [" + ", ".join(tags) + "]" if tags else ""
-                if tk == sk and sc > 0 and not sw.get('rideable'):
-                    line = f"{_name_for(tk)}   ->   [SCALE ONLY, scale {sc:g}]"
+                if tk == sk and sc != 1.0 and not sw.get('rideable'):
+                    xp = sw.get('xml_path', '')
+                    xml_short = xp.split('/')[-1] if xp else 'auto'
+                    line = f"{_name_for(tk)}   ->   [SCALE {sc:g}, xml: {xml_short}]"
                 else:
                     line = (f"{_name_for(tk)}   ->   now looks like   ->   "
                             f"{_name_for(sk)}{tag_str}")
@@ -1705,11 +3131,11 @@ class FieldEditTab(QWidget):
             "the Target panel with the selected Source's appearance. "
             "Respects current category/search filter.")
         scale_spin = QDoubleSpinBox()
-        scale_spin.setRange(0.0, 10.0)
-        scale_spin.setSingleStep(0.1)
-        scale_spin.setDecimals(1)
-        scale_spin.setValue(0.0)
-        scale_spin.setToolTip("Character scale override (0 = keep default)")
+        scale_spin.setRange(0.01, 10.0)
+        scale_spin.setSingleStep(0.01)
+        scale_spin.setDecimals(3)
+        scale_spin.setValue(1.0)
+        scale_spin.setToolTip("Character scale (1.0 = default size, <1.0 = shrink, >1.0 = enlarge)")
         scale_only_btn = QPushButton(tr("Scale Only"))
         btn_row.addWidget(add_btn)
         btn_row.addWidget(change_all_btn)
@@ -1720,7 +3146,7 @@ class FieldEditTab(QWidget):
 
         # ── Mount options row: scale + rideable ──
         mount_row = QHBoxLayout()
-        mount_row.addWidget(QLabel("Scale (0=default):"))
+        mount_row.addWidget(QLabel("Scale (1.0=default):"))
         mount_row.addWidget(scale_spin)
         mount_row.addWidget(scale_only_btn)
         mount_row.addSpacing(20)
@@ -1796,10 +3222,10 @@ class FieldEditTab(QWidget):
 
         def on_scale_only():
             scale = float(scale_spin.value())
-            if scale <= 0:
+            if scale == 1.0:
                 QMessageBox.information(dlg, tr("Scale Only"),
-                    "Raise the Scale value above 0 first. Scale Only needs a "
-                    "positive override value — it does nothing with scale=0.")
+                    "Change the Scale value from 1.0 first.\n"
+                    "1.0 = default size. Use <1.0 to shrink, >1.0 to enlarge.")
                 return
             ti = tgt_list.currentItem()
             si = src_list.currentItem()
@@ -1809,9 +3235,59 @@ class FieldEditTab(QWidget):
                     "Select a character in either the TARGET or SOURCE panel first.")
                 return
             ck = int(pick.data(Qt.UserRole))
+
+            from character_mesh_swap import _load_appearance_paths
+            catalog = _load_appearance_paths() or []
+            if not catalog:
+                QMessageBox.warning(dlg, tr("Scale Only"),
+                    "appearance_paths.json not found — cannot look up XML paths.")
+                return
+
+            from PySide6.QtWidgets import QInputDialog
+            pick_name = pick.text().split('[')[0].strip()
+            search_dlg = QDialog(dlg)
+            search_dlg.setWindowTitle(f"Pick appearance XML for: {pick_name}")
+            search_dlg.resize(600, 400)
+            sl = QVBoxLayout(search_dlg)
+            sf = QLineEdit()
+            sf.setPlaceholderText("Search by name (e.g. horse, wolf, blackstar)...")
+            sl.addWidget(sf)
+            from PySide6.QtWidgets import QListWidget
+            slist = QListWidget()
+            sl.addWidget(slist, 1)
+            from PySide6.QtWidgets import QDialogButtonBox
+            sbb = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
+            sbb.accepted.connect(search_dlg.accept)
+            sbb.rejected.connect(search_dlg.reject)
+            sl.addWidget(sbb)
+
+            def _filter_xml(text):
+                slist.clear()
+                q = text.strip().lower()
+                for e in catalog:
+                    p = e.get('path', '')
+                    if q and q not in p.lower():
+                        continue
+                    item = QListWidgetItem(p)
+                    item.setData(Qt.UserRole, p)
+                    slist.addItem(item)
+                    if slist.count() > 200:
+                        break
+
+            sf.textChanged.connect(_filter_xml)
+            _filter_xml("")
+
+            if search_dlg.exec() != QDialog.Accepted:
+                return
+            sel = slist.currentItem()
+            if not sel:
+                return
+            xml_path = sel.data(Qt.UserRole)
+
             self._mesh_swap_queue[:] = [s for s in self._mesh_swap_queue if s['tgt'] != ck]
             self._mesh_swap_queue.append(
                 {'src': ck, 'tgt': ck, 'scale': scale,
+                 'xml_path': xml_path,
                  'rideable': False, 'rider_y': 8.0})
             refresh_queue()
 
@@ -2070,11 +3546,11 @@ class FieldEditTab(QWidget):
                     continue
 
                 # Find the appearance XML path for this character
-                xml_path = _guess_xml_path(entry, catalog)
+                xml_path = sw.get('xml_path') or _guess_xml_path(entry, catalog)
 
                 # ── Scale override ──
-                scale = float(sw.get('scale') or 0)
-                if scale > 0 and xml_path:
+                scale = float(sw.get('scale') or 1.0)
+                if scale != 1.0 and scale > 0 and xml_path:
                     try:
                         _write_scaled_appearance(
                             game_path, xml_path, scale, tmp_dir)
@@ -2331,7 +3807,7 @@ class FieldEditTab(QWidget):
         try:
             import crimson_rs.pack_mod
             gp = Path(game_path)
-            mod_group = "0039"
+            mod_group = f"{self._fieldedit_overlay_spin.value():04d}"
             with tempfile.TemporaryDirectory() as tmp_dir:
                 mod_dir = os.path.join(tmp_dir, "gamedata", "binary__", "client", "bin")
                 os.makedirs(mod_dir, exist_ok=True)
@@ -2857,7 +4333,7 @@ class FieldEditTab(QWidget):
         if not game_path or not os.path.isdir(game_path):
             QMessageBox.warning(self, tr("Game Path"), tr("Game path not set."))
             return
-        mod_group = "0039"
+        mod_group = f"{self._fieldedit_overlay_spin.value():04d}"
         mount_group = self._MOUNT_OVERLAY_GROUP
         game_mod = os.path.join(game_path, mod_group)
         mount_mod = os.path.join(game_path, mount_group)

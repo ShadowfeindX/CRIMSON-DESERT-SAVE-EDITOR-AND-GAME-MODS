@@ -161,23 +161,26 @@ def _write_scaled_appearance(game_path: str, appearance_paz_path: str,
     import re
     import crimson_rs
 
+    # Game update changed .app.xml -> .app_xml
+    if appearance_paz_path.endswith('.app.xml'):
+        appearance_paz_path = appearance_paz_path[:-len('.app.xml')] + '.app_xml'
+
     app_dir_parts = appearance_paz_path.split('/')[:-1]
     app_file = appearance_paz_path.split('/')[-1]
     app_paz_dir = '/'.join(app_dir_parts)
 
     # Extract original from PAZ — preserves all sections and attributes
-    with tempfile.TemporaryDirectory(prefix='app_ext_') as aext:
-        try:
-            crimson_rs.extract_file(game_path, '0009', app_paz_dir, app_file,
-                                    output_dir=aext)
-            app_content = open(os.path.join(aext, app_file), 'r',
-                               encoding='utf-8', errors='replace').read()
-        except Exception as e:
-            raise RuntimeError(
-                f"Failed to extract appearance XML from PAZ:\n"
-                f"  Path: {appearance_paz_path}\n"
-                f"  Error: {e}\n"
-                f"  Tip: verify the PAZ path exists in 0009/0.pamt") from e
+    try:
+        raw = bytes(crimson_rs.extract_file(game_path, '0009', app_paz_dir, app_file))
+        app_content = raw.decode('utf-8', errors='replace')
+        if app_content.startswith('﻿'):
+            app_content = app_content[1:]
+    except Exception as e:
+        raise RuntimeError(
+            f"Failed to extract appearance XML from PAZ:\n"
+            f"  Path: {appearance_paz_path}\n"
+            f"  Error: {e}\n"
+            f"  Tip: verify the PAZ path exists in 0009/0.pamt") from e
 
     # Regex-replace ONLY the CharacterScale value
     if 'CharacterScale' not in app_content:

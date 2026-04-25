@@ -291,6 +291,22 @@ class SkillTreeTab(QWidget):
         self._btn_skill_export.setEnabled(False)
         skill_btn_row.addWidget(self._btn_skill_export)
 
+        self._btn_skill_export_legacy = QPushButton("Export Legacy JSON")
+        self._btn_skill_export_legacy.setToolTip(
+            "Export as Format 2 byte-diff JSON (CrimsonWings style).\n"
+            "Compatible with legacy mod loaders.")
+        self._btn_skill_export_legacy.clicked.connect(self._on_skill_export_legacy)
+        self._btn_skill_export_legacy.setEnabled(False)
+        self._btn_skill_export_legacy.setVisible(False)
+
+        self._btn_skill_export_mod = QPushButton("Export as Mod Folder")
+        self._btn_skill_export_mod.setToolTip(
+            "Export patched skill.pabgb + skill.pabgh as a mod folder\n"
+            "with modinfo.json — ready to distribute.")
+        self._btn_skill_export_mod.clicked.connect(self._on_skill_export_mod_folder)
+        self._btn_skill_export_mod.setEnabled(False)
+        skill_btn_row.addWidget(self._btn_skill_export_mod)
+
         skill_btn_row.addStretch()
         sg_layout.addLayout(skill_btn_row)
 
@@ -329,6 +345,30 @@ class SkillTreeTab(QWidget):
 
         preset_row.addStretch()
         sg_layout.addLayout(preset_row)
+
+        # --- bulk skill mod buttons ---
+        bulk_row = QHBoxLayout()
+        bulk_row.setSpacing(4)
+        bulk_lbl = QLabel("Bulk Mods:")
+        bulk_lbl.setStyleSheet(f"color: {COLORS['accent']}; font-weight: bold;")
+        bulk_row.addWidget(bulk_lbl)
+
+        for label, tip, handler in [
+            ("Zero Cooldown", "Set cooldown to 0 on ALL skills.",
+             self._bulk_zero_cooldown),
+            ("Free Skills", "Zero out all resource costs (stamina, MP, etc.).",
+             self._bulk_free_skills),
+        ]:
+            btn = QPushButton(label)
+            btn.setToolTip(tip + "\n\nLoads SkillInfo if not loaded.\nClick Apply to Game to deploy.")
+            btn.setStyleSheet(
+                "QPushButton { background-color: #B71C1C; color: white; "
+                "font-weight: bold; padding: 4px 10px; }")
+            btn.clicked.connect(handler)
+            bulk_row.addWidget(btn)
+
+        bulk_row.addStretch()
+        sg_layout.addLayout(bulk_row)
 
         # --- skill table ---
         self._skill_table = QTableWidget()
@@ -812,6 +852,8 @@ class SkillTreeTab(QWidget):
         self._skill_loaded = True
         self._btn_skill_import.setEnabled(True)
         self._btn_skill_export.setEnabled(True)
+        self._btn_skill_export_legacy.setEnabled(True)
+        self._btn_skill_export_mod.setEnabled(True)
         self._btn_apply.setEnabled(True)
         self._populate_skill_table()
         self._lbl_skill_status.setText(
@@ -1166,6 +1208,150 @@ class SkillTreeTab(QWidget):
 
     # -- Export Field JSON -----------------------------------------------
 
+    def _bulk_ensure_loaded(self) -> bool:
+        if not self._skill_loaded:
+            self._on_skill_load()
+        return self._skill_loaded
+
+    def _bulk_zero_cooldown(self) -> None:
+        if not self._bulk_ensure_loaded():
+            return
+        count = 0
+        for e in self._skill_entries:
+            if e.get('_cooltime', 0) != 0:
+                e['_cooltime'] = 0
+                e.pop('_raw', None)
+                count += 1
+        self._populate_skill_table()
+        self._lbl_skill_status.setText(f"Zero Cooldown: {count} skills modified")
+        QMessageBox.information(self, "Zero Cooldown",
+            f"Set cooldown to 0 on {count} skills.\n\nClick Apply to Game to deploy.")
+
+    def _bulk_free_skills(self) -> None:
+        if not self._bulk_ensure_loaded():
+            return
+        import skillinfo_parser as sip
+        count = 0
+        for e in self._skill_entries:
+            res_list = e.get('_useResourceStatList', [])
+            if res_list:
+                for res in res_list:
+                    if isinstance(res, dict) and res.get('value', 0) != 0:
+                        res['value'] = 0
+                        count += 1
+                e.pop('_raw', None)
+        self._populate_skill_table()
+        self._lbl_skill_status.setText(f"Free Skills: {count} resource costs zeroed")
+        QMessageBox.information(self, "Free Skills",
+            f"Zeroed {count} resource costs across all skills.\n\n"
+            f"Click Apply to Game to deploy.")
+
+    def _bulk_max_level(self) -> None:
+        if not self._bulk_ensure_loaded():
+            return
+        count = 0
+        for e in self._skill_entries:
+            if e.get('_maxLevel', 0) != 30 or e.get('max_level', 0) != 30:
+                e['_maxLevel'] = 30
+                e['max_level'] = 30
+                e.pop('_raw', None)
+                count += 1
+        self._populate_skill_table()
+        self._lbl_skill_status.setText(f"Max Level 30: {count} skills modified")
+        QMessageBox.information(self, "Max Level 30",
+            f"Set max level to 30 on {count} skills.\n\nClick Apply to Game to deploy.")
+
+    def _bulk_permanent_buffs(self) -> None:
+        if not self._bulk_ensure_loaded():
+            return
+        count = 0
+        for e in self._skill_entries:
+            flag = e.get('_buffSustainFlag', 0)
+            if flag != 1:
+                e['_buffSustainFlag'] = 1
+                e['buff_sustain_flag'] = 1
+                e.pop('_raw', None)
+                count += 1
+        self._populate_skill_table()
+        self._lbl_skill_status.setText(f"Permanent Buffs: {count} skills set to sustain")
+        QMessageBox.information(self, "Permanent Buffs",
+            f"Set _buffSustainFlag=1 on {count} skills.\n\n"
+            f"Food buffs, combat buffs, and other timed effects\n"
+            f"should now persist permanently.\n\n"
+            f"Click Apply to Game to deploy.")
+
+    def _bulk_crowwing_to_rocket(self) -> None:
+        """Test: full body swap between same-size skills across characters."""
+        if not self._bulk_ensure_loaded():
+            return
+        import skillinfo_parser as sip
+
+        by_name = {e['name']: e for e in self._skill_entries}
+
+        # Swap entire entry bodies between same-size skill pairs
+        # This swaps ALL data (buff levels, resource costs, everything)
+        # while keeping the entry header (key, name) intact
+        swaps = [
+            ('Skill_Kliff_MpIce', 'Skill_Damian_JumpStep'),
+            ('Skill_ElementalReinforce', 'Skill_Damian_ShieldThrow_II'),
+            ('Skill_Nature', 'Skill_Damian_ElementalReinforce'),
+        ]
+
+        count = 0
+        details = []
+        for src_name, tgt_name in swaps:
+            src = by_name.get(src_name)
+            tgt = by_name.get(tgt_name)
+            if not src or not tgt:
+                continue
+
+            src_bytes = sip.serialize_entry(src)
+            tgt_bytes = sip.serialize_entry(tgt)
+            if len(src_bytes) != len(tgt_bytes):
+                continue
+
+            # Swap all fields EXCEPT identity (key, name, name_len, name_bytes)
+            save_keys = ('key', 'name', 'name_len', 'name_bytes')
+            src_saved = {k: src[k] for k in save_keys}
+            tgt_saved = {k: tgt[k] for k in save_keys}
+
+            # Copy all tgt fields into src
+            for k in list(tgt.keys()):
+                if k not in save_keys:
+                    src[k] = tgt[k]
+            # Restore identity
+            for k, v in src_saved.items():
+                src[k] = v
+            src.pop('_raw', None)
+
+            count += 1
+            details.append(f"{src_name} now has {tgt_name}'s data")
+
+        self._populate_skill_table()
+        detail_str = '\n'.join(details) if details else 'No swaps applied'
+        self._lbl_skill_status.setText(f"Skill Swap: {count} pairs swapped")
+        QMessageBox.information(self, "Skill Body Swap",
+            f"Swapped full skill data between {count} pairs:\n\n"
+            f"{detail_str}\n\n"
+            f"Click Apply to Game to try it.")
+
+    def _bulk_unlock_all(self) -> None:
+        if not self._bulk_ensure_loaded():
+            return
+        count = 0
+        for e in self._skill_entries:
+            char_list = e.get('_usableCharacterInfoList', [])
+            if char_list:
+                e['_usableCharacterInfoList'] = []
+                e.pop('_raw', None)
+                count += 1
+        self._populate_skill_table()
+        self._lbl_skill_status.setText(f"Unlock All: {count} skills unlocked for all characters")
+        QMessageBox.information(self, "Unlock All",
+            f"Cleared character restrictions on {count} skills.\n\n"
+            f"All skills are now usable by all characters.\n"
+            f"Click Apply to Game to deploy.")
+
     def _on_stamina_preset(self, filename: str) -> None:
         """One-click stamina preset: load skillinfo if needed, find preset, import it."""
         if not self._skill_loaded:
@@ -1355,6 +1541,139 @@ class SkillTreeTab(QWidget):
                 f"File: {path}")
         except Exception as e:
             QMessageBox.critical(self, "Export Failed", str(e))
+
+    def _on_skill_export_legacy(self) -> None:
+        """Export skill modifications as Format 2 hybrid JSON (entry + absolute offset)."""
+        if not self._skill_loaded:
+            QMessageBox.warning(self, "Not loaded", "Load SkillInfo first.")
+            return
+
+        import skillinfo_parser as sip
+
+        van_pabgh = self._skill_pabgh
+        van_pabgb = self._skill_pabgb
+        van_index = sip.parse_skill_pabgh(van_pabgh)
+
+        entry_offsets = {}
+        for key, off in van_index:
+            for ve in self._skill_vanilla_entries:
+                if ve.get('key') == key:
+                    entry_offsets[ve.get('name', '')] = off
+                    break
+
+        changes = []
+        for i, e in enumerate(self._skill_entries):
+            if i >= len(self._skill_vanilla_entries):
+                continue
+            van = self._skill_vanilla_entries[i]
+            van_bytes = sip.serialize_entry(van)
+            mod_bytes = sip.serialize_entry(e)
+            if van_bytes == mod_bytes:
+                continue
+            entry_name = e.get('name', f'entry_{i}')
+            entry_abs = entry_offsets.get(entry_name, 0)
+            j = 0
+            while j < min(len(van_bytes), len(mod_bytes)):
+                if van_bytes[j] != mod_bytes[j]:
+                    run_start = j
+                    while j < min(len(van_bytes), len(mod_bytes)) and van_bytes[j] != mod_bytes[j]:
+                        j += 1
+                    changes.append({
+                        'entry': entry_name,
+                        'rel_offset': run_start,
+                        'offset': entry_abs + run_start,
+                        'original': van_bytes[run_start:j].hex(),
+                        'patched': mod_bytes[run_start:j].hex(),
+                    })
+                else:
+                    j += 1
+
+        if not changes:
+            QMessageBox.information(self, "Export Legacy JSON",
+                                    "No modifications to export.")
+            return
+
+        path, _ = QFileDialog.getSaveFileName(
+            self, "Export Legacy Skill JSON", "skill_mod.json",
+            "JSON Files (*.json);;All Files (*)")
+        if not path:
+            return
+
+        doc = {
+            'modinfo': {
+                'title': 'Skill Mod',
+                'version': '1.0',
+                'author': 'CrimsonGameMods SkillTree',
+                'description': f'{len(changes)} byte patch(es)',
+            },
+            'format': 2,
+            'patches': [{
+                'game_file': 'gamedata/skill.pabgb',
+                'source_group': '0008',
+                'changes': changes,
+            }],
+        }
+
+        try:
+            with open(path, 'w', encoding='utf-8') as f:
+                json.dump(doc, f, indent=2, ensure_ascii=False)
+            self._lbl_skill_status.setText(
+                f"Exported {len(changes)} legacy patches to {os.path.basename(path)}")
+            QMessageBox.information(
+                self, "Export Legacy JSON",
+                f"Exported {len(changes)} byte-level patches (hybrid format).\n\n"
+                f"File: {path}")
+        except Exception as e:
+            QMessageBox.critical(self, "Export Failed", str(e))
+
+    def _on_skill_export_mod_folder(self) -> None:
+        """Export patched skill.pabgb/pabgh as a mod folder with modinfo.json."""
+        if not self._skill_loaded:
+            QMessageBox.warning(self, "Not loaded", "Load SkillInfo first.")
+            return
+
+        if not self._has_skill_modifications():
+            QMessageBox.information(self, "Export Mod",
+                                    "No modifications to export.")
+            return
+
+        from PySide6.QtWidgets import QInputDialog
+        name, ok = QInputDialog.getText(self, "Export Mod Folder",
+            "Mod name:", text="Skill Mod")
+        if not ok or not name.strip():
+            return
+        name = name.strip()
+
+        import skillinfo_parser as sip
+        new_pabgh, new_pabgb = sip.serialize_all(self._skill_entries)
+
+        exe_dir = os.path.dirname(os.path.abspath(sys.argv[0]))
+        folder = "".join(c if (c.isalnum() or c in "-_") else "_" for c in name)
+        out = os.path.join(exe_dir, "packs", folder)
+        os.makedirs(out, exist_ok=True)
+        files_dir = os.path.join(out, "files", "gamedata", "binary__", "client", "bin")
+        os.makedirs(files_dir, exist_ok=True)
+
+        with open(os.path.join(files_dir, "skill.pabgb"), "wb") as f:
+            f.write(new_pabgb)
+        with open(os.path.join(files_dir, "skill.pabgh"), "wb") as f:
+            f.write(new_pabgh)
+
+        with open(os.path.join(out, "modinfo.json"), "w", encoding="utf-8") as f:
+            json.dump({
+                "id": name.lower().replace(" ", "_"),
+                "name": name,
+                "version": "1.0.0",
+                "game_version": "1.00.04",
+                "author": "CrimsonGameMods",
+                "description": f"Skill mod: {name} ({self._count_skill_modifications()} skills modified)",
+            }, f, indent=2)
+
+        mod_count = self._count_skill_modifications()
+        self._lbl_skill_status.setText(f"Exported mod to packs/{folder}/")
+        QMessageBox.information(self, "Exported",
+            f"Mod written to:\n{out}\n\n"
+            f"{mod_count} modified skill(s) included.")
 
 
 # ── Module-level helpers ─────────────────────────────────────────────────

@@ -463,7 +463,20 @@ class ItemBuffsTab(QWidget):
                 "Uses field names instead of byte offsets — survives game updates.\n"
                 "Compatible with Stacker Tool and future mod loaders.")
             act_export_field.triggered.connect(self._buff_export_field_json_v3)
-            export_mod_menu.addAction(act_export_field)
+
+            export_mod_menu.addSeparator()
+
+            act_export_mod = export_mod_menu.addAction("Export as Mod")
+            act_export_mod.setToolTip(
+                "Export as a ready-to-use folder mod (0036/0.paz + 0.pamt + modinfo.json).\n"
+                "Install with JMM / CDUMM, or drop into game directory.")
+            act_export_mod.triggered.connect(self._buff_export_mod_folder)
+
+            act_export_legacy = export_mod_menu.addAction("Export as Legacy JSON v2")
+            act_export_legacy.setToolTip(
+                "Opens Stacker Tool to export as Format 2 byte-diff JSON.\n"
+                "Use Pull ItemBuffs Edit in Stacker, then Export Legacy JSON.")
+            act_export_legacy.triggered.connect(self._goto_stacker_legacy_export)
             # END Export Menu
             
             
@@ -923,9 +936,9 @@ class ItemBuffsTab(QWidget):
         build_status_label()
         outer_layout.addWidget(self._buff_status_label)
 
-        bottom_bar_wrap = build_bottom_bar_wrap()
-        outer_layout.addWidget(bottom_bar_wrap)
-        bottom_bar_wrap.setVisible(False)
+        self._bottom_bar_wrap = build_bottom_bar_wrap()
+        outer_layout.addWidget(self._bottom_bar_wrap)
+        self._bottom_bar_wrap.setVisible(False)
 
         #---------------------------------------------------------------------
 
@@ -952,9 +965,9 @@ class ItemBuffsTab(QWidget):
         )
         # Parent the spinners to bottom_bar_wrap so they exist in the widget
         # tree, but hide them by default (they're exposed via the Advanced tab).
-        self._buff_overlay_spin.setParent(bottom_bar_wrap)
+        self._buff_overlay_spin.setParent(self._bottom_bar_wrap)
         self._buff_overlay_spin.setVisible(False)
-        self._buff_modgroup_spin.setParent(bottom_bar_wrap)
+        self._buff_modgroup_spin.setParent(self._bottom_bar_wrap)
         self._buff_modgroup_spin.setVisible(False)
 
         self._item_buffs_tab_widget = self
@@ -2758,6 +2771,8 @@ class ItemBuffsTab(QWidget):
             t3 = time.perf_counter()
 
             self._buff_use_structural = True
+            if hasattr(self, '_bottom_bar_wrap'):
+                self._bottom_bar_wrap.setVisible(True)
             self._buff_status_label.setText(
                 f"Extracted (Rust, source: {_buff_source}): "
                 f"{len(self._buff_data):,} bytes, {len(self._buff_items)} items. "
@@ -11260,58 +11275,68 @@ class ItemBuffsTab(QWidget):
             log.exception("Item creator deploy failed")
             QMessageBox.critical(self, "Deploy Failed", str(e))
 
+    def _goto_stacker_legacy_export(self) -> None:
+        """Switch to Stacker Tool tab for legacy JSON export."""
+        parent = self.parent()
+        while parent is not None:
+            if hasattr(parent, 'indexOf'):
+                for i in range(parent.count()):
+                    w = parent.widget(i)
+                    if w and type(w).__name__ == 'StackerTab':
+                        parent.setCurrentIndex(i)
+                        QMessageBox.information(self, "Legacy JSON Export",
+                            "Switched to Stacker Tool.\n\n"
+                            "1. Click 'Pull ItemBuffs Edit' to pull your edits.\n"
+                            "2. Click 'PREVIEW' to build the merge.\n"
+                            "3. Click 'EXPORT LEGACY JSON' to save.")
+                        return
+            parent = parent.parent()
+        QMessageBox.information(self, "Legacy JSON Export",
+            "Go to Stacker Tool tab, pull your ItemBuffs edits,\n"
+            "then use Export Legacy JSON.")
+
     def _buff_export_mod_folder(self) -> None:
-        """Export as a ready-to-use mod folder — same as Apply to Game but to a folder."""
+        """Export as a standard folder mod (Stacker style).
+
+        Output: <dir>/<name>/0036/0.paz + 0.pamt + modinfo.json
+        Uses group 0036 so any loader (JMM, CDUMM) can remap at install time.
+        """
         if not self._buff_ensure_patcher():
             return
         if not hasattr(self, '_buff_rust_items') or not self._buff_rust_items:
             QMessageBox.warning(self, "Export Mod", "Extract iteminfo first.")
             return
-        if not self._buff_modified:
-            apply_stacks = hasattr(self, '_stack_check') and self._stack_check.isChecked()
-            apply_inf_dura = hasattr(self, '_inf_dura_check') and self._inf_dura_check.isChecked()
-            if not apply_stacks and not apply_inf_dura:
-                QMessageBox.information(self, "No Changes",
-                    "No modifications to export.")
-                return
 
         from PySide6.QtWidgets import QInputDialog
-        name, ok = QInputDialog.getText(self, "Export as Mod Folder",
-            "Mod name:", text="My ItemBuffs Mod")
+        parent_dir = QFileDialog.getExistingDirectory(
+            self, "Pick where to save the folder mod",
+            self._config.get("buffs_export_dir",
+                             os.path.dirname(os.path.abspath(sys.argv[0]))))
+        if not parent_dir:
+            return
+        self._config["buffs_export_dir"] = parent_dir
+        self.config_save_requested.emit()
+
+        name, ok = QInputDialog.getText(
+            self, "Mod name",
+            "Folder mod name (a folder with this name will be created):",
+            text="My ItemBuffs Mod")
         if not ok or not name.strip():
             return
-        name = name.strip()
-
-        save_dir = QFileDialog.getExistingDirectory(
-            self, "Choose folder to export mod into",
-            os.path.join(os.path.dirname(os.path.abspath(sys.argv[0])), "packs"))
-        if not save_dir:
+        safe_name = "".join(c if (c.isalnum() or c in "-_ .") else "_"
+                            for c in name.strip())
+        out_dir = os.path.join(parent_dir, safe_name)
+        if os.path.isdir(out_dir) and os.listdir(out_dir):
+            QMessageBox.warning(self, "Export Mod",
+                f"Folder already exists and is not empty:\n{out_dir}\n\n"
+                "Pick a new name or delete it first.")
             return
-
-        folder_name = "".join(c if (c.isalnum() or c in "-_ ") else "_" for c in name)
-        out_path = os.path.join(save_dir, folder_name)
-
-        apply_stacks = hasattr(self, '_stack_check') and self._stack_check.isChecked()
-        apply_inf_dura = hasattr(self, '_inf_dura_check') and self._inf_dura_check.isChecked()
-
-        if apply_stacks:
-            target_val = self._stack_spin.value()
-            for it in self._buff_rust_items:
-                if it.get('max_stack_count', 1) > 1:
-                    it['max_stack_count'] = target_val
-        if apply_inf_dura:
-            for it in self._buff_rust_items:
-                endurance = it.get('max_endurance', 0)
-                if endurance > 0 and endurance != 65535:
-                    it['max_endurance'] = 65535
-                    it['is_destroy_when_broken'] = 0
 
         self._buff_status_label.setText("Serializing...")
         QApplication.processEvents()
 
         try:
             import crimson_rs
-            import shutil
             import tempfile
 
             final_data = self._rebuild_full_iteminfo()
@@ -11322,10 +11347,12 @@ class ItemBuffsTab(QWidget):
 
             game_path = self._buff_patcher.game_path
             INTERNAL_DIR = "gamedata/binary__/client/bin"
-            mod_group = f"{self._buff_overlay_spin.value():04d}"
+            group = "0036"
 
-            with tempfile.TemporaryDirectory() as tmp_dir:
-                group_dir = os.path.join(tmp_dir, mod_group)
+            os.makedirs(out_dir, exist_ok=True)
+
+            with tempfile.TemporaryDirectory() as tmp:
+                group_dir = os.path.join(tmp, group)
                 builder = crimson_rs.PackGroupBuilder(
                     group_dir,
                     crimson_rs.Compression.NONE,
@@ -11344,47 +11371,35 @@ class ItemBuffsTab(QWidget):
                         builder.add_file(INTERNAL_DIR, fname, staged_skill[fname])
 
                 pamt_bytes = bytes(builder.finish())
-                pamt_checksum = crimson_rs.parse_pamt_bytes(pamt_bytes)["checksum"]
 
-                os.makedirs(out_path, exist_ok=True)
-                paz_dst = os.path.join(out_path, mod_group)
-                os.makedirs(paz_dst, exist_ok=True)
-                shutil.copy2(os.path.join(group_dir, "0.paz"),
-                             os.path.join(paz_dst, "0.paz"))
-                shutil.copy2(os.path.join(group_dir, "0.pamt"),
-                             os.path.join(paz_dst, "0.pamt"))
+                out_group = os.path.join(out_dir, group)
+                os.makedirs(out_group, exist_ok=True)
+                for f in os.listdir(group_dir):
+                    shutil.copy2(os.path.join(group_dir, f),
+                                 os.path.join(out_group, f))
+                if not os.path.isfile(os.path.join(out_group, "0.pamt")):
+                    with open(os.path.join(out_group, "0.pamt"), "wb") as f:
+                        f.write(pamt_bytes)
 
-                # Build a standalone PAPGT with just this entry
-                papgt = {"unknown0": 1610, "checksum": 0, "unknown1": 0, "unknown2": 0, "entries": []}
-                papgt = crimson_rs.add_papgt_entry(
-                    papgt, mod_group, pamt_checksum, 0, 16383)
-                meta_dst = os.path.join(out_path, "meta")
-                os.makedirs(meta_dst, exist_ok=True)
-                crimson_rs.write_papgt_file(papgt,
-                    os.path.join(meta_dst, "0.papgt"))
-
-            modinfo = {
-                "id": name.lower().replace(" ", "_"),
-                "name": name,
-                "version": "1.0.0",
-                "author": "CrimsonGameMods",
-                "description": f"ItemBuffs mod: {name}",
-            }
-            with open(os.path.join(out_path, "modinfo.json"), "w",
+            with open(os.path.join(out_dir, "modinfo.json"), "w",
                       encoding="utf-8") as f:
-                json.dump(modinfo, f, indent=2)
+                json.dump({
+                    "id": safe_name.lower().replace(" ", "_"),
+                    "name": name.strip(),
+                    "version": "1.0.0",
+                    "author": "CrimsonGameMods",
+                    "description": f"ItemBuffs mod: {name.strip()}",
+                }, f, indent=2)
 
-            paz_size = os.path.getsize(os.path.join(paz_dst, "0.paz"))
-            self._buff_status_label.setText(f"Exported to {folder_name}/")
+            paz_size = os.path.getsize(os.path.join(out_group, "0.paz"))
+            self._buff_status_label.setText(f"Exported to {safe_name}/")
             QMessageBox.information(self, "Mod Exported",
-                f"Mod exported to:\n{out_path}\n\n"
+                f"Folder mod exported to:\n{out_dir}\n\n"
                 f"Contents:\n"
-                f"  {mod_group}/0.paz ({paz_size:,} bytes)\n"
-                f"  {mod_group}/0.pamt\n"
-                f"  meta/0.papgt\n"
+                f"  {group}/0.paz ({paz_size:,} bytes)\n"
+                f"  {group}/0.pamt\n"
                 f"  modinfo.json\n\n"
-                f"To install: copy {mod_group}/ and meta/ into your game directory.\n"
-                f"Or import into CDUMM / JMM mod manager.")
+                f"Install with JMM / CDUMM, or drop {group}/ into game dir.")
 
         except Exception as e:
             import traceback; traceback.print_exc()
