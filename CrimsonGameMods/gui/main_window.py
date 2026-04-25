@@ -128,6 +128,7 @@ from gui.tabs.patches import GamePatchesTab
 from gui.tabs.field_edit import FieldEditTab
 from gui.tabs.bagspace import BagSpaceTab
 from gui.tabs.skill_tree import SkillTreeTab
+from gui.tabs.reserveslot import ReserveSlotTab
 from gui.dialogs import (
     _FloatingTabWindow, DetachableTabWidget,
     GiveItemDialog, AddItemDialog, QuestEditorWindow,
@@ -838,6 +839,15 @@ class MainWindow(QMainWindow):
             except Exception:
                 pass
         self._mods_tabs.addTab(self._skill_tree_tab, "SkillTree")
+
+        self._reserveslot_tab = ReserveSlotTab(
+            config=self._config,
+            game_path_getter=lambda: self._config.get("game_install_path", ""),
+            rebuild_papgt_fn=self._rebuild_papgt_without,
+        )
+        self._reserveslot_tab.status_message.connect(self._update_status)
+        self._reserveslot_tab.config_save_requested.connect(self._save_config)
+        self._mods_tabs.addTab(self._reserveslot_tab, "ReserveSlot")
 
         if self._experimental_mode:
             try:

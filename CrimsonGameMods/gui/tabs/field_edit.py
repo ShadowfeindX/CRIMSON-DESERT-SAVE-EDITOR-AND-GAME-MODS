@@ -2845,7 +2845,7 @@ class FieldEditTab(QWidget):
         if not self._mesh_swap_queue and saved:
             self._mesh_swap_queue = [
                 {'src': int(s['src']), 'tgt': int(s['tgt']),
-                 'scale': float(s.get('scale', 0) or 0),
+                 'scale': float(s.get('scale', 1.0) or 1.0),
                  'rideable': bool(s.get('rideable', False)),
                  'rider_y': float(s.get('rider_y', 8.0) or 8.0)}
                 for s in saved if isinstance(s, dict) and 'src' in s and 'tgt' in s
@@ -3096,16 +3096,18 @@ class FieldEditTab(QWidget):
         def refresh_queue():
             queue_list.clear()
             for sw in self._mesh_swap_queue:
-                sc = float(sw.get('scale') or 0)
+                sc = float(sw.get('scale') or 1.0)
                 tk, sk = sw['tgt'], sw['src']
                 tags = []
-                if sc > 0:
+                if sc != 1.0:
                     tags.append(f"scale {sc:g}")
                 if sw.get('rideable'):
                     tags.append(f"rideable Y={float(sw.get('rider_y', 8.0)):g}")
                 tag_str = "   [" + ", ".join(tags) + "]" if tags else ""
-                if tk == sk and sc > 0 and not sw.get('rideable'):
-                    line = f"{_name_for(tk)}   ->   [SCALE ONLY, scale {sc:g}]"
+                if tk == sk and sc != 1.0 and not sw.get('rideable'):
+                    xp = sw.get('xml_path', '')
+                    xml_short = xp.split('/')[-1] if xp else 'auto'
+                    line = f"{_name_for(tk)}   ->   [SCALE {sc:g}, xml: {xml_short}]"
                 else:
                     line = (f"{_name_for(tk)}   ->   now looks like   ->   "
                             f"{_name_for(sk)}{tag_str}")
@@ -3129,11 +3131,11 @@ class FieldEditTab(QWidget):
             "the Target panel with the selected Source's appearance. "
             "Respects current category/search filter.")
         scale_spin = QDoubleSpinBox()
-        scale_spin.setRange(0.0, 10.0)
-        scale_spin.setSingleStep(0.1)
-        scale_spin.setDecimals(1)
-        scale_spin.setValue(0.0)
-        scale_spin.setToolTip("Character scale override (0 = keep default)")
+        scale_spin.setRange(0.01, 10.0)
+        scale_spin.setSingleStep(0.01)
+        scale_spin.setDecimals(3)
+        scale_spin.setValue(1.0)
+        scale_spin.setToolTip("Character scale (1.0 = default size, <1.0 = shrink, >1.0 = enlarge)")
         scale_only_btn = QPushButton(tr("Scale Only"))
         btn_row.addWidget(add_btn)
         btn_row.addWidget(change_all_btn)
@@ -3144,7 +3146,7 @@ class FieldEditTab(QWidget):
 
         # ── Mount options row: scale + rideable ──
         mount_row = QHBoxLayout()
-        mount_row.addWidget(QLabel("Scale (0=default):"))
+        mount_row.addWidget(QLabel("Scale (1.0=default):"))
         mount_row.addWidget(scale_spin)
         mount_row.addWidget(scale_only_btn)
         mount_row.addSpacing(20)
@@ -3220,10 +3222,10 @@ class FieldEditTab(QWidget):
 
         def on_scale_only():
             scale = float(scale_spin.value())
-            if scale <= 0:
+            if scale == 1.0:
                 QMessageBox.information(dlg, tr("Scale Only"),
-                    "Raise the Scale value above 0 first. Scale Only needs a "
-                    "positive override value — it does nothing with scale=0.")
+                    "Change the Scale value from 1.0 first.\n"
+                    "1.0 = default size. Use <1.0 to shrink, >1.0 to enlarge.")
                 return
             ti = tgt_list.currentItem()
             si = src_list.currentItem()
@@ -3233,9 +3235,59 @@ class FieldEditTab(QWidget):
                     "Select a character in either the TARGET or SOURCE panel first.")
                 return
             ck = int(pick.data(Qt.UserRole))
+
+            from character_mesh_swap import _load_appearance_paths
+            catalog = _load_appearance_paths() or []
+            if not catalog:
+                QMessageBox.warning(dlg, tr("Scale Only"),
+                    "appearance_paths.json not found — cannot look up XML paths.")
+                return
+
+            from PySide6.QtWidgets import QInputDialog
+            pick_name = pick.text().split('[')[0].strip()
+            search_dlg = QDialog(dlg)
+            search_dlg.setWindowTitle(f"Pick appearance XML for: {pick_name}")
+            search_dlg.resize(600, 400)
+            sl = QVBoxLayout(search_dlg)
+            sf = QLineEdit()
+            sf.setPlaceholderText("Search by name (e.g. horse, wolf, blackstar)...")
+            sl.addWidget(sf)
+            from PySide6.QtWidgets import QListWidget
+            slist = QListWidget()
+            sl.addWidget(slist, 1)
+            from PySide6.QtWidgets import QDialogButtonBox
+            sbb = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
+            sbb.accepted.connect(search_dlg.accept)
+            sbb.rejected.connect(search_dlg.reject)
+            sl.addWidget(sbb)
+
+            def _filter_xml(text):
+                slist.clear()
+                q = text.strip().lower()
+                for e in catalog:
+                    p = e.get('path', '')
+                    if q and q not in p.lower():
+                        continue
+                    item = QListWidgetItem(p)
+                    item.setData(Qt.UserRole, p)
+                    slist.addItem(item)
+                    if slist.count() > 200:
+                        break
+
+            sf.textChanged.connect(_filter_xml)
+            _filter_xml("")
+
+            if search_dlg.exec() != QDialog.Accepted:
+                return
+            sel = slist.currentItem()
+            if not sel:
+                return
+            xml_path = sel.data(Qt.UserRole)
+
             self._mesh_swap_queue[:] = [s for s in self._mesh_swap_queue if s['tgt'] != ck]
             self._mesh_swap_queue.append(
                 {'src': ck, 'tgt': ck, 'scale': scale,
+                 'xml_path': xml_path,
                  'rideable': False, 'rider_y': 8.0})
             refresh_queue()
 
@@ -3494,11 +3546,11 @@ class FieldEditTab(QWidget):
                     continue
 
                 # Find the appearance XML path for this character
-                xml_path = _guess_xml_path(entry, catalog)
+                xml_path = sw.get('xml_path') or _guess_xml_path(entry, catalog)
 
                 # ── Scale override ──
-                scale = float(sw.get('scale') or 0)
-                if scale > 0 and xml_path:
+                scale = float(sw.get('scale') or 1.0)
+                if scale != 1.0 and scale > 0 and xml_path:
                     try:
                         _write_scaled_appearance(
                             game_path, xml_path, scale, tmp_dir)
