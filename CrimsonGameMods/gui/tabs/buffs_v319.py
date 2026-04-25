@@ -1812,11 +1812,11 @@ class ItemBuffsTab(QWidget):
             if reply != QMessageBox.Yes:
                 return
             self._eb_god_mode(True)
+            self._eb_apply_preset("great_thief_all", True)
             self._eb_apply_preset("open_sockets", True)
+            self._eb_apply_preset("max_charges", True)
             self._eb_apply_preset("max_enchant", True)
             self._eb_apply_preset("no_cooldown", True)
-            self._eb_apply_preset("max_charges", True)
-            self._eb_apply_preset("great_thief_all", True)
         godmode_btn = QPushButton("God Mode")
         godmode_btn.setToolTip(f"Inject full God Mode stats:\n{godmode_desc}")
         godmode_btn.clicked.connect(apply_godmode)
@@ -3405,15 +3405,9 @@ class ItemBuffsTab(QWidget):
                     si_c = QTableWidgetItem("  (none)")
                     si_c.setForeground(QBrush(QColor(COLORS["text_dim"])))
                     table.setRowCount(row + 1)
-                    table.setItem(row, 0, c1)
+                    table.setItem(row, 0, si_c)
                     table.setItem(row, 1, QTableWidgetItem(""))
                     row += 1
-            
-            'socket_item_list'
-            'add_socket_material_item_list'
-            'use_socket'
-            'socket_valid_count'
-            
             
             edl = rust_info.get('enchant_data_list', [])
 
@@ -6016,6 +6010,8 @@ class ItemBuffsTab(QWidget):
         preset = self._ITEM_PRESETS.get(preset_key)
         if not preset:
             return
+
+        log.info("Applying preset: %s", preset)
 
         rust_info = self._buff_rust_lookup.get(self._buff_current_item.item_key)
         if not rust_info:
