@@ -844,19 +844,20 @@ class SkillTreeTab(QWidget):
             ki.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
             self._skill_table.setItem(row, 1, ki)
 
-            # Cooltime (editable)
-            ct = QTableWidgetItem(str(e['_cooltime']))
+            # Cooltime (editable) — field may be named _cooltime or missing in new parser
+            ct_val = e.get('_cooltime', e.get('_learnLevel', 0))
+            ct = QTableWidgetItem(str(ct_val))
             ct.setTextAlignment(Qt.AlignmentFlag.AlignRight |
                                 Qt.AlignmentFlag.AlignVCenter)
             self._skill_table.setItem(row, 2, ct)
 
             # MaxLevel (editable)
-            ml = QTableWidgetItem(str(e['max_level']))
+            ml = QTableWidgetItem(str(e.get('max_level', e.get('_maxLevel', 0))))
             ml.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
             self._skill_table.setItem(row, 3, ml)
 
-            # BuffLevels (read-only — structural, can't safely change)
-            bl = QTableWidgetItem(str(e['_buffLevelCount']))
+            # BuffLevels (read-only)
+            bl = QTableWidgetItem(str(e.get('_buffLevelCount', 0)))
             bl.setFlags(bl.flags() & ~Qt.ItemFlag.ItemIsEditable)
             bl.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
             self._skill_table.setItem(row, 4, bl)
@@ -1247,15 +1248,37 @@ class SkillTreeTab(QWidget):
 
             orig_bytes = bytes.fromhex(orig_hex)
             patch_bytes = bytes.fromhex(patch_hex)
-            buff = e['_buff_data_raw']
 
-            pos = buff.find(orig_bytes)
+            # Search the full serialized entry, not just _buff_data_raw
+            # (the new parser splits body into named fields, so the values
+            # may be in _useResourceStatList, _buffLevelList, etc.)
+            import skillinfo_parser as sip
+            full = sip.serialize_entry(e)
+            pos = full.find(orig_bytes)
             if pos >= 0:
-                new_buff = bytearray(buff)
-                new_buff[pos:pos + len(orig_bytes)] = patch_bytes
-                e['_buff_data_raw'] = bytes(new_buff)
-                e.pop('_raw', None)
-                patched += 1
+                patched_full = bytearray(full)
+                patched_full[pos:pos + len(orig_bytes)] = patch_bytes
+                # Re-parse the patched entry to update all named fields
+                idx = [(ek['key'], 0) for ek in [e]]
+                try:
+                    new_e = sip.parse_skill_entry(bytes(patched_full), 0, len(patched_full))
+                    # Preserve key/name from original
+                    new_e['key'] = e['key']
+                    new_e['name'] = e['name']
+                    new_e['name_len'] = e['name_len']
+                    new_e['name_bytes'] = e.get('name_bytes', e['name'].encode('ascii'))
+                    by_name[name] = new_e
+                    # Update in the list
+                    for i, se in enumerate(self._skill_entries):
+                        if se['name'] == name:
+                            self._skill_entries[i] = new_e
+                            break
+                    patched += 1
+                except Exception:
+                    # Fallback: patch _raw directly
+                    e['_raw'] = bytes(patched_full)
+                    e.pop('_buff_data_raw', None)
+                    patched += 1
             else:
                 missing_values.append(name)
                 skipped += 1

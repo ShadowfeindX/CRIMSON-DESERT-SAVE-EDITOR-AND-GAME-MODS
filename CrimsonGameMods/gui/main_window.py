@@ -1650,6 +1650,11 @@ class MainWindow(QMainWindow):
         check_update_act.triggered.connect(self._check_for_update)
         update_menu.addAction(check_update_act)
 
+        changelog_act = QAction("Changelog / Releases", self)
+        changelog_act.triggered.connect(lambda: __import__('webbrowser').open(
+            "https://github.com/NattKh/CRIMSON-DESERT-SAVE-EDITOR-AND-GAME-MODS/releases"))
+        update_menu.addAction(changelog_act)
+
         view_menu = menu_bar.addMenu("View")
         self._global_icons_action = QAction("Show Icons", self)
         self._global_icons_action.setCheckable(True)

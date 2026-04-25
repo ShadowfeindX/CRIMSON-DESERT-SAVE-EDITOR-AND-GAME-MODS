@@ -725,6 +725,16 @@ class ItemBuffsTab(QWidget):
             export_field_btn.clicked.connect(self._buff_export_field_json_v3)
             bottom_bar.addWidget(export_field_btn)
 
+            export_mod_btn = QPushButton("Export as Mod Folder")
+            export_mod_btn.setStyleSheet(
+                "background-color: #7B1FA2; color: white; font-weight: bold;")
+            export_mod_btn.setToolTip(
+                "Export as a ready-to-use mod folder (NNNN/0.paz + 0.pamt + meta/0.papgt).\n"
+                "Drop the folder into your game directory or import into a mod manager.\n"
+                "Same as Apply to Game, but saves to a folder you choose instead.")
+            export_mod_btn.clicked.connect(self._buff_export_mod_folder)
+            bottom_bar.addWidget(export_mod_btn)
+
             self._dev_export_btns_buffs = []
 
             # Primary action 1: Create Item (green)
@@ -1322,6 +1332,60 @@ class ItemBuffsTab(QWidget):
         
         pl.addWidget(self._ui_add_line(True))
         
+        self._eb_socket_row_widget = QWidget()
+        socket_row = QHBoxLayout(self._eb_socket_row_widget)
+        socket_row.setContentsMargins(0, 0, 0, 0)
+        socket_row.setSpacing(6)
+        socket_row.addWidget(QLabel("Socket Count:"))
+        self._eb_socket_count = QSpinBox()
+        self._eb_socket_count.setRange(1, 8)
+        self._eb_socket_count.setValue(5)
+        self._eb_socket_count.setFixedWidth(60)
+        self._eb_socket_count.setToolTip(
+            "Target max socket count. Writes to drop_default_data."
+            "add_socket_material_item_list.")
+        socket_row.addWidget(self._eb_socket_count)
+        socket_row.addWidget(QLabel("Pre-unlocked:"))
+        self._eb_socket_valid = QSpinBox()
+        self._eb_socket_valid.setRange(0, 8)
+        self._eb_socket_valid.setValue(0)
+        self._eb_socket_valid.setFixedWidth(60)
+        self._eb_socket_valid.setToolTip(
+            "How many sockets are unlocked on drop. Extra sockets need to "
+            "be unlocked at the Witch NPC.")
+        socket_row.addWidget(self._eb_socket_valid)
+        socket_apply_btn = QPushButton("Extend Sockets (Selected)")
+        socket_apply_btn.setToolTip(
+            "Extend socket capacity on the SELECTED item. Only applies to "
+            "items with use_socket=1 (abyss gear).")
+        socket_apply_btn.clicked.connect(self._eb_extend_sockets)
+        socket_row.addWidget(socket_apply_btn)
+        socket_row.addStretch(1)
+        pl.addWidget(self._eb_socket_row_widget)
+
+        # --- Drop enchant level ---
+        drop_enchant = QWidget()
+        drop_enchant_row = QHBoxLayout(drop_enchant)
+        drop_enchant_row.setContentsMargins(0, 0, 0, 0)
+        drop_enchant_row.setSpacing(6)
+        drop_enchant_row.addWidget(QLabel("Enchant Level:"))
+        self._eb_drop_enchant_level = QSpinBox()
+        self._eb_drop_enchant_level.setRange(0, 10)
+        self._eb_drop_enchant_level.setValue(0)
+        self._eb_drop_enchant_level.setFixedWidth(60)
+        self._eb_drop_enchant_level.setToolTip(
+            "What refinement level the item will be on drop.")
+        drop_enchant_row.addWidget(self._eb_drop_enchant_level)
+        drop_enchant_apply = QPushButton("Change Drop Level (Selected)")
+        drop_enchant_apply.setToolTip(
+            "Change the default enchantment level for the SELECTED item "
+            "when it drops or is purchased.")
+        drop_enchant_apply.clicked.connect(self._eb_change_drop_enchant)
+        drop_enchant_row.addWidget(drop_enchant_apply)
+        drop_enchant_row.addStretch(1)
+        pl.addWidget(drop_enchant)
+
+        # --- Socket extend (individual item) ---
         self._eb_socket_row_widget = QWidget()
         socket_row = QHBoxLayout(self._eb_socket_row_widget)
         socket_row.setContentsMargins(0, 0, 0, 0)
@@ -5958,7 +6022,7 @@ class ItemBuffsTab(QWidget):
         dlg.exec()
 
 
-    def _eb_apply_preset(self, preset_key: str, skip=False) -> None:
+    def _eb_apply_preset(self, preset_key: str, skip: bool = False) -> None:
         if not hasattr(self, '_buff_rust_items') or not self._buff_rust_items:
             QMessageBox.warning(self, "Apply Preset", "Extract with Rust parser first.")
             return
@@ -5996,16 +6060,25 @@ class ItemBuffsTab(QWidget):
                 f"Gimmick: {preset.get('gimmick_info', 'unchanged')}\n"
                 f"Replaces existing gimmick."
             )
-            
-            warning = preset.get('warning', "")
-            if len(warning) > 0: warning = "WARNING: " + warning + "\n\n"
-                        
+
+        if not skip:
+            warning = preset.get('warning', '')
+            if warning:
+                warning = f"WARNING: {warning}\n\n"
+
+            default_desc = (
+                f"Skills (stack with existing): {skill_str}\n"
+                f"Gimmick: {preset.get('gimmick_info', 'unchanged')}\n"
+                f"Replaces existing gimmick."
+                if preset.get('passives') else ""
+            )
+
             reply = QMessageBox.question(
                 self, f"Apply Preset: {preset['name']}",
                 f"Apply {preset['name']} preset to {display_name}?\n\n"
-                f"{preset.get('description', default_message)}\n\n"
+                f"{preset.get('description', default_desc)}\n\n"
                 f"{warning}{charge_change_warn}"
-                f"Click 'Apply to Game' after to write or Export to save.",
+                f"Click 'Apply to Game' after to write.",
                 QMessageBox.Yes | QMessageBox.No, QMessageBox.No,
             )
             if reply != QMessageBox.Yes:
@@ -6036,6 +6109,23 @@ class ItemBuffsTab(QWidget):
                 if ddd.get(dd) is not None:
                     existing[dd] = ddd[dd]
             # rust_info['drop_default_data'] = existing
+
+        # Sync mirrored fields — game expects these to match their parent values
+        if 'cooltime' in preset:
+            rust_info['unk_post_cooltime_a'] = preset['cooltime']
+            rust_info['unk_post_cooltime_b'] = preset['cooltime']
+        if 'max_charged_useable_count' in preset:
+            rust_info['unk_post_max_charged_a'] = preset['max_charged_useable_count']
+            rust_info['unk_post_max_charged_b'] = preset['max_charged_useable_count']
+
+        if preset.get('drop_default_data') is not None:
+            ddd = preset['drop_default_data']
+            existing_ddd = rust_info.get('drop_default_data')
+            if existing_ddd:
+                for dd in ('drop_enchant_level', 'add_socket_material_item_list',
+                           'socket_item_list', 'socket_valid_count', 'use_socket'):
+                    if ddd.get(dd) is not None:
+                        existing_ddd[dd] = ddd[dd]
 
         # Sync mirrored fields — game expects these to match their parent values
         if 'cooltime' in preset:
@@ -11330,6 +11420,138 @@ class ItemBuffsTab(QWidget):
         except Exception as e:
             log.exception("Item creator deploy failed")
             QMessageBox.critical(self, "Deploy Failed", str(e))
+
+    def _buff_export_mod_folder(self) -> None:
+        """Export as a ready-to-use mod folder — same as Apply to Game but to a folder."""
+        if not self._buff_ensure_patcher():
+            return
+        if not hasattr(self, '_buff_rust_items') or not self._buff_rust_items:
+            QMessageBox.warning(self, "Export Mod", "Extract iteminfo first.")
+            return
+        if not self._buff_modified:
+            apply_stacks = hasattr(self, '_stack_check') and self._stack_check.isChecked()
+            apply_inf_dura = hasattr(self, '_inf_dura_check') and self._inf_dura_check.isChecked()
+            if not apply_stacks and not apply_inf_dura:
+                QMessageBox.information(self, "No Changes",
+                    "No modifications to export.")
+                return
+
+        from PySide6.QtWidgets import QInputDialog
+        name, ok = QInputDialog.getText(self, "Export as Mod Folder",
+            "Mod name:", text="My ItemBuffs Mod")
+        if not ok or not name.strip():
+            return
+        name = name.strip()
+
+        save_dir = QFileDialog.getExistingDirectory(
+            self, "Choose folder to export mod into",
+            os.path.join(os.path.dirname(os.path.abspath(sys.argv[0])), "packs"))
+        if not save_dir:
+            return
+
+        folder_name = "".join(c if (c.isalnum() or c in "-_ ") else "_" for c in name)
+        out_path = os.path.join(save_dir, folder_name)
+
+        apply_stacks = hasattr(self, '_stack_check') and self._stack_check.isChecked()
+        apply_inf_dura = hasattr(self, '_inf_dura_check') and self._inf_dura_check.isChecked()
+
+        if apply_stacks:
+            target_val = self._stack_spin.value()
+            for it in self._buff_rust_items:
+                if it.get('max_stack_count', 1) > 1:
+                    it['max_stack_count'] = target_val
+        if apply_inf_dura:
+            for it in self._buff_rust_items:
+                endurance = it.get('max_endurance', 0)
+                if endurance > 0 and endurance != 65535:
+                    it['max_endurance'] = 65535
+                    it['is_destroy_when_broken'] = 0
+
+        self._buff_status_label.setText("Serializing...")
+        QApplication.processEvents()
+
+        try:
+            import crimson_rs
+            import shutil
+            import tempfile
+
+            final_data = self._rebuild_full_iteminfo()
+            fa = bytearray(final_data)
+            self._apply_vfx_changes(fa)
+            self._apply_transmog_swaps(fa)
+            final_data = bytes(fa)
+
+            game_path = self._buff_patcher.game_path
+            INTERNAL_DIR = "gamedata/binary__/client/bin"
+            mod_group = f"{self._buff_overlay_spin.value():04d}"
+
+            with tempfile.TemporaryDirectory() as tmp_dir:
+                group_dir = os.path.join(tmp_dir, mod_group)
+                builder = crimson_rs.PackGroupBuilder(
+                    group_dir,
+                    crimson_rs.Compression.NONE,
+                    crimson_rs.Crypto.NONE,
+                )
+                builder.add_file(INTERNAL_DIR, "iteminfo.pabgb", final_data)
+                _pabgh = getattr(self, '_buff_rebuilt_pabgh', None)
+                if not _pabgh:
+                    _pabgh = bytes(crimson_rs.extract_file(
+                        game_path, '0008', INTERNAL_DIR, 'iteminfo.pabgh'))
+                builder.add_file(INTERNAL_DIR, "iteminfo.pabgh", _pabgh)
+
+                staged_skill = getattr(self, "_staged_skill_files", None) or {}
+                for fname in ("skill.pabgb", "skill.pabgh"):
+                    if fname in staged_skill:
+                        builder.add_file(INTERNAL_DIR, fname, staged_skill[fname])
+
+                pamt_bytes = bytes(builder.finish())
+                pamt_checksum = crimson_rs.parse_pamt_bytes(pamt_bytes)["checksum"]
+
+                os.makedirs(out_path, exist_ok=True)
+                paz_dst = os.path.join(out_path, mod_group)
+                os.makedirs(paz_dst, exist_ok=True)
+                shutil.copy2(os.path.join(group_dir, "0.paz"),
+                             os.path.join(paz_dst, "0.paz"))
+                shutil.copy2(os.path.join(group_dir, "0.pamt"),
+                             os.path.join(paz_dst, "0.pamt"))
+
+                # Build a standalone PAPGT with just this entry
+                papgt = {"entries": []}
+                papgt = crimson_rs.add_papgt_entry(
+                    papgt, mod_group, pamt_checksum, 0, 16383)
+                meta_dst = os.path.join(out_path, "meta")
+                os.makedirs(meta_dst, exist_ok=True)
+                crimson_rs.write_papgt_file(papgt,
+                    os.path.join(meta_dst, "0.papgt"))
+
+            modinfo = {
+                "id": name.lower().replace(" ", "_"),
+                "name": name,
+                "version": "1.0.0",
+                "author": "CrimsonGameMods",
+                "description": f"ItemBuffs mod: {name}",
+            }
+            with open(os.path.join(out_path, "modinfo.json"), "w",
+                      encoding="utf-8") as f:
+                json.dump(modinfo, f, indent=2)
+
+            paz_size = os.path.getsize(os.path.join(paz_dst, "0.paz"))
+            self._buff_status_label.setText(f"Exported to {folder_name}/")
+            QMessageBox.information(self, "Mod Exported",
+                f"Mod exported to:\n{out_path}\n\n"
+                f"Contents:\n"
+                f"  {mod_group}/0.paz ({paz_size:,} bytes)\n"
+                f"  {mod_group}/0.pamt\n"
+                f"  meta/0.papgt\n"
+                f"  modinfo.json\n\n"
+                f"To install: copy {mod_group}/ and meta/ into your game directory.\n"
+                f"Or import into CDUMM / JMM mod manager.")
+
+        except Exception as e:
+            import traceback; traceback.print_exc()
+            self._buff_status_label.setText(f"Export failed: {e}")
+            QMessageBox.critical(self, "Export Failed",
+                f"Failed to export mod:\n{e}")
 
     def _buff_apply_to_game(self) -> None:
         if not self._buff_ensure_patcher():
