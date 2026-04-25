@@ -222,11 +222,16 @@ class ItemBuffsTab(QWidget):
             f"{action_name} is an advanced feature that requires Dev Mode.\n\n"
             "By enabling Dev Mode you agree to the following:\n\n"
             "  - Experimental features may corrupt saves or crash the game\n"
-            "  - Export as Mod / CDUMM / JSON are UNSUPPORTED\n"
-            "  - We do NOT provide help for exported mod packages\n"
-            "  - Contact the mod loader developer for loader issues\n"
-            "  - Bug reports about exported mods will be closed\n\n"
-            "Apply to Game remains the supported deployment method.\n\n"
+            "  - Legacy export formats (Export as Mod / CDUMM / JSON Patch)\n"
+            "    have been removed. These used byte offsets that break on\n"
+            "    every game update.\n"
+            "  - Export as Field JSON v3 is the only supported export format.\n"
+            "    It uses field names and survives game updates.\n"
+            "  - JMM and CDUMM mod managers do not yet support Field JSON v3.\n"
+            "    Until they adopt it, exported mods will only work with the\n"
+            "    Stacker Tool or mod loaders that support Format 3.\n"
+            "  - Apply to Game remains the recommended deployment method\n"
+            "    for personal use.\n\n"
             "Enable Dev Mode now?",
             QMessageBox.Yes | QMessageBox.No,
             QMessageBox.No,
@@ -332,9 +337,56 @@ class ItemBuffsTab(QWidget):
   
             return more_menu
 
-        def build_import_menu() -> QMenu:
+        def build_action_row() -> QHBoxLayout:
+            action_row = QHBoxLayout()
+            action_row.setSpacing(4)
+
+            extract_rust_btn = QPushButton("Extract")
+            extract_rust_btn.setObjectName("accentBtn")
+            extract_rust_btn.setToolTip("Extract iteminfo from game.\n"
+                "Uses existing overlay if present, falls back to vanilla.")
+            extract_rust_btn.clicked.connect(self._buff_extract_rust)
+            action_row.addWidget(extract_rust_btn)
+
+            extract_vanilla_btn = QPushButton("Extract Vanilla")
+            extract_vanilla_btn.setToolTip("Always extract from vanilla game files (0008/).\n"
+                "Use this after Apply to Game to get a clean baseline.")
+            extract_vanilla_btn.clicked.connect(self._buff_extract_vanilla)
+            action_row.addWidget(extract_vanilla_btn)
+            
+            reset_btn = QPushButton("Reset")
+            reset_btn.setToolTip("Discard all in-memory changes, re-extract from disk")
+            reset_btn.clicked.connect(self._buff_remove_all)
+            action_row.addWidget(reset_btn)
+
+            enable_exports_btn = QPushButton("Enable Exports")
+            enable_exports_btn.setStyleSheet(
+                "QPushButton { background-color: #6A1B9A; color: white; font-weight: bold; }")
+            enable_exports_btn.setToolTip("Enable export features (Dev Mode required)")
+            enable_exports_btn.clicked.connect(lambda: self._require_dev_mode("Enable Exports"))
+            action_row.addWidget(enable_exports_btn)
+
+            apply_game_btn = QPushButton("Apply to Game")
+            apply_game_btn.setStyleSheet("QPushButton {"
+                "background-color: #B71C1C; color: white; font-weight: bold; }")
+            apply_game_btn.setToolTip(
+                "Deploy modified iteminfo.pabgb directly to the game.\n"
+                "Creates a PAZ overlay — original files are NOT modified.\n"
+                "Restart the game for changes to take effect.\n"
+                "Use Restore (More ▾) to undo.")
+            apply_game_btn.clicked.connect(self._buff_apply_to_game)
+            self._buff_apply_game_btn = apply_game_btn
+            action_row.addWidget(apply_game_btn)
+
+            import_mod_btn = QPushButton("Import")
+            import_mod_btn.setStyleSheet("QPushButton {"
+                "background-color: #00695C; color: white; font-weight: bold; }")
+            
+            # START Import Menu
             import_mod_menu = QMenu(self)
             import_mod_menu.setToolTipsVisible(True)
+            import_mod_btn.setMenu(import_mod_menu)
+            action_row.addWidget(import_mod_btn)
             
             act_import_config = import_mod_menu.addAction("Import ItemBuffs Config")
             act_import_config.setToolTip(
@@ -367,13 +419,18 @@ class ItemBuffsTab(QWidget):
                 "config.\nPoint at a mod's files/gamedata/binary__/client/bin/"
                 "iteminfo.pabgb — every modified field becomes editable here.")
             act_import_cdumm_mod.triggered.connect(self._buff_import_mod_folder)
+            # END Import Menu
             
-            return import_mod_menu
+            export_mod_btn = QPushButton("Export")
+            export_mod_btn.setStyleSheet("QPushButton {"
+                "background-color: #00695C; color: white; font-weight: bold; }")
 
-            
-        def build_export_menu() -> QMenu:
             export_mod_menu = QMenu(self)
             export_mod_menu.setToolTipsVisible(True)
+            export_mod_btn.setMenu(export_mod_menu)
+            action_row.addWidget(export_mod_btn)
+            
+            # START Export Menu
             # Export buttons are dev-gated (normal users never see them).
             act_export_config = export_mod_menu.addAction("Export ItemBuffs Config")
             act_export_config.setToolTip(
@@ -381,89 +438,22 @@ class ItemBuffsTab(QWidget):
             act_export_config.triggered.connect(self._buff_save_config)
             
             export_mod_menu.addSeparator()
-
-            act_export_json_mod = export_mod_menu.addAction("Export JSON Patch...")
-            act_export_json_mod.setToolTip(
-                "ADVANCED — UNSUPPORTED. Contact mod loader dev for help.\n\n"
-                "Export value-only changes as a JSON patch file.")
-            act_export_json_mod.triggered.connect(self._buff_export_json)
-            export_mod_menu.addAction(act_export_json_mod)
-
-            act_export_mod = export_mod_menu.addAction("Export Mod...")
-            act_export_mod.setToolTip(
-                "ADVANCED — UNSUPPORTED. Contact mod loader dev for help.\n\n"
-                "Export as raw game files for mod loaders (CDMM, DMM, CDUMM).")
-            act_export_mod.triggered.connect(self._buff_export_mod)
-            export_mod_menu.addAction(act_export_mod)
-
-            act_export_cdumm_mod = export_mod_menu.addAction("Export CDUMM Mod...")
-            act_export_cdumm_mod.setToolTip(
-                "ADVANCED — UNSUPPORTED. Contact mod loader dev for help.\n\n"
-                "Export as pre-packed PAZ mod for JMM / CDUMM / DMM.")
-            act_export_cdumm_mod.triggered.connect(self._buff_export_cdumm_mod)
-            export_mod_menu.addAction(act_export_cdumm_mod)
-
-            act_export_all = export_mod_menu.addAction("Export All Mod Formats...")
-            act_export_all.setToolTip(
-                "ADVANCED — UNSUPPORTED. Export in all three formats at once.")
-            act_export_all.triggered.connect(self._buff_export_all_formats)
-            export_mod_menu.addAction(act_export_all)
             
-            return export_mod_menu
+            # act_export_perfect_mod = export_mod_menu.addAction("Export Perfect Loader Mod...")
+            # act_export_perfect_mod.setToolTip(
+            #     "Export a Perfect/Semantic-format MOD.")
+            # act_export_perfect_mod.triggered.connect(self._buff_export_perfect_mod)
 
-        def build_action_row() -> QHBoxLayout:
-            action_row = QHBoxLayout()
-            action_row.setSpacing(4)
-
-            extract_rust_btn = QPushButton("Extract")
-            extract_rust_btn.setObjectName("accentBtn")
-            extract_rust_btn.setToolTip("Extract iteminfo from game using Rust parser")
-            extract_rust_btn.clicked.connect(self._buff_extract_rust)
-            action_row.addWidget(extract_rust_btn)
+            act_export_field = export_mod_menu.addAction("Export as Field JSON v3")
+            act_export_field.setToolTip(
+                "Export all edits as a Format 3 field-name JSON.\n"
+                "Uses field names instead of byte offsets — survives game updates.\n"
+                "Compatible with Stacker Tool and future mod loaders.")
+            act_export_field.triggered.connect(self._buff_export_field_json_v3)
+            export_mod_menu.addAction(act_export_field)
+            # END Export Menu
             
-            extract_vanilla_btn = QPushButton("Extract Vanilla")
-            extract_vanilla_btn.setToolTip("Always extract from vanilla game files (0008/).\n"
-                "Use this after Apply to Game to get a clean baseline.")
-            extract_vanilla_btn.clicked.connect(self._buff_extract_vanilla)
-            action_row.addWidget(extract_vanilla_btn)
             
-            reset_btn = QPushButton("Reset")
-            reset_btn.setToolTip("Discard all in-memory changes, re-extract from disk")
-            reset_btn.clicked.connect(self._buff_remove_all)
-            action_row.addWidget(reset_btn)
-            
-            enable_exports_btn = QPushButton("Enable Exports")
-            enable_exports_btn.setStyleSheet(
-                "QPushButton { background-color: #6A1B9A; color: white; font-weight: bold; }")
-            enable_exports_btn.setToolTip("Enable export features (Dev Mode required)")
-            enable_exports_btn.clicked.connect(lambda: self._require_dev_mode("Enable Exports"))
-            action_row.addWidget(enable_exports_btn)
-
-            apply_game_btn = QPushButton("Apply to Game")
-            apply_game_btn.setStyleSheet("QPushButton {"
-                "background-color: #B71C1C; color: white; font-weight: bold; }")
-            apply_game_btn.setToolTip(
-                "Deploy modified iteminfo.pabgb directly to the game.\n"
-                "Creates a PAZ overlay — original files are NOT modified.\n"
-                "Restart the game for changes to take effect.\n"
-                "Use Restore (More ▾) to undo.")
-            apply_game_btn.clicked.connect(self._buff_apply_to_game)
-            self._buff_apply_game_btn = apply_game_btn
-            action_row.addWidget(apply_game_btn)
-
-            import_mod_btn = QPushButton("Import")
-            import_mod_btn.setStyleSheet("QPushButton {"
-                "background-color: #00695C; color: white; font-weight: bold; }")
-            import_mod_menu = build_import_menu()
-            import_mod_btn.setMenu(import_mod_menu)
-            action_row.addWidget(import_mod_btn)
-            
-            export_mod_btn = QPushButton("Export")
-            export_mod_btn.setStyleSheet("QPushButton {"
-                "background-color: #00695C; color: white; font-weight: bold; }")
-            export_mod_menu = build_export_menu()
-            export_mod_btn.setMenu(export_mod_menu)
-            action_row.addWidget(export_mod_btn)
 
             transmog_btn = QPushButton("Transmog (Armor / Weapon Visual Swap)")
             transmog_btn.setStyleSheet("QPushButton {"
@@ -557,24 +547,22 @@ class ItemBuffsTab(QWidget):
             self._buff_show_icons_btn.setToolTip("Toggle item icons in the items list")
             self._buff_show_icons_btn.clicked.connect(self._buff_toggle_icons)
             self._buff_icons_enabled = False
-            
+
             def toggle_fav():
                 self._buff_items_table.cellChanged.disconnect(toggle_fav)
                 self._showing_favorites = False
             def show_favs():
                 if self._showing_favorites: toggle_fav()
-                # favorites = self._favorite_items
-                # if len(favorites) > 0:
                 self._showing_favorites = True
                 self._show_similar_items({"key": 0},"favorites")
                 self._buff_items_table.cellChanged.connect(toggle_fav)
             self._show_favorite_items = show_favs
-            
+
             fav_btn = QPushButton("⭐")
             fav_btn.setToolTip("Show favorited items only")
             fav_btn.clicked.connect(show_favs)
             self._showing_favorites = False
-            
+
             search_row.addWidget(fav_btn)
             search_row.addWidget(QLabel("Search:"))
             search_row.addWidget(self._buff_search, 1)
@@ -727,40 +715,15 @@ class ItemBuffsTab(QWidget):
             bottom_bar.setContentsMargins(0, 0, 0, 0)
             bottom_bar.setSpacing(6)
 
-            # Export buttons are dev-gated (normal users never see them).
-            export_buffs_btn = QPushButton("Export JSON Patch")
-            export_buffs_btn.setToolTip(
-                "Export value-only changes as a JSON patch file.\n"
-                "Requires Dev Mode (will prompt on first use).")
-            export_buffs_btn.clicked.connect(self._buff_export_json)
-            bottom_bar.addWidget(export_buffs_btn)
-
-            export_mod_btn = QPushButton("Export as Mod")
-            export_mod_btn.setStyleSheet(
-                "background-color: #7B1FA2; color: white; font-weight: bold;")
-            export_mod_btn.setToolTip(
-                "Export as raw game files for mod loaders (CDMM, DMM, CDUMM).\n"
-                "Requires Dev Mode (will prompt on first use).")
-            export_mod_btn.clicked.connect(self._buff_export_mod)
-            bottom_bar.addWidget(export_mod_btn)
-
-            export_cdumm_btn = QPushButton("Export as CDUMM Mod")
-            export_cdumm_btn.setStyleSheet(
-                "background-color: #1B5E20; color: white; font-weight: bold;")
-            export_cdumm_btn.setToolTip(
-                "Export as pre-packed PAZ mod for JMM / CDUMM / DMM.\n"
-                "Requires Dev Mode (will prompt on first use).")
-            export_cdumm_btn.clicked.connect(self._buff_export_cdumm_mod)
-            bottom_bar.addWidget(export_cdumm_btn)
-
-            export_all_btn = QPushButton("Export All Formats")
-            export_all_btn.setStyleSheet(
+            export_field_btn = QPushButton("Export as Field JSON v3")
+            export_field_btn.setStyleSheet(
                 "background-color: #00695C; color: white; font-weight: bold;")
-            export_all_btn.setToolTip(
-                "Export in all three formats at once.\n"
-                "Requires Dev Mode (will prompt on first use).")
-            export_all_btn.clicked.connect(self._buff_export_all_formats)
-            bottom_bar.addWidget(export_all_btn)
+            export_field_btn.setToolTip(
+                "Export all edits as a Format 3 field-name JSON.\n"
+                "Uses field names instead of byte offsets — survives game updates.\n"
+                "Compatible with Stacker Tool and future mod loaders.")
+            export_field_btn.clicked.connect(self._buff_export_field_json_v3)
+            bottom_bar.addWidget(export_field_btn)
 
             self._dev_export_btns_buffs = []
 
@@ -1389,7 +1352,8 @@ class ItemBuffsTab(QWidget):
         socket_row.addWidget(socket_apply_btn)
         socket_row.addStretch(1)
         pl.addWidget(self._eb_socket_row_widget)
-        
+
+        # --- Drop enchant level ---
         drop_enchant = QWidget()
         drop_enchant_row = QHBoxLayout(drop_enchant)
         drop_enchant_row.setContentsMargins(0, 0, 0, 0)
@@ -1407,7 +1371,6 @@ class ItemBuffsTab(QWidget):
             "Change the default enchantment level for the SELECTED item "
             "when it drops or is purchased.")
         drop_enchant_apply.clicked.connect(self._eb_change_drop_enchant)
-        
         drop_enchant_row.addWidget(drop_enchant_apply)
         drop_enchant_row.addStretch(1)
         pl.addWidget(drop_enchant)
@@ -3302,10 +3265,6 @@ class ItemBuffsTab(QWidget):
 
 
     def _buff_refresh_stats(self) -> None:
-        """
-        Fills Stat Table UI with updated data for the selected item
-        """
-        
         item = self._buff_current_item
         if item is None:
             self._buff_stats_table.setRowCount(0)
@@ -3370,14 +3329,14 @@ class ItemBuffsTab(QWidget):
 
         if rust_info:
             ddd = rust_info.get('drop_default_data', {})
-            self._eb_drop_enchant_level.setValue(ddd['drop_enchant_level'])
-            
+            self._eb_drop_enchant_level.setValue(ddd.get('drop_enchant_level', 0))
+
             if ddd.get('use_socket'):
-                svc = ddd['socket_valid_count']
-                sml = ddd['add_socket_material_item_list']
+                svc = ddd.get('socket_valid_count', 0)
+                sml = ddd.get('add_socket_material_item_list', [])
                 self._eb_socket_valid.setValue(svc)
                 self._eb_socket_count.setValue(len(sml))
-                
+
                 s_sep = QTableWidgetItem(f"--- Sockets ({svc}/{len(sml)}) ---")
                 s_sep.setForeground(QBrush(QColor("#F83B3B")))
                 s_sep.setFont(QFont("Consolas", 9, QFont.Bold))
@@ -3387,13 +3346,12 @@ class ItemBuffsTab(QWidget):
                 table.setItem(row, 1, QTableWidgetItem(""))
                 table.setSpan(row, 0, 1, 2)
                 row += 1
-                
-                sil = ddd['socket_item_list']
+
+                sil = ddd.get('socket_item_list', [])
                 if sil:
                     for si in sil:
                         si_name = self._name_db.get_name(si) if hasattr(self, '_name_db') else si
-                        # si_name = self._buff_rust_lookup.get(si, si)
-                        si_c = QTableWidgetItem(f"  {si_name}  ← click to select for Remove")
+                        si_c = QTableWidgetItem(f"  {si_name}")
                         si_c.setForeground(QBrush(QColor("#F83B3B")))
                         si_c.setData(Qt.UserRole + 1, ('socket', si))
                         table.setRowCount(row + 1)
@@ -3408,7 +3366,7 @@ class ItemBuffsTab(QWidget):
                     table.setItem(row, 0, si_c)
                     table.setItem(row, 1, QTableWidgetItem(""))
                     row += 1
-            
+
             edl = rust_info.get('enchant_data_list', [])
 
             psl = rust_info.get('equip_passive_skill_list', [])
@@ -5961,6 +5919,7 @@ class ItemBuffsTab(QWidget):
         },
     }
 
+
     def _eb_great_thief_pick_variant(self) -> None:
         from PySide6.QtWidgets import QDialog, QVBoxLayout, QLabel, QPushButton, QHBoxLayout
 
@@ -6190,6 +6149,46 @@ class ItemBuffsTab(QWidget):
         )
 
 
+    # Accessory + cloak categories where the game RENDERS sockets when
+    # present, even though these items ship with use_socket=0 and no
+    # add_socket_material_item_list by default. Confirmed via DennyBro's
+    # "Accessories 5 Socket OP" JSON mod (Nexus): 169 items across these
+    # categories are the full set that the game treats as socketable when
+    # use_socket=1 + a 5-entry material list is populated. Weapons/armor
+    # already ship with sockets, so they're handled by the existing
+    # extend-existing path and don't need force-enable.
+    _FORCE_SOCKET_CATEGORIES = {"Ring", "Necklace", "Earring", "Cloak"}
+    # DennyBro also enables sockets on nobility-degree insignia. Those
+    # don't match the standard category map, so we pattern-match them
+    # separately on the string_key.
+    _NOBILITY_DEGREE_PATTERN = "_Nobility_Degree_"
+
+    def _socketable_force_target(self, it: dict) -> bool:
+        """Is this item one of the force-enable accessories/cloaks that
+        the game will respect sockets on, given a properly-populated dict?
+
+        Returns True only for items with drop_default_data + equip_type
+        + a string_key that classifies as an accessory category or a
+        nobility-degree insignia. Everything else (weapons, armor pieces
+        with vanilla sockets, materials, quest items) is left alone — the
+        existing extend path handles them.
+        """
+        if not it.get("drop_default_data"):
+            return False
+        if not it.get("equip_type_info"):
+            # equip_type_info == 0 means not equipment; sockets are
+            # meaningless on consumables / materials / quest items.
+            return False
+        sk = it.get("string_key", "") or ""
+        if self._NOBILITY_DEGREE_PATTERN in sk:
+            return True
+        try:
+            from armor_catalog import get_category
+            cat = get_category(sk)
+        except Exception:
+            cat = None
+        return cat in self._FORCE_SOCKET_CATEGORIES
+
     def _eb_change_drop_enchant(self) -> None:
         if not hasattr(self, '_buff_rust_items') or not self._buff_rust_items:
             QMessageBox.warning(self, "Drop Enchant Level", "Extract with Rust parser first.")
@@ -6216,7 +6215,7 @@ class ItemBuffsTab(QWidget):
                 QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
             if reply != QMessageBox.Yes:
                 return
-            
+
         ddd['drop_enchant_level'] = drop_level
 
         self._buff_modified = True
@@ -6275,47 +6274,6 @@ class ItemBuffsTab(QWidget):
         self._eb_status.setText(
             f"Sockets on {display_name}: {target_count} max, {target_valid} pre-unlocked. "
             f"Export as Mod to write.")
-
-
-    # Accessory + cloak categories where the game RENDERS sockets when
-    # present, even though these items ship with use_socket=0 and no
-    # add_socket_material_item_list by default. Confirmed via DennyBro's
-    # "Accessories 5 Socket OP" JSON mod (Nexus): 169 items across these
-    # categories are the full set that the game treats as socketable when
-    # use_socket=1 + a 5-entry material list is populated. Weapons/armor
-    # already ship with sockets, so they're handled by the existing
-    # extend-existing path and don't need force-enable.
-    _FORCE_SOCKET_CATEGORIES = {"Ring", "Necklace", "Earring", "Cloak"}
-    # DennyBro also enables sockets on nobility-degree insignia. Those
-    # don't match the standard category map, so we pattern-match them
-    # separately on the string_key.
-    _NOBILITY_DEGREE_PATTERN = "_Nobility_Degree_"
-
-    def _socketable_force_target(self, it: dict) -> bool:
-        """Is this item one of the force-enable accessories/cloaks that
-        the game will respect sockets on, given a properly-populated dict?
-
-        Returns True only for items with drop_default_data + equip_type
-        + a string_key that classifies as an accessory category or a
-        nobility-degree insignia. Everything else (weapons, armor pieces
-        with vanilla sockets, materials, quest items) is left alone — the
-        existing extend path handles them.
-        """
-        if not it.get("drop_default_data"):
-            return False
-        if not it.get("equip_type_info"):
-            # equip_type_info == 0 means not equipment; sockets are
-            # meaningless on consumables / materials / quest items.
-            return False
-        sk = it.get("string_key", "") or ""
-        if self._NOBILITY_DEGREE_PATTERN in sk:
-            return True
-        try:
-            from armor_catalog import get_category
-            cat = get_category(sk)
-        except Exception:
-            cat = None
-        return cat in self._FORCE_SOCKET_CATEGORIES
 
     def _eb_extend_all_sockets_to_5(self) -> None:
         if not hasattr(self, '_buff_rust_items') or not self._buff_rust_items:
@@ -8186,6 +8144,108 @@ class ItemBuffsTab(QWidget):
             })
         return ops
 
+    def _buff_export_field_json_v3(self) -> None:
+        """Export edits as Format 3 field-name JSON (survives game updates)."""
+        if not hasattr(self, '_buff_rust_items') or not self._buff_rust_items:
+            QMessageBox.warning(self, "Export Field JSON v3",
+                "Extract iteminfo first (click 'Extract').")
+            return
+        orig = getattr(self, '_buff_rust_items_original', None)
+        if not orig:
+            QMessageBox.warning(self, "Export Field JSON v3",
+                "No vanilla baseline found. Re-extract iteminfo.")
+            return
+
+        orig_by_key = {it['key']: it for it in orig}
+        intents = []
+        for item in self._buff_rust_items:
+            ikey = item.get('key', 0)
+            skey = item.get('string_key', '')
+            vanilla = orig_by_key.get(ikey)
+            if not vanilla:
+                intents.append({
+                    'entry': skey, 'key': ikey,
+                    'op': 'add_entry',
+                    'data': {k: v for k, v in item.items()
+                             if k not in ('key', 'string_key')},
+                })
+                continue
+            diffs = self._field_diff(skey, ikey, vanilla, item)
+            intents.extend(diffs)
+
+        if not intents:
+            QMessageBox.information(self, "Export Field JSON v3",
+                "No field-level changes detected. Nothing to export.")
+            return
+
+        from PySide6.QtWidgets import QInputDialog
+        name, ok = QInputDialog.getText(self, "Export Field JSON v3",
+            "Mod name:", text="My ItemBuffs Mod")
+        if not ok or not name.strip():
+            return
+        name = name.strip()
+
+        default_name = name.replace(' ', '_') + ".field.json"
+        path, _ = QFileDialog.getSaveFileName(
+            self, "Export Field JSON v3", default_name,
+            "Field JSON (*.field.json *.json);;All Files (*)")
+        if not path:
+            return
+
+        doc = {
+            'modinfo': {
+                'title': name,
+                'version': '1.0',
+                'author': 'CrimsonGameMods ItemBuffs',
+                'description': f'{len(intents)} field-level intent(s)',
+                'note': 'Format 3 — uses field names, survives game updates',
+            },
+            'format': 3,
+            'target': 'iteminfo.pabgb',
+            'intents': intents,
+        }
+
+        try:
+            with open(path, 'w', encoding='utf-8') as f:
+                json.dump(doc, f, indent=2, ensure_ascii=False, default=str)
+            self._buff_status_label.setText(
+                f"Exported {len(intents)} field intents to {os.path.basename(path)}")
+            QMessageBox.information(self, "Export Field JSON v3",
+                f"Exported {len(intents)} field-level intents.\n\n"
+                f"This file uses field names — it survives game updates.\n"
+                f"Compatible with Stacker Tool and future mod loaders.\n\n"
+                f"File: {path}")
+        except Exception as e:
+            QMessageBox.critical(self, "Export Failed", str(e))
+
+    @staticmethod
+    def _field_diff(entry: str, key: int, a: dict, b: dict,
+                    prefix: str = '') -> list[dict]:
+        intents = []
+        all_keys = set(list(a.keys()) + list(b.keys()))
+        for k in sorted(all_keys):
+            if k in ('key', 'string_key'):
+                continue
+            path = f'{prefix}.{k}' if prefix else k
+            va, vb = a.get(k), b.get(k)
+            if va == vb:
+                continue
+            if isinstance(va, dict) and isinstance(vb, dict):
+                intents.extend(
+                    ItemBuffsTab._field_diff(entry, key, va, vb, path))
+            elif isinstance(va, list) and isinstance(vb, list):
+                if va != vb:
+                    intents.append({
+                        'entry': entry, 'key': key,
+                        'field': path, 'op': 'set', 'new': vb,
+                    })
+            else:
+                intents.append({
+                    'entry': entry, 'key': key,
+                    'field': path, 'op': 'set', 'new': vb,
+                })
+        return intents
+
     def _buff_export_all_formats(self) -> None:
         if not self._require_dev_mode("Export All Formats"):
             return
@@ -9656,53 +9716,31 @@ class ItemBuffsTab(QWidget):
 
 
     def _cd_patch_all_items(self) -> None:
-        if not hasattr(self, '_buff_patcher') or self._buff_patcher is None:
-            QMessageBox.warning(self, "No Cooldown", "Extract iteminfo first.")
-            return
-        if not hasattr(self, '_buff_items') or not self._buff_items:
+        if not hasattr(self, '_buff_rust_items') or not self._buff_rust_items:
             QMessageBox.warning(self, "No Cooldown", "Extract iteminfo first.")
             return
 
-        raw = self._buff_patcher._original_data
         patched = 0
-        skipped = 0
-        for item in self._buff_items:
-            if item.item_key in self._cd_patches:
-                skipped += 1
+        already = 0
+        for it in self._buff_rust_items:
+            cur_cd = it.get('cooltime', 0) or 0
+            if cur_cd <= 1:
+                if cur_cd == 1:
+                    already += 1
                 continue
-            abs_off, cur_val = self._cd_detect(item.item_key)
-            if abs_off is None:
-                continue
-            if cur_val == 1:
-                continue
-            orig_bytes = bytes(raw[abs_off:abs_off + 4])
-            self._cd_patches[item.item_key] = (abs_off, orig_bytes, 1)
+            it['cooltime'] = 1
+            it['unk_post_cooltime_a'] = 1
+            it['unk_post_cooltime_b'] = 1
             patched += 1
 
         self._buff_modified = True
+        self._buff_refresh_stats()
 
-        has_stat_edits = self._buff_modified and bool(
-            getattr(self, '_buff_rust_items', None) and
-            any(
-                it.get('equip_passive_skill_list') or
-                any(ed.get('equip_buffs') or ed.get('enchant_stat_data')
-                    for ed in it.get('enchant_data_list', []))
-                for it in self._buff_rust_items
-            )
-        )
-
-        skip_note = f"\n{skipped} item(s) were already queued and skipped." if skipped else ""
-        export_hint = (
-            "\n\nYou also have stat/passive edits — use:\n"
-            "  • Export as Mod  (includes everything)\n"
-            "  • Export JSON Patch  (value-only edits)"
-            if has_stat_edits else
-            "\n\nUse Export JSON Patch or Export as Mod to apply."
-        )
-
+        skip_note = f"\n{already} item(s) already at 1s." if already else ""
         QMessageBox.information(
             self, "No Cooldown — Done",
-            f"Queued {patched} cooldown patch(es) (→ 1s).{skip_note}{export_hint}"
+            f"Set cooltime → 1s on {patched} item(s).{skip_note}\n\n"
+            f"Use Export as Mod or Apply to Game to write."
         )
 
 
@@ -10789,7 +10827,7 @@ class ItemBuffsTab(QWidget):
         """Open the visual item creator dialog."""
         if not hasattr(self, '_buff_rust_items') or not self._buff_rust_items:
             QMessageBox.warning(self, "Create Item",
-                "Extract with Rust parser first (click 'Extract (Rust)').")
+                                "Extract with Rust parser first (click 'Extract (Rust)').")
             return
 
         from gui.item_creator_dialog import ItemCreatorDialog
@@ -11306,6 +11344,21 @@ class ItemBuffsTab(QWidget):
             )
             return
 
+        # Check for iteminfo conflicts from other tools before applying
+        try:
+            from overlay_coordinator import check_iteminfo_conflicts_before_apply
+            buff_dir = f"{self._buff_overlay_spin.value():04d}"
+            warning = check_iteminfo_conflicts_before_apply(
+                self._buff_patcher.game_path, buff_dir, self._config)
+            if warning:
+                reply = QMessageBox.warning(
+                    self, "ItemInfo Conflict Detected", warning,
+                    QMessageBox.Yes | QMessageBox.Cancel, QMessageBox.Cancel)
+                if reply != QMessageBox.Yes:
+                    return
+        except Exception:
+            pass
+
         if self._buff_modified:
             save_first = QMessageBox.question(
                 self, "Save Config?",
@@ -11602,6 +11655,17 @@ class ItemBuffsTab(QWidget):
             )
             msg += stack_msg
 
+            try:
+                from shared_state import record_overlay
+                files = ["iteminfo.pabgb", "iteminfo.pabgh"]
+                if getattr(self, "_staged_skill_files", None):
+                    files.extend(sorted(self._staged_skill_files.keys()))
+                if getattr(self, "_staged_equip_files", None):
+                    files.extend(sorted(self._staged_equip_files.keys()))
+                record_overlay(game_path, buff_dir, "ItemBuffs", files)
+            except Exception:
+                pass
+
             self._buff_status_label.setText(f"Success: packed to {buff_dir}/")
             QMessageBox.information(self, "Applied Successfully", msg)
             self.paz_refresh_requested.emit()
@@ -11769,8 +11833,14 @@ class ItemBuffsTab(QWidget):
         for d in (game_mod, legacy_mod, equip_group_dir, equip_legacy_dir):
             if os.path.isdir(d):
                 try:
+                    group_name = os.path.basename(d)
                     shutil.rmtree(d)
-                    messages.append(f"Removed {os.path.basename(d)}/")
+                    messages.append(f"Removed {group_name}/")
+                    try:
+                        from overlay_coordinator import post_restore
+                        post_restore(game_path, group_name)
+                    except Exception:
+                        pass
                 except Exception as e:
                     messages.append(f"Failed to remove {os.path.basename(d)}/: {e}")
 
@@ -11843,14 +11913,14 @@ class ItemBuffsTab(QWidget):
 
         from PySide6.QtWidgets import QMenu
         menu = QMenu(self)
-        
-        if self._showing_favorites:
+
+        if getattr(self, '_showing_favorites', False):
             fav_action = menu.addAction("Remove from Favorites ⭐")
-            call_fav = lambda: self._remove_from_favorites(item)  
+            call_fav = lambda: self._remove_from_favorites(item)
         else:
             fav_action = menu.addAction("Add to Favorites ⭐")
             call_fav = lambda: self._add_to_favorites(item)
-            
+
         add_action = menu.addAction("Add to Equipment Set...")
 
         # "Find similar" submenu — shows category/equip_type/item_type peers.
@@ -11874,10 +11944,10 @@ class ItemBuffsTab(QWidget):
             diff_action = menu.addAction("Diff against another item...")
 
         action = menu.exec(self._buff_items_table.viewport().mapToGlobal(pos))
-        if action == add_action:
-            self._set_add_item(item)
-        elif action == fav_action:
+        if action == fav_action:
             call_fav()
+        elif action == add_action:
+            self._set_add_item(item)
         elif rust_info and self._index is not None:
             if action == sim_cat_action:
                 self._show_similar_items(rust_info, mode="category")
@@ -11890,39 +11960,38 @@ class ItemBuffsTab(QWidget):
             elif action == diff_action:
                 self._buff_open_item_diff_dialog(initial_a=rust_info["key"])
 
-    def _add_to_favorites(self, item: ItemRecord) -> None:
+    def _add_to_favorites(self, item) -> None:
         self._buff_status_label.setText(f"{item.name}({item.item_key}) added to favorites.")
         QMessageBox.information(self, "New Favorite :",
             f"{item.name}({item.item_key}) added to favorites.")
         self._favorite_items.append({"key": item.item_key})
         self.config_save_requested.emit()
-        
-    def _remove_from_favorites(self, item: ItemRecord) -> None:
-        QMessageBox.information(self, "Removing Favorite :", 
+
+    def _remove_from_favorites(self, item) -> None:
+        QMessageBox.information(self, "Removing Favorite :",
             f"{item.name}({item.item_key}) removed from favorites.")
         self._favorite_items = [
-            i for i in self._favorite_items if i['key'] != item.item_key ]
+            i for i in self._favorite_items if i['key'] != item.item_key]
+        self._config["favorite_items"] = self._favorite_items
         self.config_save_requested.emit()
-        self._show_favorite_items() \
-            if (len(self._favorite_items) > 0) \
-            else self._render_items_into_table([], "No Favorites Found.")
-        
-        # self._favorite_items.append({"key": item.item_key})
+        if getattr(self, '_show_favorite_items', None):
+            self._show_favorite_items() \
+                if len(self._favorite_items) > 0 \
+                else self._render_items_into_table([], "No Favorites Found.")
 
     def _show_similar_items(self, rust_info: dict, mode: str) -> None:
         """Reload the items table with everything similar to `rust_info`."""
         if self._index is None:
             return
-        
+
         if mode == "favorites":
             peers = self._favorite_items
         else:
             peers = self._index.find_similar(rust_info, mode=mode)
-        
-            if not peers:
-                QMessageBox.information(
-                    self, "No Similar Items",
-                    f"No other items found with the same {mode}.")
+        if not peers:
+            QMessageBox.information(
+                self, "No Similar Items",
+                f"No other items found with the same {mode}.")
             return
         # Map peers back to SaveItem entries from _buff_items so the existing
         # table render path stays untouched.
