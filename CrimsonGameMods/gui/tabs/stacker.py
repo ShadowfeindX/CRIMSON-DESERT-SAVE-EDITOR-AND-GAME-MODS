@@ -1155,6 +1155,16 @@ class StackerTab(QWidget):
         pull_btn.clicked.connect(self._pull_from_itembuffs)
         blay.addWidget(pull_btn)
 
+        pull_dmm_btn = _size_button(QPushButton("⇅ Pull DMM"))
+        pull_dmm_btn.setObjectName("flatBtn")
+        pull_dmm_btn.setToolTip(
+            "Import all enabled DMM mods that target iteminfo.pabgb. "
+            "Runs the Stacker Inspector to convert byte patches to "
+            "field-level edits, then adds them as stack sources for "
+            "unified merging.")
+        pull_dmm_btn.clicked.connect(self._pull_from_dmm)
+        blay.addWidget(pull_dmm_btn)
+
         blay.addStretch(1)
 
         rm_btn = _size_button(QPushButton("Remove"))
@@ -1453,6 +1463,74 @@ class StackerTab(QWidget):
         }
 
     # ------------------------------------------------------------
+    def _pull_from_dmm(self):
+        """Import all enabled DMM mods that target iteminfo.pabgb.
+
+        Reads DMM's config.json, finds its mods folder, loads each active
+        JSON mod that patches iteminfo, and adds them as Stacker sources.
+        For legacy byte-patch mods, runs the Inspector for field attribution
+        so semantic merge is possible.
+        """
+        dmm_exe = self._config.get("dmm_exe_path", "")
+        if not dmm_exe or not os.path.isfile(dmm_exe):
+            from PySide6.QtWidgets import QMessageBox
+            QMessageBox.warning(
+                self, "DMM Not Found",
+                "DMM is not configured. Go to the Mod Loader tab and "
+                "set the DMM path first."
+            )
+            return
+
+        from shared_state import get_dmm_iteminfo_mods
+        game = self._game_edit.text().strip() if hasattr(self, "_game_edit") else ""
+        mods = get_dmm_iteminfo_mods(game, dmm_exe)
+        if not mods:
+            from PySide6.QtWidgets import QMessageBox
+            QMessageBox.information(
+                self, "No ItemInfo Mods",
+                "No active DMM mods target iteminfo.pabgb."
+            )
+            return
+
+        # Remove any prior DMM-pulled entries to avoid duplicates
+        self._mods = [m for m in self._mods if not m.name.startswith("[DMM] ")]
+
+        added = 0
+        for file_name, mods_path, doc in mods:
+            json_path = os.path.join(mods_path, file_name)
+            info = doc.get("modinfo") or doc
+            title = info.get("title") or info.get("name") or file_name
+
+            # Classify: if it has format:3 intents, load as field_json;
+            # otherwise as legacy_json
+            if doc.get("format") == 3 and doc.get("intents"):
+                entry = ModEntry(
+                    name=f"[DMM] {title}",
+                    path=json_path,
+                    kind="field_json",
+                    note=f"DMM Format 3 ({len(doc['intents'])} intents)",
+                )
+            else:
+                patches = doc.get("patches", [])
+                n = sum(len(p.get("changes", [])) for p in patches)
+                entry = ModEntry(
+                    name=f"[DMM] {title}",
+                    path=json_path,
+                    kind="legacy_json",
+                    note=f"DMM legacy JSON ({n} byte patches)",
+                )
+
+            self._mods.append(entry)
+            added += 1
+            self._log_line(f"  + [DMM] {title} ({entry.kind})")
+
+        self._refresh_mod_list()
+        self._log_line(
+            f"✓ Pulled {added} iteminfo mod(s) from DMM. "
+            f"Click Preview to inspect, then Install Stack to merge."
+        )
+
+    # ------------------------------------------------------------
     # Type-tag styling for the Sources list row. Keeps the badge visually
     # distinct at a glance: green for itembuffs, blue for folder mods,
     # amber for legacy JSON, grey for loose pabgb.
@@ -1462,6 +1540,7 @@ class StackerTab(QWidget):
         "loose_pabgb":     ("PABGB",     "#1F2128", "#9EA4B8"),
         "legacy_json":     ("JSON v2",   "#2A2418", "#DC961E"),
         "field_json":      ("FIELD v3",  "#1A2A2A", "#26C6DA"),
+        "dmm_json":        ("DMM",       "#1A1A2A", "#7B68EE"),
     }
 
     def _append_mod_row(self, m: ModEntry):
@@ -1649,6 +1728,22 @@ class StackerTab(QWidget):
             QMessageBox.information(self, "Stacker Tool", msg)
             return
 
+        # Pre-apply conflict check — warn if other tools have iteminfo overlays
+        if install and not export:
+            try:
+                from overlay_coordinator import check_iteminfo_conflicts_before_apply
+                our_group = f"{self._overlay_spin.value():04d}" if hasattr(self, "_overlay_spin") else "0062"
+                warning = check_iteminfo_conflicts_before_apply(
+                    game, our_group, self._config)
+                if warning:
+                    reply = QMessageBox.warning(
+                        self, "ItemInfo Conflict Detected", warning,
+                        QMessageBox.Yes | QMessageBox.Cancel, QMessageBox.Cancel)
+                    if reply != QMessageBox.Yes:
+                        return
+            except Exception:
+                pass
+
         # If exporting, ask the user where + what name BEFORE doing any work.
         export_target = None
         export_name = None
@@ -1699,6 +1794,30 @@ class StackerTab(QWidget):
             self._log_line(f"✘ Could not extract vanilla iteminfo: {e}")
             return
         self._log_line(f"  vanilla iteminfo.pabgb: {len(vanilla_bytes):,} bytes")
+
+        # Check if another tool (DMM) has an active iteminfo overlay.
+        # If so, warn the user — merging from vanilla may conflict with
+        # what DMM already applied.
+        try:
+            from overlay_coordinator import get_active_iteminfo_overlay, load_state
+            state = load_state(game)
+            dmm_overlays = [
+                (g, e) for g, e in state.overlays.items()
+                if e.owner != "CrimsonGameMods"
+                and any("iteminfo" in f.lower() for f in e.files)
+            ]
+            if dmm_overlays:
+                groups_str = ", ".join(f"{g} ({e.owner})" for g, e in dmm_overlays)
+                self._log_line(
+                    f"  ⚠ Other tool(s) have iteminfo overlays active: {groups_str}")
+                self._log_line(
+                    f"    Stacker merges from vanilla (0008/) — the final overlay "
+                    f"will include your mods' changes but NOT the other tool's changes.")
+                self._log_line(
+                    f"    If you want both, use 'Pull DMM' to import their mods "
+                    f"into this merge.")
+        except Exception:
+            pass
 
         try:
             vanilla_items = crimson_rs.parse_iteminfo_from_bytes(vanilla_bytes)
@@ -2656,6 +2775,14 @@ class StackerTab(QWidget):
         if sibling_files:
             bundled_note = f" (+ {len(sibling_files)} sibling file{'s' if len(sibling_files) != 1 else ''}: {', '.join(sorted(sibling_files.keys()))})"
         self._log_line(f"  wrote overlay {group}/ + updated meta/0.papgt{bundled_note}")
+        try:
+            from shared_state import record_overlay
+            files = ["iteminfo.pabgb", "iteminfo.pabgh"]
+            if sibling_files:
+                files.extend(sorted(sibling_files.keys()))
+            record_overlay(game, group, "Stacker merge", files)
+        except Exception:
+            pass
 
     # ------------------------------------------------------------
     def _pack_and_install_equipslot_overlay(self, game: str, group: str,
@@ -2697,6 +2824,12 @@ class StackerTab(QWidget):
         self._log_line(
             f"  wrote equipslotinfo overlay {group}/ + updated meta/0.papgt "
             f"({', '.join(sorted(equip_files.keys()))})")
+        try:
+            from shared_state import record_overlay
+            record_overlay(game, group, "Stacker equipslot",
+                           sorted(equip_files.keys()))
+        except Exception:
+            pass
 
     # ------------------------------------------------------------
     def _refresh_mod_list(self) -> None:
@@ -3046,18 +3179,13 @@ class StackerTab(QWidget):
         intents = []
         mod_title = "Merged Stack"
 
-        # ── Path B: legacy JSON → old parser reparse-diff ──
-        if has_legacy:
-            legacy_intents, title = self._translate_legacy_to_field(
-                legacy_sources)
-            if legacy_intents is None:
-                return  # user cancelled or error (already shown)
-            intents.extend(legacy_intents)
-            if title:
-                mod_title = title
-
-        # ── Path A: diff merged vs current vanilla ──
-        if has_merged and not has_legacy:
+        # ── Path A: diff merged vs current vanilla (preferred) ──
+        # If PREVIEW has been run, the merged result already incorporates
+        # ALL source types (legacy_json, folder_paz, itembuffs, etc.)
+        # via reparse-diff / semantic / strict modes. Diffing the merged
+        # dicts against vanilla gives correct field-name intents regardless
+        # of whether the source was legacy byte offsets, inserts, or dicts.
+        if has_merged:
             vanilla_lookup = {
                 it['string_key']: it for it in self._vanilla_items}
             for merged_item in self._merged_items:
@@ -3073,6 +3201,19 @@ class StackerTab(QWidget):
                     continue
                 diffs = _deep_diff_to_intents(skey, ikey, vanilla, merged_item)
                 intents.extend(diffs)
+
+        # ── Path B (fallback): legacy JSON → baseline reparse-diff ──
+        # Only used when PREVIEW was NOT run (no merged items) but legacy
+        # JSON sources are present. Applies byte patches to a matching
+        # baseline, reparses, and diffs.
+        if not has_merged and has_legacy:
+            legacy_intents, title = self._translate_legacy_to_field(
+                legacy_sources)
+            if legacy_intents is None:
+                return
+            intents.extend(legacy_intents)
+            if title:
+                mod_title = title
 
         if not intents:
             QMessageBox.information(self, "Export Field JSON",
@@ -3113,100 +3254,86 @@ class StackerTab(QWidget):
 
     def _translate_legacy_to_field(self, legacy_sources: list
                                    ) -> tuple[list | None, str]:
-        """Translate legacy JSON mods to field-name intents via old parser.
+        """Translate legacy JSON mods to field-name intents.
+
+        Supports mods targeting ANY game version we have a baseline for.
+        For each mod, picks the baseline whose vanilla bytes match the
+        mod's 'original' hex values, then diffs parsed dicts to emit
+        field-name intents.
 
         Returns (intents_list, mod_title) or (None, '') on failure/cancel.
         """
-        # Try to find a bundled baseline first
-        old_path = None
+        import crimson_rs
+
+        # ── 1) Discover all available baselines ──
+        baselines: list[tuple[str, str]] = []  # (version, path)
         for base in [os.path.dirname(os.path.abspath(__file__)),
                      getattr(sys, '_MEIPASS', ''), os.getcwd()]:
-            baselines_dir = os.path.join(base, '..', '..', 'game_baselines')
-            baselines_dir = os.path.normpath(baselines_dir)
-            if not os.path.isdir(baselines_dir):
-                baselines_dir = os.path.join(base, 'game_baselines')
-            if os.path.isdir(baselines_dir):
-                versions = sorted(os.listdir(baselines_dir), reverse=True)
-                for ver in versions:
-                    candidate = os.path.join(
-                        baselines_dir, ver, 'iteminfo.pabgb')
+            for rel in [os.path.join(base, '..', '..', 'game_baselines'),
+                        os.path.join(base, 'game_baselines')]:
+                bd = os.path.normpath(rel)
+                if not os.path.isdir(bd):
+                    continue
+                for ver in sorted(os.listdir(bd)):
+                    candidate = os.path.join(bd, ver, 'iteminfo.pabgb')
                     if os.path.isfile(candidate):
-                        old_path = candidate
-                        break
-            if old_path:
+                        baselines.append((ver, candidate))
+            if baselines:
                 break
 
-        if not old_path:
-            old_path, _ = QFileDialog.getOpenFileName(
-                self, "Select OLD vanilla iteminfo.pabgb",
-                "",
+        if not baselines:
+            path, _ = QFileDialog.getOpenFileName(
+                self, "Select vanilla iteminfo.pabgb", "",
                 "PABGB files (*.pabgb);;All Files (*)")
-        if not old_path:
-            return None, ''
+            if not path:
+                return None, ''
+            baselines.append(("unknown", path))
 
-        self._log_line(f"Loading old vanilla: {old_path}")
+        self._log_line(f"Found {len(baselines)} baseline(s): "
+                       f"{', '.join(v for v, _ in baselines)}")
 
-        try:
-            old_data = open(old_path, 'rb').read()
-        except Exception as e:
-            QMessageBox.critical(self, "Export Field JSON",
-                f"Could not read old vanilla file:\n{e}")
-            return None, ''
-
-        # Load legacy parser. The .pyd exports PyInit_crimson_rs so it
-        # MUST be loaded as module name "crimson_rs". We temporarily evict
-        # the current crimson_rs from sys.modules, load the legacy one,
-        # grab a reference, then restore the original.
-        try:
-            import importlib.util
-            legacy_pyd = None
-            for base in [os.path.dirname(os.path.abspath(__file__)),
-                         getattr(sys, '_MEIPASS', ''), os.getcwd()]:
-                for rel in [
-                    os.path.join(base, '..', '..', 'crimson_rs',
-                                 '_legacy', 'crimson_rs.pyd'),
-                    os.path.join(base, 'crimson_rs', '_legacy',
-                                 'crimson_rs.pyd'),
-                ]:
-                    p = os.path.normpath(rel)
-                    if os.path.isfile(p):
-                        legacy_pyd = p
-                        break
-                if legacy_pyd:
-                    break
-            if not legacy_pyd:
-                raise FileNotFoundError("crimson_rs/_legacy/crimson_rs.pyd")
-            saved_modules = {}
-            for k in list(sys.modules):
-                if k == 'crimson_rs' or k.startswith('crimson_rs.'):
-                    saved_modules[k] = sys.modules.pop(k)
+        # ── 2) Load baseline data + parsers ──
+        # Each cache entry: (raw_data, parsed_items, lookup_dict, parser_fn)
+        # parser_fn is the parse function that successfully parsed this baseline
+        baseline_cache: dict[str, tuple[bytes, list, dict, object]] = {}
+        failed_vers: list[tuple[str, str]] = []
+        for ver, path in baselines:
             try:
-                spec = importlib.util.spec_from_file_location(
-                    "crimson_rs", legacy_pyd)
-                legacy_rs = importlib.util.module_from_spec(spec)
-                spec.loader.exec_module(legacy_rs)
-            finally:
-                for k in list(sys.modules):
-                    if k == 'crimson_rs' or k.startswith('crimson_rs.'):
-                        sys.modules.pop(k, None)
-                sys.modules.update(saved_modules)
-        except Exception as e:
+                data = open(path, 'rb').read()
+                items = crimson_rs.parse_iteminfo_from_bytes(data)
+                lookup = {it['string_key']: it for it in items}
+                baseline_cache[ver] = (data, items, lookup,
+                                       crimson_rs.parse_iteminfo_from_bytes)
+                self._log_line(f"  Baseline {ver}: {len(items)} items, "
+                               f"{len(data):,} bytes (current parser)")
+            except Exception:
+                failed_vers.append((ver, path))
+
+        if failed_vers:
+            legacy_rs = self._load_legacy_parser()
+            if legacy_rs:
+                for ver, path in failed_vers:
+                    try:
+                        data = open(path, 'rb').read()
+                        items = legacy_rs.parse_iteminfo_from_bytes(data)
+                        lookup = {it['string_key']: it for it in items}
+                        baseline_cache[ver] = (data, items, lookup,
+                                               legacy_rs.parse_iteminfo_from_bytes)
+                        self._log_line(f"  Baseline {ver}: {len(items)} items "
+                                       f"(legacy parser)")
+                    except Exception as e:
+                        self._log_line(f"  Baseline {ver}: FAILED ({e})")
+            else:
+                for ver, _ in failed_vers:
+                    self._log_line(f"  Baseline {ver}: current parser failed, "
+                                   f"no legacy parser available")
+
+        if not baseline_cache:
             QMessageBox.critical(self, "Export Field JSON",
-                f"Could not load legacy parser:\n{e}\n\n"
-                "Make sure crimson_rs/_legacy/crimson_rs.pyd exists.")
+                "Could not parse any baseline file.")
             return None, ''
 
-        # Parse old vanilla
-        try:
-            old_items = legacy_rs.parse_iteminfo_from_bytes(old_data)
-        except Exception as e:
-            QMessageBox.critical(self, "Export Field JSON",
-                f"Legacy parser failed on old vanilla:\n{e}")
-            return None, ''
-        old_lookup = {it['string_key']: it for it in old_items}
-        self._log_line(f"  Old vanilla: {len(old_items)} items, "
-                       f"{len(old_data):,} bytes")
-
+        # ── 3) For each mod, find matching baseline and translate ──
         all_intents = []
         mod_title = None
 
@@ -3228,28 +3355,83 @@ class StackerTab(QWidget):
             changes = []
             for p in patches_list:
                 changes.extend(p.get('changes', []))
-
             if not changes:
                 self._log_line(f"  ✘ {m.name}: no changes found")
                 continue
 
-            # Apply byte patches to old vanilla
-            patched_data = bytearray(old_data)
+            # Pick best baseline: the one where most 'original' hex values
+            # match the vanilla bytes at the specified offsets
+            best_ver = None
+            best_score = -1
+            best_data = None
+            best_lookup = None
+            best_parser = None
+            for ver, (data, _items, lookup, parser_fn) in baseline_cache.items():
+                score = 0
+                for c in changes:
+                    off = c.get('offset')
+                    orig_hex = c.get('original', '')
+                    if off is None or not orig_hex:
+                        continue
+                    try:
+                        if isinstance(off, int):
+                            pass
+                        elif isinstance(off, str):
+                            s = off.strip()
+                            if s.lower().startswith('0x'):
+                                off = int(s, 16)
+                            else:
+                                try:
+                                    off = int(s, 16)
+                                except ValueError:
+                                    off = int(s)
+                        else:
+                            off = int(off)
+                    except (TypeError, ValueError):
+                        continue
+                    orig_bytes = bytes.fromhex(orig_hex)
+                    if off + len(orig_bytes) <= len(data):
+                        if data[off:off + len(orig_bytes)] == orig_bytes:
+                            score += 1
+                if score > best_score:
+                    best_score = score
+                    best_ver = ver
+                    best_data = data
+                    best_lookup = lookup
+                    best_parser = parser_fn
+
+            if best_data is None or best_lookup is None:
+                self._log_line(f"  ✘ {m.name}: no matching baseline found")
+                continue
+
+            match_pct = (best_score / len(changes) * 100) if changes else 0
+            self._log_line(f"  {m.name}: matched baseline {best_ver} "
+                           f"({best_score}/{len(changes)} = {match_pct:.0f}%)")
+
+            # Apply byte patches to matched baseline.
+            # Sort by offset descending so inserts don't shift later offsets.
+            def _change_off(c):
+                v = c.get('offset', c.get('rel_offset', 0))
+                try:
+                    return int(v, 16) if isinstance(v, str) else int(v)
+                except (TypeError, ValueError):
+                    return 0
+            sorted_changes = sorted(changes, key=_change_off, reverse=True)
+            patched_data = bytearray(best_data)
             applied = 0
-            for c in changes:
+            for c in sorted_changes:
                 try:
                     applied += _apply_one_legacy_patch(
-                        patched_data, old_data, c)
+                        patched_data, best_data, c)
                 except Exception:
                     pass
 
             self._log_line(f"  {m.name}: applied {applied}/{len(changes)} "
-                           f"patches to old vanilla")
+                           f"patches")
 
-            # Reparse patched data with legacy parser
+            # Reparse patched data with the SAME parser that loaded this baseline
             try:
-                patched_items = legacy_rs.parse_iteminfo_from_bytes(
-                    bytes(patched_data))
+                patched_items = best_parser(bytes(patched_data))
             except Exception as e:
                 self._log_line(f"  ✘ {m.name}: reparse failed ({e})")
                 continue
@@ -3257,17 +3439,17 @@ class StackerTab(QWidget):
 
             # Diff old vs patched → field-name intents
             mod_intents = 0
-            for skey, orig in old_lookup.items():
+            for skey, orig in best_lookup.items():
                 patched = patched_lookup.get(skey)
                 if not patched:
                     continue
                 diffs = _deep_diff_to_intents(
                     skey, orig.get('key', 0), orig, patched)
-                # Remap field names that changed between parser versions
                 for intent in diffs:
                     field = intent.get('field', '')
                     for old_name, new_name in self._FIELD_RENAMES.items():
-                        if field == old_name or field.startswith(old_name + '.'):
+                        if field == old_name or field.startswith(
+                                old_name + '.'):
                             intent['field'] = field.replace(
                                 old_name, new_name, 1)
                     top_field = field.split('.')[0].split('[')[0]
@@ -3276,9 +3458,8 @@ class StackerTab(QWidget):
                     all_intents.append(intent)
                     mod_intents += 1
 
-            # Check for new entries in patched that aren't in old
             for skey in patched_lookup:
-                if skey not in old_lookup:
+                if skey not in best_lookup:
                     pi = patched_lookup[skey]
                     all_intents.append({
                         'entry': skey,
@@ -3292,3 +3473,42 @@ class StackerTab(QWidget):
                            f"recovered")
 
         return all_intents, mod_title or "Translated Legacy Mod"
+
+    def _load_legacy_parser(self):
+        """Load the legacy crimson_rs parser from _legacy/ dir. Returns module or None."""
+        try:
+            import importlib.util
+            legacy_pyd = None
+            for base in [os.path.dirname(os.path.abspath(__file__)),
+                         getattr(sys, '_MEIPASS', ''), os.getcwd()]:
+                for rel in [
+                    os.path.join(base, '..', '..', 'crimson_rs',
+                                 '_legacy', 'crimson_rs.pyd'),
+                    os.path.join(base, 'crimson_rs', '_legacy',
+                                 'crimson_rs.pyd'),
+                ]:
+                    p = os.path.normpath(rel)
+                    if os.path.isfile(p):
+                        legacy_pyd = p
+                        break
+                if legacy_pyd:
+                    break
+            if not legacy_pyd:
+                return None
+            saved_modules = {}
+            for k in list(sys.modules):
+                if k == 'crimson_rs' or k.startswith('crimson_rs.'):
+                    saved_modules[k] = sys.modules.pop(k)
+            try:
+                spec = importlib.util.spec_from_file_location(
+                    "crimson_rs", legacy_pyd)
+                legacy_rs = importlib.util.module_from_spec(spec)
+                spec.loader.exec_module(legacy_rs)
+                return legacy_rs
+            finally:
+                for k in list(sys.modules):
+                    if k == 'crimson_rs' or k.startswith('crimson_rs.'):
+                        sys.modules.pop(k, None)
+                sys.modules.update(saved_modules)
+        except Exception:
+            return None

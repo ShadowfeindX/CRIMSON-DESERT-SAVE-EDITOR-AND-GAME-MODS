@@ -40,6 +40,103 @@ import crimson_rs
 log = logging.getLogger(__name__)
 
 
+# ── inspect_legacy_patches implementation ─────────────────────────
+# This function was planned for crimson_rs but never added to the Rust
+# PyO3 bindings. We implement it in Python using parse_iteminfo_tracked
+# which DOES exist and provides the byte-range spans we need.
+#
+# Monkey-patched onto crimson_rs so all call sites
+# (`crimson_rs.inspect_legacy_patches(...)`) work without changes.
+
+_tracked_cache: dict[int, tuple[dict, dict]] = {}
+
+
+def _get_tracked(vanilla_bytes: bytes):
+    """Cache the tracked parse result keyed by id(bytes) to avoid
+    re-parsing the same vanilla on every call."""
+    key = id(vanilla_bytes)
+    if key in _tracked_cache:
+        return _tracked_cache[key]
+
+    result = crimson_rs.parse_iteminfo_tracked(vanilla_bytes)
+    items = result["items"]
+    spans = result["spans"]
+
+    # Build lookup: string_key → (entry_start_abs, ranges_list)
+    # Note: span["start"] and ranges[i]["start"] may use different bases
+    # due to a doubling in the tracked reader. Use ranges[0]["start"] as
+    # the true absolute start since it's consistent with all range offsets.
+    entry_index = {}
+    for item, span in zip(items, spans):
+        sk = item.get("string_key", "")
+        if sk and span["ranges"]:
+            true_start = span["ranges"][0]["start"]
+            entry_index[sk] = (true_start, span["ranges"])
+
+    _tracked_cache[key] = (entry_index, result)
+    if len(_tracked_cache) > 3:
+        oldest = next(iter(_tracked_cache))
+        del _tracked_cache[oldest]
+
+    return entry_index, result
+
+
+def _inspect_legacy_patches(vanilla_bytes: bytes, queries: list[dict]
+                            ) -> list[dict | None]:
+    """Resolve (entry, rel_offset) queries to field paths using the
+    tracked reader's byte-range spans.
+
+    Each query is {"entry": str, "rel_offset": int, "length": int}.
+    Returns parallel list: dict with field info or None if not found.
+    """
+    entry_index, _ = _get_tracked(vanilla_bytes)
+
+    results = []
+    for q in queries:
+        entry_name = q.get("entry", "")
+        rel_offset = q.get("rel_offset", -1)
+        length = q.get("length", 1)
+
+        lookup = entry_index.get(entry_name)
+        if lookup is None:
+            results.append(None)
+            continue
+
+        entry_start, ranges = lookup
+
+        # Ranges use absolute offsets into the file.
+        # rel_offset is relative to entry_start.
+        abs_offset = entry_start + rel_offset
+
+        # Find which range contains this absolute offset
+        hit = None
+        for r in ranges:
+            if r["start"] <= abs_offset < r["end"]:
+                hit = r
+                break
+
+        if hit is None:
+            results.append(None)
+            continue
+
+        abs_end = abs_offset + length
+        # Convert back to entry-relative for the caller
+        results.append({
+            "path": hit["path"],
+            "ty": hit["ty"],
+            "field_start_rel": hit["start"] - entry_start,
+            "field_end_rel": hit["end"] - entry_start,
+            "byte_offset_in_field": abs_offset - hit["start"],
+            "spans_field_end": abs_end > hit["end"],
+        })
+
+    return results
+
+
+if not hasattr(crimson_rs, "inspect_legacy_patches"):
+    crimson_rs.inspect_legacy_patches = _inspect_legacy_patches
+
+
 # Status values for PatchInspection. "applied" = bytes matched vanilla and
 # we overwrote. "stale" = original mismatch (different game version).
 # "no_entry" = entry name not in vanilla (renamed upstream). "no_field" =

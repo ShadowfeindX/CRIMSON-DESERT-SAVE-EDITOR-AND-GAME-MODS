@@ -20,6 +20,7 @@ from PySide6.QtWidgets import (
     QLabel,
     QMessageBox,
     QPushButton,
+    QSpinBox,
     QTableWidget,
     QTableWidgetItem,
     QVBoxLayout,
@@ -65,6 +66,12 @@ class BagSpaceTab(QWidget):
         self._updating_table = False
         self._build_ui()
 
+    @property
+    def _overlay_group(self) -> str:
+        if hasattr(self, '_overlay_spin'):
+            return f"{self._overlay_spin.value():04d}"
+        return OVERLAY_GROUP
+
     def set_game_path(self, path: str) -> None:
         self._game_path = path or ""
 
@@ -92,6 +99,19 @@ class BagSpaceTab(QWidget):
         force_btn.clicked.connect(lambda: self._set_character_slots(700, 700))
         top_row.addWidget(force_btn)
 
+        top_row.addWidget(QLabel("Mod#:"))
+        self._overlay_spin = QSpinBox()
+        self._overlay_spin.setRange(1, 9999)
+        self._overlay_spin.setValue(self._config.get("bagspace_overlay_dir", 61))
+        self._overlay_spin.setFixedWidth(70)
+        self._overlay_spin.setToolTip(
+            "Overlay folder number for BagSpace mods.\n"
+            "Each tab should use a different number to avoid conflicts.\n"
+            "Default: 0062")
+        self._overlay_spin.valueChanged.connect(
+            lambda v: self._config.update({"bagspace_overlay_dir": int(v)}))
+        top_row.addWidget(self._overlay_spin)
+
         apply_btn = QPushButton("Apply to Game")
         apply_btn.setObjectName("accentBtn")
         apply_btn.clicked.connect(self._apply_to_game)
@@ -100,6 +120,20 @@ class BagSpaceTab(QWidget):
         export_btn = QPushButton("Export as Mod")
         export_btn.clicked.connect(self._export_as_mod)
         top_row.addWidget(export_btn)
+
+        export_field_btn = QPushButton("Export Field JSON")
+        export_field_btn.setStyleSheet("background-color: #00695C; color: white; font-weight: bold;")
+        export_field_btn.setToolTip(
+            "Export edits as Format 3 field-name JSON.\n"
+            "Uses field names — survives game updates.")
+        export_field_btn.clicked.connect(self._export_field_json)
+        top_row.addWidget(export_field_btn)
+
+        import_field_btn = QPushButton("Import Field JSON")
+        import_field_btn.setToolTip(
+            "Import a Format 3 field-name JSON and apply its intents.")
+        import_field_btn.clicked.connect(self._import_field_json)
+        top_row.addWidget(import_field_btn)
 
         restore_btn = QPushButton("Restore")
         restore_btn.clicked.connect(self._restore_overlay)
@@ -176,7 +210,7 @@ class BagSpaceTab(QWidget):
             import crimson_rs
 
             source_group = (
-                OVERLAY_GROUP
+                self._overlay_group
                 if prefer_overlay and self._has_bagspace_overlay(game_path)
                 else "0008"
             )
@@ -364,11 +398,12 @@ class BagSpaceTab(QWidget):
             QMessageBox.warning(self, "No Game Path", "Set the game install path first.")
             return
 
+        grp = self._overlay_group
         reply = QMessageBox.question(
             self,
             "Apply BagSpace",
             "Apply the staged Character bag slot values to the game as a PAZ overlay?\n\n"
-            f"Overlay group: {OVERLAY_GROUP}\n"
+            f"Overlay group: {grp}\n"
             "Restart the game after applying.",
             QMessageBox.Yes | QMessageBox.No,
             QMessageBox.No,
@@ -381,7 +416,7 @@ class BagSpaceTab(QWidget):
             import crimson_rs
 
             with tempfile.TemporaryDirectory() as tmp_dir:
-                group_dir = os.path.join(tmp_dir, OVERLAY_GROUP)
+                group_dir = os.path.join(tmp_dir, grp)
                 os.makedirs(group_dir, exist_ok=True)
                 builder = _pack_builder(crimson_rs, group_dir)
                 builder.add_file(INTERNAL_DIR, "inventory.pabgb", data)
@@ -389,7 +424,7 @@ class BagSpaceTab(QWidget):
                 pamt_bytes = bytes(builder.finish())
                 checksum = crimson_rs.parse_pamt_bytes(pamt_bytes)["checksum"]
 
-                dst = os.path.join(game_path, OVERLAY_GROUP)
+                dst = os.path.join(game_path, grp)
                 if os.path.isdir(dst):
                     shutil.rmtree(dst)
                 os.makedirs(dst, exist_ok=True)
@@ -402,20 +437,27 @@ class BagSpaceTab(QWidget):
             papgt_path = os.path.join(game_path, "meta", "0.papgt")
             papgt = crimson_rs.parse_papgt_file(papgt_path)
             papgt["entries"] = [
-                e for e in papgt["entries"] if e.get("group_name") != OVERLAY_GROUP
+                e for e in papgt["entries"] if e.get("group_name") != grp
             ]
             papgt = crimson_rs.add_papgt_entry(
-                papgt, OVERLAY_GROUP, checksum, 0, 16383
+                papgt, grp, checksum, 0, 16383
             )
             crimson_rs.write_papgt_file(papgt, papgt_path)
 
+            try:
+                from shared_state import record_overlay
+                record_overlay(game_path, grp, "BagSpace",
+                               ["inventoryinfo.pabgb", "inventoryinfo.pabgh"])
+            except Exception:
+                pass
+
             self._dirty = False
-            self._status.setText(f"Applied BagSpace overlay to {OVERLAY_GROUP}/.")
-            self.status_message.emit(f"BagSpace overlay deployed to {OVERLAY_GROUP}/")
+            self._status.setText(f"Applied BagSpace overlay to {grp}/.")
+            self.status_message.emit(f"BagSpace overlay deployed to {grp}/")
             QMessageBox.information(
                 self,
                 "BagSpace Applied",
-                f"BagSpace overlay deployed to:\n{os.path.join(game_path, OVERLAY_GROUP)}\n\n"
+                f"BagSpace overlay deployed to:\n{os.path.join(game_path, grp)}\n\n"
                 "Restart the game to apply changes.",
             )
         except Exception as e:
@@ -482,7 +524,8 @@ class BagSpaceTab(QWidget):
             QMessageBox.warning(self, "No Game Path", "Set the game install path first.")
             return
 
-        overlay_dir = os.path.join(game_path, OVERLAY_GROUP)
+        grp = self._overlay_group
+        overlay_dir = os.path.join(game_path, grp)
         if not os.path.isdir(overlay_dir):
             QMessageBox.information(
                 self,
@@ -503,6 +546,11 @@ class BagSpaceTab(QWidget):
 
         try:
             shutil.rmtree(overlay_dir)
+            try:
+                from overlay_coordinator import post_restore
+                post_restore(game_path, grp)
+            except Exception:
+                pass
             papgt_path = os.path.join(game_path, "meta", "0.papgt")
             if os.path.isfile(papgt_path):
                 import crimson_rs
@@ -511,7 +559,7 @@ class BagSpaceTab(QWidget):
                 before = len(papgt.get("entries", []))
                 papgt["entries"] = [
                     e for e in papgt.get("entries", [])
-                    if e.get("group_name") != OVERLAY_GROUP
+                    if e.get("group_name") != grp
                 ]
                 if len(papgt["entries"]) != before:
                     crimson_rs.write_papgt_file(papgt, papgt_path)
@@ -532,12 +580,128 @@ class BagSpaceTab(QWidget):
             self._status.setText(f"Restore failed: {e}")
             QMessageBox.critical(self, "Restore Failed", str(e))
 
-    @staticmethod
-    def _has_bagspace_overlay(game_path: str) -> bool:
-        return os.path.isfile(os.path.join(game_path, OVERLAY_GROUP, ".se_bagspace"))
+    def _has_bagspace_overlay(self, game_path: str) -> bool:
+        return os.path.isfile(os.path.join(game_path, self._overlay_group, ".se_bagspace"))
 
     def _character_summary(self) -> str:
         char = next((r for r in self._records if r.get("name") == "Character"), None)
         if not char or "default_slots" not in char or "max_slots" not in char:
             return "unknown"
         return f"{char['default_slots']}/{char['max_slots']}"
+
+    def _export_field_json(self) -> None:
+        if not self._records or self._inventory_data is None:
+            QMessageBox.warning(self, "Export", "Load inventory data first.")
+            return
+
+        game_path = self._game_path or self._config.get("game_install_path", "")
+        if not game_path:
+            QMessageBox.warning(self, "Export", "Set the game install path first.")
+            return
+
+        try:
+            import crimson_rs
+            van_data = bytes(crimson_rs.extract_file(
+                game_path, '0008', INTERNAL_DIR, 'inventory.pabgb'))
+            van_pabgh = bytes(crimson_rs.extract_file(
+                game_path, '0008', INTERNAL_DIR, 'inventory.pabgh'))
+            parser = self._load_parser()
+            vanilla_records = parser.parse_inventory_pabgb(van_data, van_pabgh)
+        except Exception as e:
+            QMessageBox.critical(self, "Export", f"Failed to load vanilla baseline:\n{e}")
+            return
+
+        van_by_name = {r['name']: r for r in vanilla_records if 'default_slots' in r}
+
+        intents = []
+        for rec in self._records:
+            if 'default_slots' not in rec:
+                continue
+            name = rec['name']
+            van = van_by_name.get(name)
+            if not van:
+                continue
+            if rec['default_slots'] != van['default_slots']:
+                intents.append({
+                    'entry': name, 'key': rec.get('key', 0),
+                    'field': 'default_slots', 'op': 'set',
+                    'new': rec['default_slots'],
+                })
+            if rec['max_slots'] != van['max_slots']:
+                intents.append({
+                    'entry': name, 'key': rec.get('key', 0),
+                    'field': 'max_slots', 'op': 'set',
+                    'new': rec['max_slots'],
+                })
+
+        if not intents:
+            QMessageBox.information(self, "Export", "No changes to export.")
+            return
+
+        path, _ = QFileDialog.getSaveFileName(
+            self, "Export Field JSON", "BagSpace.field.json",
+            "Field JSON (*.field.json *.json);;All Files (*)")
+        if not path:
+            return
+
+        doc = {
+            'modinfo': {
+                'title': 'BagSpace Mod',
+                'version': '1.0',
+                'author': 'CrimsonGameMods BagSpace',
+                'description': f'{len(intents)} field-level intent(s)',
+                'note': 'Format 3 — uses field names, survives game updates',
+            },
+            'format': 3,
+            'target': 'inventory.pabgb',
+            'intents': intents,
+        }
+        with open(path, 'w', encoding='utf-8') as f:
+            json.dump(doc, f, indent=2, ensure_ascii=False, default=str)
+        self._status.setText(
+            f"Exported {len(intents)} intents to {os.path.basename(path)}")
+        QMessageBox.information(self, "Export Field JSON",
+            f"Exported {len(intents)} field-level intents.\n\nFile: {path}")
+
+    def _import_field_json(self) -> None:
+        if not self._records or self._inventory_data is None:
+            QMessageBox.warning(self, "Import", "Load inventory data first.")
+            return
+
+        path, _ = QFileDialog.getOpenFileName(
+            self, "Import Field JSON", "",
+            "Field JSON (*.field.json *.json);;All Files (*)")
+        if not path:
+            return
+        with open(path, 'r', encoding='utf-8') as f:
+            doc = json.load(f)
+        if doc.get('format') != 3 or not doc.get('intents'):
+            QMessageBox.warning(self, "Import", "Not a valid Format 3 Field JSON file.")
+            return
+
+        rec_by_name = {r['name']: r for r in self._records if 'default_slots' in r}
+        applied = skipped = 0
+        for intent in doc['intents']:
+            target = rec_by_name.get(intent.get('entry'))
+            if not target:
+                skipped += 1
+                continue
+            field = intent.get('field', '')
+            if intent.get('op') != 'set' or field not in ('default_slots', 'max_slots'):
+                skipped += 1
+                continue
+            val = int(intent['new'])
+            offset_key = 'default_offset' if field == 'default_slots' else 'max_offset'
+            struct.pack_into("<H", self._inventory_data, int(target[offset_key]), val)
+            applied += 1
+
+        if applied:
+            self._records = self._load_parser().parse_inventory_pabgb(
+                bytes(self._inventory_data), self._inventory_pabgh)
+            self._dirty = True
+            self._refresh_table()
+
+        self._status.setText(f"Imported {applied} intents, {skipped} skipped.")
+        QMessageBox.information(self, "Import Field JSON",
+            f"Applied {applied} intent(s), skipped {skipped}.\n\n"
+            f"Click Apply to Game to deploy.")
