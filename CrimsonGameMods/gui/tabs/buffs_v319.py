@@ -405,20 +405,7 @@ class ItemBuffsTab(QWidget):
                 "Use this after Apply to Game to get a clean baseline.")
             extract_vanilla_btn.clicked.connect(self._buff_extract_vanilla)
             action_row.addWidget(extract_vanilla_btn)
-
-            desc_search_btn = QPushButton("Search by Description")
-            desc_search_btn.setToolTip(
-                "Search ALL buffs, passives, stats by in-game description.\n"
-                "Keywords: 'imbue fire', 'damage', 'stamina', 'immunity', etc.")
-            desc_search_btn.clicked.connect(self._buff_open_desc_search)
-            # action_row.addWidget(desc_search_btn)
-
-            adv_json_btn = QPushButton("JSON Edit")
-            adv_json_btn.setToolTip(
-                "Open raw enchant data as editable JSON — full control")
-            adv_json_btn.clicked.connect(self._eb_json_edit)
-            # action_row.addWidget(adv_json_btn)
-
+            
             reset_btn = QPushButton("Reset")
             reset_btn.setToolTip("Discard all in-memory changes, re-extract from disk")
             reset_btn.clicked.connect(self._buff_remove_all)
@@ -502,37 +489,33 @@ class ItemBuffsTab(QWidget):
                 "Save your current edits as a reusable config file.")
             act_export_config.triggered.connect(self._buff_save_config)
             
-            export_mod_menu.addSeparator()
-            
-            # act_export_perfect_mod = export_mod_menu.addAction("Export Perfect Loader Mod...")
-            # act_export_perfect_mod.setToolTip(
-            #     "Export a Perfect/Semantic-format MOD.")
-            # act_export_perfect_mod.triggered.connect(self._buff_export_perfect_mod)
 
-            act_export_field = export_mod_menu.addAction("Export as Field JSON v3")
+            act_export_field = export_mod_menu.addAction("Export as Field JSON (v3)")
             act_export_field.setToolTip(
                 "Export all edits as a Format 3 field-name JSON.\n"
                 "Uses field names instead of byte offsets — survives game updates.\n"
                 "Compatible with Stacker Tool and future mod loaders.")
             act_export_field.triggered.connect(self._buff_export_field_json_v3)
-
+            export_mod_menu.addAction(act_export_field)
+            
             export_mod_menu.addSeparator()
-
-            act_export_mod = export_mod_menu.addAction("Export as Mod")
+            
+            act_export_mod = export_mod_menu.addAction("Export as Mod Folder")
             act_export_mod.setToolTip(
-                "Export as a ready-to-use folder mod (0036/0.paz + 0.pamt + modinfo.json).\n"
-                "Install with JMM / CDUMM, or drop into game directory.")
+                "Export as a ready-to-use mod folder (NNNN/0.paz + 0.pamt + meta/0.papgt).\n"
+                "Drop the folder into your game directory or import into a mod manager.\n"
+                "Same as Apply to Game, but saves to a folder you choose instead.")
             act_export_mod.triggered.connect(self._buff_export_mod_folder)
-
-            act_export_legacy = export_mod_menu.addAction("Export as Legacy JSON v2")
+            export_mod_menu.addAction(act_export_mod)
+            
+            act_export_legacy = export_mod_menu.addAction("Export as Legacy JSON (v2)")
             act_export_legacy.setToolTip(
                 "Opens Stacker Tool to export as Format 2 byte-diff JSON.\n"
                 "Use Pull ItemBuffs Edit in Stacker, then Export Legacy JSON.")
-            act_export_legacy.triggered.connect(self._goto_stacker_legacy_export)
+            act_export_legacy.triggered.connect(self._goto_stacker_legacy_export)   
+                     
             # END Export Menu
             
-            
-
             transmog_btn = QPushButton("Transmog (Armor / Weapon Visual Swap)")
             transmog_btn.setStyleSheet("QPushButton {"
                 "background-color: #6A1B9A; color: white; font-weight: bold; }")
@@ -551,7 +534,7 @@ class ItemBuffsTab(QWidget):
             create_item_btn = QPushButton("⚒ Create Custom Item")
             create_item_btn.setStyleSheet(
                 "QPushButton { background-color: #00695C; color: white; "
-                "font-weight: bold; padding: 8px 14px; font-size: 13px; }")
+                "font-weight: bold; font-size: 13px; }")
             create_item_btn.setToolTip(
                 "Design a brand-new item by cloning an existing donor.\n\n"
                 "• Pick any of 6,000+ game items as a starting point\n"
@@ -574,7 +557,7 @@ class ItemBuffsTab(QWidget):
             add_save_btn = QPushButton("🎒 Add Custom Item to Save")
             add_save_btn.setStyleSheet(
                 "QPushButton { background-color: #1565C0; color: white; "
-                "font-weight: bold; padding: 8px 14px; font-size: 13px; }")
+                "font-weight: bold; font-size: 13px; }")
             add_save_btn.setToolTip(
                 "Open the Add-to-Save dialog for an ALREADY-deployed custom item.\n"
                 "Scans <game>/0058/iteminfo.pabgb for keys in the custom range\n"
@@ -616,27 +599,6 @@ class ItemBuffsTab(QWidget):
             self._buff_category_filter.setMinimumWidth(180)
             self._buff_category_filter.addItem("All categories", None)
             self._buff_category_filter.currentIndexChanged.connect(self._buff_search_items)
-            
-            desc_search_btn = QPushButton("Search by Description")
-            desc_search_btn.setToolTip(
-                "Search ALL buffs, passives, stats by in-game description.\n"
-                "Keywords: 'imbue fire', 'damage', 'stamina', 'immunity', etc.")
-            desc_search_btn.clicked.connect(self._buff_open_desc_search)
-
-            diff_btn = QPushButton("Item Diff")
-            diff_btn.setToolTip(
-                "Compare two items field by field — see exactly what's different\n"
-                "between e.g. a working modded item and a broken one.")
-            diff_btn.clicked.connect(self._buff_open_item_diff_dialog)
-            # search_row.addWidget(diff_btn)
-
-            inspect_btn = QPushButton("Inspect Item")
-            inspect_btn.setToolTip(
-                "Deep-dive on the currently selected item — every field, type,\n"
-                "and value rendered in a searchable tree. Shows crafting deps\n"
-                "and any references back to this item from elsewhere in iteminfo.")
-            inspect_btn.clicked.connect(self._buff_open_item_inspector)
-            # search_row.addWidget(inspect_btn)
 
             my_inv_btn = QPushButton("My Inventory")
             my_inv_btn.setToolTip("Show only items from your loaded save that exist in iteminfo")
@@ -772,6 +734,8 @@ class ItemBuffsTab(QWidget):
                 self._build_buff_hero_presets_page(), "Presets")
             self._buff_action_tabs.addTab(
                 self._build_buff_quick_edit_page(), "Quick Edit")
+            self._buff_action_tabs.addTab(
+                self._build_buff_drop_data_page(), "Drop Data")
             self._buff_action_tabs.addTab(
                 self._build_buff_effects_page(), "Passives & Effects")
             self._buff_action_tabs.addTab(
@@ -947,6 +911,15 @@ class ItemBuffsTab(QWidget):
         
         inner_layout = QSplitter(Qt.Horizontal)
         inner_layout.setChildrenCollapsible(False)
+        
+        def ui_add_line(shadow=False) -> QFrame:
+            line = QFrame()
+            line.setFrameShape(QFrame.Shape.HLine)
+            if shadow:
+                line.setFrameShadow(QFrame.Shadow.Sunken)
+            return line
+        
+        self._ui_add_line = ui_add_line
         
         # Kept as empty widget for any legacy code that references it.
         self._buff_right_panel = QWidget()
@@ -1429,7 +1402,41 @@ class ItemBuffsTab(QWidget):
         self._buff_type_combo.currentTextChanged.connect(self._buff_update_desc)
         self._buff_update_desc()
         pl.addWidget(self._buff_desc_label)
-
+        
+        pl.addWidget(self._ui_add_line(True))
+        
+        # --- Socket count ---
+        self._eb_socket_row_widget = QWidget()
+        socket_row = QHBoxLayout(self._eb_socket_row_widget)
+        socket_row.setContentsMargins(0, 0, 0, 0)
+        socket_row.setSpacing(6)
+        socket_row.addWidget(QLabel("Count:"))
+        self._eb_socket_count = QSpinBox()
+        self._eb_socket_count.setRange(1, 8)
+        self._eb_socket_count.setValue(5)
+        self._eb_socket_count.setFixedWidth(60)
+        self._eb_socket_count.setToolTip(
+            "Target max socket count. Writes to drop_default_data."
+            "add_socket_material_item_list.")
+        socket_row.addWidget(self._eb_socket_count)
+        socket_row.addWidget(QLabel("Pre-unlocked:"))
+        self._eb_socket_valid = QSpinBox()
+        self._eb_socket_valid.setRange(0, 8)
+        self._eb_socket_valid.setValue(0)
+        self._eb_socket_valid.setFixedWidth(60)
+        self._eb_socket_valid.setToolTip(
+            "How many sockets are unlocked on drop. Extra sockets need to "
+            "be unlocked at the Witch NPC.")
+        socket_row.addWidget(self._eb_socket_valid)
+        socket_apply_btn = QPushButton("Extend Sockets (Selected)")
+        socket_apply_btn.setToolTip(
+            "Extend socket capacity on the SELECTED item. Only applies to "
+            "items with use_socket=1 (abyss gear).")
+        socket_apply_btn.clicked.connect(self._eb_extend_sockets)
+        socket_row.addWidget(socket_apply_btn)
+        socket_row.addStretch(1)
+        pl.addWidget(self._eb_socket_row_widget)
+        
         # --- Drop enchant level ---
         drop_enchant = QWidget()
         drop_enchant_row = QHBoxLayout(drop_enchant)
@@ -1716,21 +1723,79 @@ class ItemBuffsTab(QWidget):
 
         return page
 
+    def _build_buff_drop_data_page(self) -> QWidget:
+        page = QWidget()
+        pl = QVBoxLayout(page)
+        pl.setContentsMargins(8, 8, 8, 8)
+        pl.setSpacing(8)
+        return page
+
+
     def _build_buff_hero_presets_page(self) -> QWidget:
         """Hero Presets sub-tab — 3 large colored buttons."""
+        
+        # TEMP styles array
+        styles = [
+            ("#4682B4","White"),
+            ("#FFFFFF","Black"),
+            ("#00FF7F","Black"),
+            ("#00BFFF","Black"),
+            ("#9370DB","Black"),
+            ("#DC143C","White"),
+            ("#778899","Black"),
+            ("#FFD700","Black"),
+            ("#FF69B4","Black"),
+            ("#FF8C00","Black"),
+            ("#00FFFF","Black"),
+            ("#7FFF00","Black"),
+            ("#DDA0DD","Black"),
+            ("#2E8B57","White"),
+        ]   
+        
+        def gen_styles(font_color: str, bkg_color: str):
+            return f"""
+            QPushButton, QToolTip {{
+                font-size: 13px;
+                font-weight: bold;
+            }}
+            
+            QPushButton {{
+                color: {font_color};
+                background-color: {bkg_color};
+                padding: 16px 24px;
+            }}
+            
+            QToolTip {{
+                color: black;
+                background-color: white;
+                border: 1px solid black;
+            }}
+            """        
+        
         page = QWidget()
         pl = QVBoxLayout(page)
         pl.setContentsMargins(8, 8, 8, 8)
         pl.setSpacing(8)
 
-        pl.addWidget(QLabel(
-            "One-click presets. Click an item in the list, "
-            "then click a preset below."))
-
         grid = QGridLayout()
         grid.setSpacing(8)
         grid_columns = 3
         grid_buttons: list[QPushButton] = []
+        grid_label = QLabel(
+            "One-click presets. Click an item in the list, "
+            "then choose a preset below to apply.")
+        
+        dev_grid = QGridLayout()
+        dev_grid.setSpacing(8)
+        dev_grid_buttons: list[QPushButton] = []
+        dev_grid_label = QLabel(
+            "DEV Ring presets. Click an item in the list, "
+            "then choose a preset below to apply.")
+
+        custom_grid = QGridLayout()
+        custom_grid.setSpacing(8)
+        custom_grid_buttons: list[QPushButton] = []
+        custom_grid_label = QLabel("")
       
         sockets_btn = QPushButton("5 Sockets")
         sockets_btn.setToolTip("Item will drop with 5 open sockets by default.")
@@ -1755,13 +1820,11 @@ class ItemBuffsTab(QWidget):
         charges_btn.clicked.connect(
             lambda: self._eb_apply_preset("max_charges"))
         grid_buttons.append(charges_btn)
-
         stacks_btn = QPushButton("Max Stacks")
         stacks_btn.setToolTip("Item will have a max stack size of 999999.")
         stacks_btn.clicked.connect(
             lambda: self._eb_apply_preset("max_stacks"))
         grid_buttons.append(stacks_btn)
-
         godmode_desc = textwrap.dedent("""
             - No Cooldown   
             - Max Charges
@@ -1807,12 +1870,12 @@ class ItemBuffsTab(QWidget):
             )
             if reply != QMessageBox.Yes:
                 return
-            self._eb_god_mode(skip=True)
-            self._eb_apply_preset("open_sockets", skip=True)
-            self._eb_apply_preset("max_enchant", skip=True)
-            self._eb_apply_preset("no_cooldown", skip=True)
-            self._eb_apply_preset("max_charges", skip=True)
-            self._eb_apply_preset("great_thief_all", skip=True)
+            self._eb_god_mode(True)
+            self._eb_apply_preset("great_thief_all", True)
+            self._eb_apply_preset("open_sockets", True)
+            self._eb_apply_preset("max_charges", True)
+            self._eb_apply_preset("max_enchant", True)
+            self._eb_apply_preset("no_cooldown", True)
         godmode_btn = QPushButton("God Mode")
         godmode_btn.setToolTip(f"Inject full God Mode stats:\n{godmode_desc}")
         godmode_btn.clicked.connect(apply_godmode)
@@ -1844,38 +1907,69 @@ class ItemBuffsTab(QWidget):
         great_thief_btn.clicked.connect(self._eb_great_thief_pick_variant)
         grid_buttons.append(great_thief_btn)
         
-        def gen_styles(font_color: str, bkg_color: str):
-            return f"""
-            QPushButton, QToolTip {{
-                font-size: 13px;
-                font-weight: bold;
-            }}
-            
-            QPushButton {{
-                color: {font_color};
-                background-color: {bkg_color};
-                padding: 16px 24px;
-            }}
-            
-            QToolTip {{
-                color: black;
-                background-color: white;
-                border: 1px solid black;
-            }}
-            """        
-
-        # TEMP styles array
-        styles = [
-            ("#FFFFFF","Black"),
-            ("#00FF7F","Black"),
-            ("#00BFFF","Black"),
-            ("#9370DB","Black"),
-            ("#DC143C","White"),
-            ("#778899","Black"),
-            ("#FFD700","Black"),
-            ("#FF69B4","Black"),
-        ]
+        dev_immunity_btn = QPushButton("Immunity")
+        dev_immunity_btn.setToolTip("Adds DEV Immune Ring buff to item.")
+        dev_immunity_btn.clicked.connect(
+            lambda: self._eb_apply_dev_preset("immune"))
+        dev_grid_buttons.append(dev_immunity_btn)
         
+        dev_str_hp_btn = QPushButton("STR/HP")
+        dev_str_hp_btn.setToolTip(
+            "Inject DEV STR/HP Ring stats:\n"
+            "- Max DDD (Damage)\n"
+            "- Max HP Regen")
+        dev_str_hp_btn.clicked.connect(
+            lambda: self._eb_apply_dev_preset("str_hp"))
+        dev_grid_buttons.append(dev_str_hp_btn)
+
+        dev_def_hp_btn = QPushButton("DEF/HP")
+        dev_def_hp_btn.setToolTip(
+            "Inject DEV DEF/HP Ring stats:\n"
+            "- Max DPV (Defense)\n"
+            "- Max HP Regen")
+        dev_def_hp_btn.clicked.connect(
+            lambda: self._eb_apply_dev_preset("def_hp"))
+        dev_grid_buttons.append(dev_def_hp_btn)
+
+        dev_mp_stam_btn = QPushButton("MP/Stamina")
+        dev_mp_stam_btn.setToolTip(
+            "Inject DEV MP/Stamina Ring stats:\n"
+            "- Max Spirit Regen\n"
+            "- Max Stamina Regen\n"
+            "- Max Stamina Cost Reduction")
+        dev_mp_stam_btn.clicked.connect(
+            lambda: self._eb_apply_dev_preset("mp_stam"))
+        dev_grid_buttons.append(dev_mp_stam_btn)
+
+        dev_speed = QPushButton("Speed")
+        dev_speed.setToolTip(
+            "Inject DEV Speed Ring stats:\n"
+            "- Max Attack Speed\n"
+            "- Max Move Speed\n"
+            "- Max Crit Rate")
+        dev_speed.clicked.connect(
+            lambda: self._eb_apply_dev_preset("speed"))
+        dev_grid_buttons.append(dev_speed)
+
+        dev_mode_desc = textwrap.dedent("""
+            Inject ALL DEV Ring stats:
+            - Immunity
+            - Max DDD (Damage)
+            - Max DPV (Defense)
+            - Max Attack Speed
+            - Max Move Speed
+            - Max Crit Rate
+            - Max HP Regen
+            - Max Spirit Regen
+            - Max Stamina Regen
+            - Max Stamina Cost Reduction
+        """).strip()
+        dev_all = QPushButton("All")
+        dev_all.setToolTip(dev_mode_desc)
+        dev_all.clicked.connect(
+            lambda: self._eb_apply_dev_preset("all"))
+        dev_grid_buttons.append(dev_all)
+
         # Apply Layout and Styles to all grid buttons
         i = 0
         for btn in grid_buttons:
@@ -1885,6 +1979,23 @@ class ItemBuffsTab(QWidget):
             grid.addWidget(btn,r,c)
             i += 1
 
+        i = 0
+        for btn in dev_grid_buttons:
+            bc,fc = styles[~(i % len(styles))]
+            r,c = divmod(i,grid_columns)
+            btn.setStyleSheet(gen_styles(fc,bc))
+            dev_grid.addWidget(btn,r,c)
+            i += 1
+            
+        i = 0
+        for btn in custom_grid_buttons:
+            bc,fc = styles[i % len(styles)]
+            r,c = divmod(i,grid_columns)
+            btn.setStyleSheet(gen_styles(fc,bc))
+            custom_grid.addWidget(btn,r,c)
+            i += 1
+        
+        pl.addWidget(grid_label)
         pl.addLayout(grid)
 
         # ── DEV Ring Presets (collapsible) ──────────────────────────────
@@ -2305,36 +2416,36 @@ class ItemBuffsTab(QWidget):
         sgl.setContentsMargins(10, 14, 10, 10)
 
         # Per-item socket extender row
-        self._eb_socket_row_widget = QWidget()
-        socket_row = QHBoxLayout(self._eb_socket_row_widget)
-        socket_row.setContentsMargins(0, 0, 0, 0)
-        socket_row.setSpacing(6)
-        socket_row.addWidget(QLabel("Count:"))
-        self._eb_socket_count = QSpinBox()
-        self._eb_socket_count.setRange(1, 8)
-        self._eb_socket_count.setValue(5)
-        self._eb_socket_count.setFixedWidth(60)
-        self._eb_socket_count.setToolTip(
-            "Target max socket count. Writes to drop_default_data."
-            "add_socket_material_item_list.")
-        socket_row.addWidget(self._eb_socket_count)
-        socket_row.addWidget(QLabel("Pre-unlocked:"))
-        self._eb_socket_valid = QSpinBox()
-        self._eb_socket_valid.setRange(0, 8)
-        self._eb_socket_valid.setValue(0)
-        self._eb_socket_valid.setFixedWidth(60)
-        self._eb_socket_valid.setToolTip(
-            "How many sockets are unlocked on drop. Extra sockets need to "
-            "be unlocked at the Witch NPC.")
-        socket_row.addWidget(self._eb_socket_valid)
-        socket_apply_btn = QPushButton("Extend Sockets (Selected)")
-        socket_apply_btn.setToolTip(
-            "Extend socket capacity on the SELECTED item. Only applies to "
-            "items with use_socket=1 (abyss gear).")
-        socket_apply_btn.clicked.connect(self._eb_extend_sockets)
-        socket_row.addWidget(socket_apply_btn)
-        socket_row.addStretch(1)
-        sgl.addWidget(self._eb_socket_row_widget)
+        # self._eb_socket_row_widget = QWidget()
+        # socket_row = QHBoxLayout(self._eb_socket_row_widget)
+        # socket_row.setContentsMargins(0, 0, 0, 0)
+        # socket_row.setSpacing(6)
+        # socket_row.addWidget(QLabel("Count:"))
+        # self._eb_socket_count = QSpinBox()
+        # self._eb_socket_count.setRange(1, 8)
+        # self._eb_socket_count.setValue(5)
+        # self._eb_socket_count.setFixedWidth(60)
+        # self._eb_socket_count.setToolTip(
+        #     "Target max socket count. Writes to drop_default_data."
+        #     "add_socket_material_item_list.")
+        # socket_row.addWidget(self._eb_socket_count)
+        # socket_row.addWidget(QLabel("Pre-unlocked:"))
+        # self._eb_socket_valid = QSpinBox()
+        # self._eb_socket_valid.setRange(0, 8)
+        # self._eb_socket_valid.setValue(0)
+        # self._eb_socket_valid.setFixedWidth(60)
+        # self._eb_socket_valid.setToolTip(
+        #     "How many sockets are unlocked on drop. Extra sockets need to "
+        #     "be unlocked at the Witch NPC.")
+        # socket_row.addWidget(self._eb_socket_valid)
+        # socket_apply_btn = QPushButton("Extend Sockets (Selected)")
+        # socket_apply_btn.setToolTip(
+        #     "Extend socket capacity on the SELECTED item. Only applies to "
+        #     "items with use_socket=1 (abyss gear).")
+        # socket_apply_btn.clicked.connect(self._eb_extend_sockets)
+        # socket_row.addWidget(socket_apply_btn)
+        # socket_row.addStretch(1)
+        # sgl.addWidget(self._eb_socket_row_widget)
 
         # Bulk 'All → 5' socket button on its own row so it isn't squeezed
         # alongside the per-item row above.
@@ -2369,11 +2480,28 @@ class ItemBuffsTab(QWidget):
         info.setStyleSheet(f"color: {COLORS['warning']}; font-size: 10px;")
         form.addRow(info)
 
-        # JSON Edit + Import
+        # Item Tools
         item_tools_container = QWidget()
         item_tools_row = QHBoxLayout(item_tools_container)
         item_tools_row.setContentsMargins(0, 0, 0, 0)
         item_tools_row.setSpacing(4)
+        
+        diff_btn = QPushButton("Item Diff")
+        diff_btn.setToolTip(
+            "Compare two items field by field — see exactly what's different\n"
+            "between e.g. a working modded item and a broken one.")
+        diff_btn.clicked.connect(self._buff_open_item_diff_dialog)
+        item_tools_row.addWidget(diff_btn)
+
+        inspect_btn = QPushButton("Inspect Item")
+        inspect_btn.setToolTip(
+            "Deep-dive on the currently selected item — every field, type,\n"
+            "and value rendered in a searchable tree. Shows crafting deps\n"
+            "and any references back to this item from elsewhere in iteminfo.")
+        inspect_btn.clicked.connect(self._buff_open_item_inspector)
+        item_tools_row.addWidget(inspect_btn)
+
+        # JSON Edit
         json_btn = QPushButton("Edit JSON")
         json_btn.setToolTip("Open raw enchant data as editable JSON — full control")
         json_btn.clicked.connect(self._eb_json_edit)
@@ -2621,7 +2749,7 @@ class ItemBuffsTab(QWidget):
             iteminfo = bytes(crimson_rs.extract_file(
                 game_path, buff_dir, "gamedata/binary__/client/bin",
                 "iteminfo.pabgb"))
-
+            
             # Verify overlay is from the SAME game version — if the size
             # differs significantly from vanilla, the overlay is stale
             # (from a prior game update) and will fail to parse. Fall back
@@ -5793,39 +5921,39 @@ class ItemBuffsTab(QWidget):
             "warning": "Embedding abyss gears in-game on items that do not normally have socket slots can cause crashing.",
             "drop_default_data": {
                 "add_socket_material_item_list": [
-                    {"item": 1, "value": 500},
-                    {"item": 1, "value": 1000},
-                    {"item": 1, "value": 2000},
-                    {"item": 1, "value": 3000},
-                    {"item": 1, "value": 4000},
+                    {"item": 1,"value": 500},
+                    {"item": 1,"value": 1000},
+                    {"item": 1,"value": 2000},
+                    {"item": 1,"value": 3000},
+                    {"item": 1,"value": 4000}
                 ],
                 "socket_valid_count": 5,
-                "use_socket": 1,
-            },
+                "use_socket": 1
+            }
         },
         "max_enchant": {
             "name": "Max Refine",
-            "description": "All newly obtained copies of this item will be lvl 10 by default.",
+            "description": "All newly obtained copies of this item will be lvl 10 be default.",
             "drop_default_data": {
-                "drop_enchant_level": 10,
-            },
+                "drop_enchant_level": 10
+            }
         },
         "no_cooldown": {
-            "name": "No Cooldown",
+            "name":"No Cooldown",
             "description": "Set cooldown of item ability to 1s and remove recharge restrictions.",
             "cooltime": 1,
             "item_charge_type": 0,
-            "respawn_time_seconds": 0,
+            "respawn_time_seconds": 0
         },
         "max_charges": {
-            "name": "Max Charges",
+            "name":"Max Charges",
             "description": "Set charges of item ability to 100.",
-            "max_charged_useable_count": 100,
+            "max_charged_useable_count": 100
         },
         "max_stacks": {
             "name": "Max Stacks",
             "description": "Set the max stack size of an item to 999999.",
-            "max_stack_count": 999999,
+            "max_stack_count": 999999  
         },
         "shadow_boots": {
             "name": "Shadow Boots",
@@ -6042,6 +6170,8 @@ class ItemBuffsTab(QWidget):
         if not preset:
             return
 
+        log.info("Applying preset: %s", preset)
+
         rust_info = self._buff_rust_lookup.get(self._buff_current_item.item_key)
         if not rust_info:
             return
@@ -6049,16 +6179,27 @@ class ItemBuffsTab(QWidget):
         display_name = self._name_db.get_name(self._buff_current_item.item_key)
         skill_str = ', '.join(str(p['skill']) for p in preset.get('passives', []))
 
-        cur_charge = rust_info.get('item_charge_type', 0)
-        new_charge = preset.get('item_charge_type', cur_charge)
-        charge_change_warn = ""
-        if cur_charge != new_charge and new_charge == 0:
-            charge_change_warn = (
-                f"\n\nWARNING: Switching item from passive -> activated.\n"
-                f"Existing copies in your save have NO charge-tracking data and\n"
-                f"will show '0 uses' in-game. Get a FRESH copy (store/craft/drop)\n"
-                f"AFTER applying the mod for the activation to work."
-            )
+        if not skip:
+            cur_charge = rust_info.get('item_charge_type', 0)
+            new_charge = preset.get('item_charge_type', cur_charge)
+            charge_change_warn = ""
+            if cur_charge != new_charge and new_charge == 0:
+                charge_change_warn = (
+                    f"WARNING: Switching item from passive -> activated.\n"
+                    f"Existing copies in your save have NO charge-tracking data and\n"
+                    f"will show '0 uses' in-game. Get a FRESH copy (store/craft/drop)\n"
+                    f"AFTER applying the mod for the activation to work.\n\n"
+                )
+                
+            cur_stack_size = rust_info.get('max_stack_count', 1)
+            new_stack_size = preset.get('max_stack_count', cur_stack_size)
+            max_stack_warn = ""
+            if cur_stack_size != new_stack_size and cur_stack_size == 1:
+                max_stack_warn = (
+                    "WARNING: Changing the stack size for items that do "
+                    "not stack by default can cause ui glitches and lost items.\n"
+                    "Proceed with caution.\n\n"                    
+                )
 
         if not skip:
             warning = preset.get('warning', '')
@@ -6076,7 +6217,7 @@ class ItemBuffsTab(QWidget):
                 self, f"Apply Preset: {preset['name']}",
                 f"Apply {preset['name']} preset to {display_name}?\n\n"
                 f"{preset.get('description', default_desc)}\n\n"
-                f"{warning}{charge_change_warn}"
+                f"{warning}{charge_change_warn}{max_stack_warn}"
                 f"Click 'Apply to Game' after to write.",
                 QMessageBox.Yes | QMessageBox.No, QMessageBox.No,
             )
@@ -6098,6 +6239,24 @@ class ItemBuffsTab(QWidget):
                     'docking_child_data', 'max_stack_count'):
             if preset.get(gf) is not None:
                 rust_info[gf] = preset[gf]
+        
+        
+        if preset.get('drop_default_data') is not None:
+            ddd = preset['drop_default_data']
+            existing = rust_info.get('drop_default_data')
+            for dd in ('drop_enchant_level','add_socket_material_item_list',
+                       'socket_item_list','socket_valid_count','use_socket'):
+                if ddd.get(dd) is not None:
+                    existing[dd] = ddd[dd]
+            # rust_info['drop_default_data'] = existing
+
+        # Sync mirrored fields — game expects these to match their parent values
+        if 'cooltime' in preset:
+            rust_info['unk_post_cooltime_a'] = preset['cooltime']
+            rust_info['unk_post_cooltime_b'] = preset['cooltime']
+        if 'max_charged_useable_count' in preset:
+            rust_info['unk_post_max_charged_a'] = preset['max_charged_useable_count']
+            rust_info['unk_post_max_charged_b'] = preset['max_charged_useable_count']
 
         if preset.get('drop_default_data') is not None:
             ddd = preset['drop_default_data']
@@ -8864,7 +9023,7 @@ class ItemBuffsTab(QWidget):
                     cur = crimson_rs.parse_papgt_file(vanilla_papgt)
                 else:
                     cur = {"unknown0": 1610, "checksum": 0, "unknown1": 0, "unknown2": 0, "entries": []}
-                cur["entries"] = [e for e in cur["entries"]
+                    cur["entries"] = [e for e in cur["entries"]
                                   if e.get("group_name") != mod_group]
                 cur = crimson_rs.add_papgt_entry(
                     cur, mod_group, pamt_checksum, is_optional=0, language=0x3FFF)
@@ -11766,7 +11925,7 @@ class ItemBuffsTab(QWidget):
             self._buff_status_label.setText(f"Export failed: {e}")
             QMessageBox.critical(self, "Export Failed",
                 f"Failed to export mod:\n{e}")
-
+            
     def _buff_apply_to_game(self) -> None:
         if not self._buff_ensure_patcher():
             return
@@ -12961,3 +13120,4 @@ class ItemBuffsTab(QWidget):
                     downloaded += 1
         self._set_refresh_local()
         self._set_status.setText(f"{msg} Downloaded {downloaded} new sets.")
+        
