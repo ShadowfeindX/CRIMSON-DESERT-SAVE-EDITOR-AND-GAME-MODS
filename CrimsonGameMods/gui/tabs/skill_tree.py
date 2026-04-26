@@ -297,7 +297,7 @@ class SkillTreeTab(QWidget):
             "Compatible with legacy mod loaders.")
         self._btn_skill_export_legacy.clicked.connect(self._on_skill_export_legacy)
         self._btn_skill_export_legacy.setEnabled(False)
-        self._btn_skill_export_legacy.setVisible(False)
+        skill_btn_row.addWidget(self._btn_skill_export_legacy)
 
         self._btn_skill_export_mod = QPushButton("Export as Mod Folder")
         self._btn_skill_export_mod.setToolTip(
@@ -1572,16 +1572,23 @@ class SkillTreeTab(QWidget):
                 continue
             entry_name = e.get('name', f'entry_{i}')
             entry_abs = entry_offsets.get(entry_name, 0)
-            j = 0
+            # Standard PABGB convention: entry body base = after key(4) +
+            # name_len(4) + name_string(N). The null terminator is counted
+            # as byte 0 of the body, not part of the header.
+            name_len = e.get('name_len', len(entry_name))
+            hdr_size = 4 + 4 + name_len
+            body_base_abs = entry_abs + hdr_size
+            j = hdr_size
             while j < min(len(van_bytes), len(mod_bytes)):
                 if van_bytes[j] != mod_bytes[j]:
                     run_start = j
                     while j < min(len(van_bytes), len(mod_bytes)) and van_bytes[j] != mod_bytes[j]:
                         j += 1
+                    rel = run_start - hdr_size
                     changes.append({
                         'entry': entry_name,
-                        'rel_offset': run_start,
-                        'offset': entry_abs + run_start,
+                        'rel_offset': rel,
+                        'offset': body_base_abs + rel,
                         'original': van_bytes[run_start:j].hex(),
                         'patched': mod_bytes[run_start:j].hex(),
                     })

@@ -10,8 +10,11 @@ JSON-edit validation, and item diff.
 """
 from __future__ import annotations
 
+import logging
 from collections import Counter, defaultdict
 from typing import Any, Iterable, Optional
+
+log = logging.getLogger(__name__)
 
 
 CATEGORY_LABEL_OVERRIDES: dict[int, str] = {
@@ -73,6 +76,8 @@ class IteminfoIndex:
         self.gimmick_to_items: dict[int, list[dict]] = defaultdict(list)
         # passive skill id → [item dicts that have it in equip_passive_skill_list]
         self.passive_to_items: dict[int, list[dict]] = defaultdict(list)
+        # buff id → [item dicts that have it in equip_buffs]
+        self.buff_to_items: dict[int, list[dict]] = defaultdict(list)
         # equip_type_info → [item dicts] (weapon class hash → users)
         self.equip_type_to_items: dict[int, list[dict]] = defaultdict(list)
         # category_info → [item dicts]
@@ -102,8 +107,19 @@ class IteminfoIndex:
                 sid = p.get("skill")
                 if sid:
                     self.passive_to_items[int(sid)].append(it)
+            bl = set()
+            for ed in it.get("enchant_data_list", []):
+                for eb in ed.get("equip_buffs", []):
+                    bid = eb.get("buff")
+                    if bid:
+                        bl.add(bid)
+            for bid in bl:
+                self.buff_to_items[bid].append(it)
             self.category_to_items[cat].append(it)
             self.item_type_to_items[it_type].append(it)
+
+        log.info("Index built: %d items, %d passives, %d buffs",
+                 len(items), len(self.passive_to_items), len(self.buff_to_items))
 
         # Derive friendly category labels from common string_key suffixes.
         for cat, group in self.category_to_items.items():
@@ -131,8 +147,9 @@ class IteminfoIndex:
         return users[:limit] if limit else users
 
     def find_similar(self, item: dict, mode: str = "category") -> list[dict]:
-        """Items 'similar' to the given one. mode in {category, equip_type, item_type}.
+        """Items 'similar' to the given one.
 
+        mode in {category, equip_type, item_type, passives, buffs}.
         Excludes the input item itself.
         """
         key = item.get("key")
@@ -142,6 +159,34 @@ class IteminfoIndex:
         elif mode == "item_type":
             it_type = item.get("item_type") or 0
             pool = self.item_type_to_items.get(it_type, [])
+        elif mode == "passives":
+            psl = item.get("equip_passive_skill_list", [])
+            if not psl:
+                return []
+            seen: set[int] = set()
+            pool = []
+            for p in psl:
+                pid = p.get("skill")
+                if pid:
+                    for it in self.passive_to_items.get(int(pid), []):
+                        k = it.get("key")
+                        if k and k not in seen:
+                            seen.add(k)
+                            pool.append(it)
+        elif mode == "buffs":
+            edl = item.get("enchant_data_list", [])
+            if not edl:
+                return []
+            seen_b: set[int] = set()
+            pool = []
+            for b in edl[0].get("equip_buffs", []):
+                bid = b.get("buff")
+                if bid:
+                    for it in self.buff_to_items.get(bid, []):
+                        k = it.get("key")
+                        if k and k not in seen_b:
+                            seen_b.add(k)
+                            pool.append(it)
         else:  # category
             cat = item.get("category_info") or 0
             pool = self.category_to_items.get(cat, [])

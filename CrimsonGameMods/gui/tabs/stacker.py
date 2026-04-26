@@ -217,6 +217,8 @@ def _detect_dict_features(items: list) -> dict:
         'socket_forced_on': 0,
         'socket_5_extended': 0,
         'up_v2_tribe_unioned': 0,
+        'abyss_unlocked': 0,
+        'abyss_total': 0,
         'passives_added': 0,
         'extra_enchant_levels': 0,
     }
@@ -253,6 +255,11 @@ def _detect_dict_features(items: list) -> dict:
                 if costs == [500, 1000, 2000, 3000, 4000]:
                     feats['socket_forced_on'] += 1
 
+        if 'AbyssGear' in (it.get('string_key') or ''):
+            feats['abyss_total'] += 1
+            if it.get('equipable_hash', -1) == 0:
+                feats['abyss_unlocked'] += 1
+
         if it.get('equip_passive_skill_list'):
             feats['passives_added'] += 1
 
@@ -288,6 +295,10 @@ def _features_summary_lines(feats: dict) -> list:
         lines.append(f"  Sockets (5 slots)     : {feats['socket_5_extended']:>5} items")
     if feats.get('socket_forced_on'):
         lines.append(f"    └ force-enabled     : {feats['socket_forced_on']:>5} accessories/cloaks (DennyBro pattern)")
+    if feats.get('abyss_unlocked') and feats['abyss_unlocked'] == feats.get('abyss_total', 0):
+        lines.append(f"  Abyss Gear Unlocked   : {feats['abyss_unlocked']:>5}/{feats['abyss_total']} (all unrestricted)")
+    elif feats.get('abyss_unlocked'):
+        lines.append(f"  Abyss Gear Unlocked   : {feats['abyss_unlocked']:>5}/{feats['abyss_total']} items")
     if feats.get('up_v2_tribe_unioned'):
         lines.append(f"  UP v2 tribe unioned   : {feats['up_v2_tribe_unioned']:>5} items")
     if feats.get('passives_added'):
@@ -312,6 +323,8 @@ def _compact_features_summary(feats: dict) -> str:
         bits.append(f"dyeable({feats['dyeable_flipped']})")
     if feats.get('socket_5_extended'):
         bits.append(f"sock-5({feats['socket_5_extended']})")
+    if feats.get('abyss_unlocked'):
+        bits.append(f"abyss({feats['abyss_unlocked']}/{feats.get('abyss_total',0)})")
     if feats.get('up_v2_tribe_unioned'):
         bits.append(f"UP-v2({feats['up_v2_tribe_unioned']})")
     if feats.get('passives_added'):

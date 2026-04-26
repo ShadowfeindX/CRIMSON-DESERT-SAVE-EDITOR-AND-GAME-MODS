@@ -283,6 +283,10 @@ class MainWindow(QMainWindow):
         if abs(self._zoom_factor - 1.0) > 0.001:
             QTimer.singleShot(0, self._apply_zoom)
 
+        if not self._config.get("show_gamepath_bar", True):
+            self._global_hide_btn.setChecked(True)
+            self._toggle_global_info(True)
+
         self._refresh_sidebar()
 
         try:
@@ -507,14 +511,14 @@ class MainWindow(QMainWindow):
         gp_detect.clicked.connect(self._global_auto_detect_path)
         info_layout.addWidget(gp_detect)
 
-        self._global_hide_btn = QPushButton("X")
+        self._global_hide_btn = QPushButton("▲")
         self._global_hide_btn.setFixedSize(24, 24)
         self._global_hide_btn.setCheckable(True)
-        self._global_hide_btn.setToolTip("Hide/Show game path bar")
+        self._global_hide_btn.setToolTip("Hide game path bar (▲ collapse / ▼ expand)")
         self._global_hide_btn.setStyleSheet(
             f"QPushButton {{ background: {COLORS['accent']}; color: white; "
-            f"font-weight: bold; border-radius: 12px; font-size: 12px; }}"
-            f"QPushButton:checked {{ background: #4CAF50; }}")
+            f"font-weight: bold; border-radius: 12px; font-size: 14px; }}"
+            f"QPushButton:checked {{ background: {COLORS['accent']}; }}")
         self._global_hide_btn.clicked.connect(self._toggle_global_info)
         info_layout.addWidget(self._global_hide_btn)
 
@@ -1722,6 +1726,17 @@ class MainWindow(QMainWindow):
 
         view_menu.addSeparator()
 
+        panels_menu = view_menu.addMenu("Show / Hide Panels")
+
+        self._show_gamepath_action = QAction("Game Path Bar", self)
+        self._show_gamepath_action.setCheckable(True)
+        self._show_gamepath_action.setChecked(
+            self._config.get("show_gamepath_bar", True))
+        self._show_gamepath_action.triggered.connect(self._menu_toggle_gamepath)
+        panels_menu.addAction(self._show_gamepath_action)
+
+        view_menu.addSeparator()
+
         self._view_menu = view_menu
         self._tab_actions = []
 
@@ -2432,7 +2447,18 @@ QCheckBox::indicator {{
         for w in self._global_info_widget.findChildren(QWidget):
             if w is not self._global_hide_btn:
                 w.setVisible(not checked)
-        self._global_hide_btn.setText("+" if checked else "X")
+        self._global_hide_btn.setText("▼" if checked else "▲")
+        self._global_hide_btn.setToolTip(
+            ("Show game path bar (▼ expand)" if checked
+             else "Hide game path bar (▲ collapse)"))
+        if hasattr(self, '_show_gamepath_action'):
+            self._show_gamepath_action.setChecked(not checked)
+        self._config["show_gamepath_bar"] = not checked
+        self._save_config()
+
+    def _menu_toggle_gamepath(self, checked):
+        self._global_hide_btn.setChecked(not checked)
+        self._toggle_global_info(not checked)
 
     def _global_browse_game_path(self) -> None:
         current = self._config.get("game_install_path", "")
@@ -2465,7 +2491,14 @@ QCheckBox::indicator {{
 
     def _on_tab_navigate_requested(self, selector: str) -> None:
         try:
-            if selector.startswith("tab_index:"):
+            if selector == "stacker":
+                stacker = getattr(self, '_stacker_tab', None)
+                if stacker is not None:
+                    idx = self._mods_tabs.indexOf(stacker)
+                    if idx >= 0:
+                        self._mods_tabs.setCurrentIndex(idx)
+                        return
+            elif selector.startswith("tab_index:"):
                 tab = getattr(self, '_buffs_tab', None)
                 if tab is not None:
                     idx = self._mods_tabs.indexOf(tab)
