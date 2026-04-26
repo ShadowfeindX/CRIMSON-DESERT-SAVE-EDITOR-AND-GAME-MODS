@@ -113,6 +113,7 @@ class ItemBuffsTab(QWidget):
         self._buff_item_limits = {}
         self._experimental_mode: bool = bool(self._config.get("experimental_mode", False))
         self._favorite_items: List[dict] = self._config.setdefault("favorite_items", [])
+        self._copy_buffer: dict = {}
         self._build_ui()
 
     def _safely_replace_buff_item(self, target_key: int, new_dict: dict) -> None:
@@ -3524,6 +3525,7 @@ class ItemBuffsTab(QWidget):
                 s_sep.setForeground(QBrush(QColor("#F83B3B")))
                 s_sep.setFont(QFont("Consolas", 9, QFont.Bold))
                 s_sep.setFlags(s_sep.flags() & ~Qt.ItemIsSelectable)
+                s_sep.setData(Qt.UserRole + 1, ('header', 'sockets'))
                 table.setRowCount(row + 1)
                 table.setItem(row, 0, s_sep)
                 table.setItem(row, 1, QTableWidgetItem(""))
@@ -3542,13 +3544,13 @@ class ItemBuffsTab(QWidget):
                         table.setItem(row, 1, QTableWidgetItem(""))
                         table.setSpan(row, 0, 1, 2)
                         row += 1
-                else:
-                    si_c = QTableWidgetItem("  (none)")
-                    si_c.setForeground(QBrush(QColor(COLORS["text_dim"])))
-                    table.setRowCount(row + 1)
-                    table.setItem(row, 0, si_c)
-                    table.setItem(row, 1, QTableWidgetItem(""))
-                    row += 1
+                # else:
+                #     si_c = QTableWidgetItem("  (none)")
+                #     si_c.setForeground(QBrush(QColor(COLORS["text_dim"])))
+                #     table.setRowCount(row + 1)
+                #     table.setItem(row, 0, si_c)
+                #     table.setItem(row, 1, QTableWidgetItem(""))
+                #     row += 1
 
             edl = rust_info.get('enchant_data_list', [])
 
@@ -3557,6 +3559,7 @@ class ItemBuffsTab(QWidget):
             ps_sep.setForeground(QBrush(QColor("#4FC3F7")))
             ps_sep.setFont(QFont("Consolas", 9, QFont.Bold))
             ps_sep.setFlags(ps_sep.flags() & ~Qt.ItemIsSelectable)
+            ps_sep.setData(Qt.UserRole + 1, ('header', 'passives'))
             table.setRowCount(row + 1)
             table.setItem(row, 0, ps_sep)
             table.setItem(row, 1, QTableWidgetItem(""))
@@ -3577,13 +3580,13 @@ class ItemBuffsTab(QWidget):
                     table.setItem(row, 0, c1)
                     table.setItem(row, 1, c2)
                     row += 1
-            else:
-                c1 = QTableWidgetItem("  (none)")
-                c1.setForeground(QBrush(QColor(COLORS["text_dim"])))
-                table.setRowCount(row + 1)
-                table.setItem(row, 0, c1)
-                table.setItem(row, 1, QTableWidgetItem(""))
-                row += 1
+            # else:
+            #     c1 = QTableWidgetItem("  (none)")
+            #     c1.setForeground(QBrush(QColor(COLORS["text_dim"])))
+            #     table.setRowCount(row + 1)
+            #     table.setItem(row, 0, c1)
+            #     table.setItem(row, 1, QTableWidgetItem(""))
+            #     row += 1
 
             if edl:
                 display_level = 0
@@ -3649,6 +3652,7 @@ class ItemBuffsTab(QWidget):
             eb_sep.setForeground(QBrush(QColor("#AB47BC")))
             eb_sep.setFont(QFont("Consolas", 9, QFont.Bold))
             eb_sep.setFlags(eb_sep.flags() & ~Qt.ItemIsSelectable)
+            eb_sep.setData(Qt.UserRole + 1, ('header', 'buffs'))
             table.setRowCount(row + 1)
             table.setItem(row, 0, eb_sep)
             table.setItem(row, 1, QTableWidgetItem(""))
@@ -5502,7 +5506,7 @@ class ItemBuffsTab(QWidget):
             return
         if not hasattr(self, '_buff_current_item') or self._buff_current_item is None:
             return
-
+        
         table = self._buff_stats_table
         item = table.itemAt(pos)
         if not item:
@@ -5524,44 +5528,133 @@ class ItemBuffsTab(QWidget):
             return
 
         kind = kind_data[0]
+        
+        def paste_from_copy_buffer(rust_info: dict):
+            if not hasattr(self, '_copy_buffer') or not self._copy_buffer:
+                return
+            
+            btype, bdata = self._copy_buffer.values()
+            match btype:
+                case 'passive':
+                    i = self._eb_passive_combo.findData(bdata['skill'])
+                    self._eb_passive_combo.setCurrentIndex(i)
+                    self._eb_level_spin.setValue(bdata['level'])
+                    self._eb_apply()
+                case 'buff':
+                    i = self._eb_buff_combo.findData(bdata['buff'])
+                    self._eb_buff_combo.setCurrentIndex(i)
+                    self._eb_buff_level.setValue(bdata['level'])
+                    self._eb_add_buff()
+                case 'stat': "STUB"
+                case 'passives_list':
+                    psl = rust_info['equip_passive_skill_list']
+                    merged = {s['skill']: s for s in psl} | {s['skill']: s for s in bdata}
+                    final = list(merged.values())
+                    print(final)
+                    rust_info['equip_passive_skill_list'] = final
+                    self._buff_modified = True
+                    self._buff_refresh_stats()
+                case 'buffs_list':
+                    edl = rust_info.get('enchant_data_list', [])
+                    if edl:
+                        ed0 = edl[0]
+                        merged = {b['buff']: b for b in ed0.get('equip_buffs', [])} | {b['buff']: b for b in bdata}
+                        final = list(merged.values())
+                        print(final)
+                        for ed in edl:
+                            ed["equip_buffs"] = final
+                    self._buff_modified = True
+                    self._buff_refresh_stats()
+                case 'sockets_list':
+                    ddd = rust_info['drop_default_data']
+                    ddd['socket_item_list'] = bdata
+                    if len(ddd['add_socket_material_item_list']) < len(bdata):
+                        count = self._eb_socket_count.value()
+                        valid = self._eb_socket_valid.value()
+                        self._eb_socket_count.setValue(max(count, len(bdata)))
+                        self._eb_socket_valid.setValue(max(valid, len(bdata)))
+                        self._eb_extend_sockets()
+                    self._buff_modified = True
+                    self._buff_refresh_stats()
+                case _:
+                    log.warning("Unknown copy buffer type: %s\n%s", btype, bdata)
+            
 
+        act_paste = "STUB"
         if kind == 'passive':
             skill_id = kind_data[1]
             name = self._PASSIVE_SKILL_NAMES.get(skill_id, f"Skill {skill_id}")
             if isinstance(name, dict):
                 name = name.get('suffix', name.get('english_name', str(skill_id)))
-            act_remove = menu.addAction(f"Remove passive: {name}")
-            act_remove_all = menu.addAction("Remove ALL passives")
             act_show_similar = menu.addAction("Show items with this passive")
+            menu.addSeparator()
+            act_copy = menu.addAction(f"Copy passive: {name}")
+            if self._copy_buffer.get('type') == 'passive':
+                copy_id = self._copy_buffer['data']['skill']
+                act_paste = menu.addAction(
+                    f"Paste passive: "
+                    f"{self._PASSIVE_SKILL_NAMES.get(copy_id, f"Skill {copy_id}")}"
+                )
+            act_remove = menu.addAction(f"Remove passive: {name}")
             psl = rust_info.get('equip_passive_skill_list', []) or []
 
             action = menu.exec(table.viewport().mapToGlobal(pos))
-            if action == act_remove:
-                rust_info['equip_passive_skill_list'] = [p for p in psl if p['skill'] != skill_id]
-                self._buff_modified = True
-                self._buff_refresh_stats()
-                self._buff_status_label.setText(f"Removed passive {name}")
-            elif action == act_remove_all:
-                rust_info['equip_passive_skill_list'] = []
-                self._buff_modified = True
-                self._buff_refresh_stats()
-                self._buff_status_label.setText("Removed all passives")
-            elif action == act_show_similar:
+            if action == act_show_similar:
                 if psl:
                     probe = dict(rust_info)
                     probe['equip_passive_skill_list'] = [{"skill": skill_id, "level": 0}]
                     self._show_similar_items(probe, "passives")
+            elif action == act_copy:
+                passive = next((p for p in psl if p['skill'] == skill_id), None)
+                if passive:
+                    self._copy_buffer = {
+                        "type": "passive",
+                        "data": passive
+                    }
+                    log.info(f"Passive ({skill_id}) added to copy buffer")
+                    self._buff_status_label.setText(f"Copied passive {name}")
+            elif action == act_paste:
+                paste_from_copy_buffer(rust_info)
+            elif action == act_remove:
+                rust_info['equip_passive_skill_list'] = [p for p in psl if p['skill'] != skill_id]
+                self._buff_modified = True
+                self._buff_refresh_stats()
+                self._buff_status_label.setText(f"Removed passive {name}")
 
         elif kind == 'buff':
             buff_id = kind_data[1]
             name = self._EQUIP_BUFF_NAMES.get(buff_id, f"Buff {buff_id}")
-            act_remove = menu.addAction(f"Remove buff: {name}")
-            act_remove_all = menu.addAction("Remove ALL buffs")
             act_show_similar = menu.addAction("Show items with this buff")
+            menu.addSeparator()
+            act_copy = menu.addAction(f"Copy buff: {name}")
+            if hasattr(self, '_copy_buffer') and self._copy_buffer.get('type') == 'buff':
+                copy_id = self._copy_buffer['data']['buff']
+                act_paste = menu.addAction(
+                    f"Paste buff: "
+                    f"{self._EQUIP_BUFF_NAMES.get(copy_id, f"Buff {copy_id}")}"
+                )
+            act_remove = menu.addAction(f"Remove buff: {name}")
 
             action = menu.exec(table.viewport().mapToGlobal(pos))
             edl = rust_info.get('enchant_data_list', [])
-            if action == act_remove:
+            if action == act_show_similar:
+                if edl:
+                    probe = dict(rust_info)
+                    probe['enchant_data_list'] = [{"equip_buffs": [{"buff": buff_id}]}]
+                    self._show_similar_items(probe, "buffs")
+            elif action == act_copy:
+                bl = edl[0].get('equip_buffs', [])
+                buff = next((b for b in bl if b['buff'] == buff_id), None)
+                if buff:
+                    self._copy_buffer = {
+                        "type": "buff",
+                        "data": buff
+                    }
+                    log.info(f"Buff ({buff_id}) added to copy buffer")
+                    self._buff_status_label.setText(f"Copied buff {name}")
+            elif action == act_paste:
+                paste_from_copy_buffer(rust_info)
+            elif action == act_remove:
                 removed_levels = 0
                 for ed in edl:
                     old = ed.get('equip_buffs', []) or []
@@ -5572,17 +5665,6 @@ class ItemBuffsTab(QWidget):
                 self._buff_modified = True
                 self._buff_refresh_stats()
                 self._buff_status_label.setText(f"Removed buff {name} ({removed_levels} levels)")
-            elif action == act_show_similar:
-                if edl:
-                    probe = dict(rust_info)
-                    probe['enchant_data_list'] = [{"equip_buffs": [{"buff": buff_id}]}]
-                    self._show_similar_items(probe, "buffs")
-            elif action == act_remove_all:
-                for ed in edl:
-                    ed['equip_buffs'] = []
-                self._buff_modified = True
-                self._buff_refresh_stats()
-                self._buff_status_label.setText("Removed all buffs")
 
         elif kind == 'stat':
             stat_key = kind_data[1]
@@ -5609,7 +5691,70 @@ class ItemBuffsTab(QWidget):
                 self._buff_modified = True
                 self._buff_refresh_stats()
                 self._buff_status_label.setText(f"Removed stat {name} ({removed} levels)")
-
+        
+        elif kind == 'header':
+            header = kind_data[1]
+            act_sim = act_paste_all = "STUB"
+            if header == 'passives':
+                act_sim = menu.addAction(f"Show items with similar {header}")
+                if hasattr(self, '_copy_buffer') and self._copy_buffer.get('type') == 'passive':
+                    copy_id = self._copy_buffer['data']['skill']
+                    act_paste = menu.addAction(
+                        f"Paste passive: "
+                        f"{self._PASSIVE_SKILL_NAMES.get(copy_id, f"Skill {copy_id}")}"
+                    )
+            elif header == 'buffs':
+                act_sim = menu.addAction(f"Show items with similar {header}")
+                if hasattr(self, '_copy_buffer') and self._copy_buffer.get('type') == 'buff':
+                    copy_id = self._copy_buffer['data']['buff']
+                    act_paste = menu.addAction(
+                        f"Paste buff: "
+                        f"{self._EQUIP_BUFF_NAMES.get(copy_id, f"Buff {copy_id}")}"
+                    )
+            menu.addSeparator()
+            act_copy_all = menu.addAction(f"Copy ALL {header}")
+            if hasattr(self, '_copy_buffer') and \
+                self._copy_buffer.get('type') == f"{header}_list":
+                    act_paste_all = menu.addAction(f"Paste ALL {header}")
+            act_remove_all = menu.addAction(f"Remove ALL {header}")
+                    
+            action = menu.exec(table.viewport().mapToGlobal(pos))
+            if action in (act_paste, act_paste_all):
+                paste_from_copy_buffer(rust_info)
+            elif action == act_sim:
+                self._show_similar_items(rust_info, header)
+            elif action == act_copy_all:
+                new_buffer = {
+                    "type": f"{header}_list",
+                    "data": None
+                }
+                match header:
+                    case 'passives':
+                        new_buffer['data'] = rust_info.get('equip_passive_skill_list', [])
+                    case 'buffs':
+                        edl = rust_info.get('enchant_data_list', [])
+                        if edl:
+                            new_buffer['data'] = edl[0].get('equip_buffs', [])
+                    case 'sockets':
+                        ddd = rust_info.get('drop_default_data')
+                        if ddd:
+                            new_buffer['data'] = ddd.get('socket_item_list', [])
+                    case _:
+                        "STUB"
+                if new_buffer['data']:
+                    self._copy_buffer = new_buffer
+            elif action == act_remove_all:
+                if header == 'passives':
+                    rust_info['equip_passive_skill_list'] = []
+                elif header == 'buffs':
+                    for ed in rust_info.get('enchant_data_list', []):
+                        ed['equip_buffs'] = []
+                elif header == 'sockets':
+                    rust_info['drop_default_data']['socket_item_list'] = []
+                self._buff_modified = True
+                self._buff_refresh_stats()
+                self._buff_status_label.setText(f"Removed all {header}")
+            
 
     def _eb_remove_passive(self) -> None:
         if not hasattr(self, '_buff_rust_items') or not self._buff_rust_items:
@@ -6170,7 +6315,7 @@ class ItemBuffsTab(QWidget):
         if not preset:
             return
 
-        log.info("Applying preset: %s", preset)
+        log.info("Applying preset: %s", preset_key)
 
         rust_info = self._buff_rust_lookup.get(self._buff_current_item.item_key)
         if not rust_info:
@@ -12684,6 +12829,10 @@ class ItemBuffsTab(QWidget):
                 self, "No Similar Items",
                 f"No other items found with the same {mode}.")
             return
+        # Include original item if showing from stats table
+        # to allow better comparisons and copy/paste functionality
+        if mode in ('passives','buffs','stats'):
+            peers.append(rust_info)
         # Map peers back to SaveItem entries from _buff_items so the existing
         # table render path stays untouched.
         peer_keys = {p["key"] for p in peers}
