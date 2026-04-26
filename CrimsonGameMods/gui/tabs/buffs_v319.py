@@ -1404,7 +1404,39 @@ class ItemBuffsTab(QWidget):
         pl.addWidget(self._buff_desc_label)
         
         pl.addWidget(self._ui_add_line(True))
-
+        
+        # --- Socket count ---
+        self._eb_socket_row_widget = QWidget()
+        socket_row = QHBoxLayout(self._eb_socket_row_widget)
+        socket_row.setContentsMargins(0, 0, 0, 0)
+        socket_row.setSpacing(6)
+        socket_row.addWidget(QLabel("Count:"))
+        self._eb_socket_count = QSpinBox()
+        self._eb_socket_count.setRange(1, 8)
+        self._eb_socket_count.setValue(5)
+        self._eb_socket_count.setFixedWidth(60)
+        self._eb_socket_count.setToolTip(
+            "Target max socket count. Writes to drop_default_data."
+            "add_socket_material_item_list.")
+        socket_row.addWidget(self._eb_socket_count)
+        socket_row.addWidget(QLabel("Pre-unlocked:"))
+        self._eb_socket_valid = QSpinBox()
+        self._eb_socket_valid.setRange(0, 8)
+        self._eb_socket_valid.setValue(0)
+        self._eb_socket_valid.setFixedWidth(60)
+        self._eb_socket_valid.setToolTip(
+            "How many sockets are unlocked on drop. Extra sockets need to "
+            "be unlocked at the Witch NPC.")
+        socket_row.addWidget(self._eb_socket_valid)
+        socket_apply_btn = QPushButton("Extend Sockets (Selected)")
+        socket_apply_btn.setToolTip(
+            "Extend socket capacity on the SELECTED item. Only applies to "
+            "items with use_socket=1 (abyss gear).")
+        socket_apply_btn.clicked.connect(self._eb_extend_sockets)
+        socket_row.addWidget(socket_apply_btn)
+        socket_row.addStretch(1)
+        pl.addWidget(self._eb_socket_row_widget)
+        
         # --- Drop enchant level ---
         drop_enchant = QWidget()
         drop_enchant_row = QHBoxLayout(drop_enchant)
@@ -1838,12 +1870,12 @@ class ItemBuffsTab(QWidget):
             )
             if reply != QMessageBox.Yes:
                 return
-            self._eb_god_mode(skip=True)
-            self._eb_apply_preset("open_sockets", skip=True)
-            self._eb_apply_preset("max_enchant", skip=True)
-            self._eb_apply_preset("no_cooldown", skip=True)
-            self._eb_apply_preset("max_charges", skip=True)
-            self._eb_apply_preset("great_thief_all", skip=True)
+            self._eb_god_mode(True)
+            self._eb_apply_preset("great_thief_all", True)
+            self._eb_apply_preset("open_sockets", True)
+            self._eb_apply_preset("max_charges", True)
+            self._eb_apply_preset("max_enchant", True)
+            self._eb_apply_preset("no_cooldown", True)
         godmode_btn = QPushButton("God Mode")
         godmode_btn.setToolTip(f"Inject full God Mode stats:\n{godmode_desc}")
         godmode_btn.clicked.connect(apply_godmode)
@@ -2448,11 +2480,28 @@ class ItemBuffsTab(QWidget):
         info.setStyleSheet(f"color: {COLORS['warning']}; font-size: 10px;")
         form.addRow(info)
 
-        # JSON Edit + Import
+        # Item Tools
         item_tools_container = QWidget()
         item_tools_row = QHBoxLayout(item_tools_container)
         item_tools_row.setContentsMargins(0, 0, 0, 0)
         item_tools_row.setSpacing(4)
+        
+        diff_btn = QPushButton("Item Diff")
+        diff_btn.setToolTip(
+            "Compare two items field by field — see exactly what's different\n"
+            "between e.g. a working modded item and a broken one.")
+        diff_btn.clicked.connect(self._buff_open_item_diff_dialog)
+        item_tools_row.addWidget(diff_btn)
+
+        inspect_btn = QPushButton("Inspect Item")
+        inspect_btn.setToolTip(
+            "Deep-dive on the currently selected item — every field, type,\n"
+            "and value rendered in a searchable tree. Shows crafting deps\n"
+            "and any references back to this item from elsewhere in iteminfo.")
+        inspect_btn.clicked.connect(self._buff_open_item_inspector)
+        item_tools_row.addWidget(inspect_btn)
+
+        # JSON Edit
         json_btn = QPushButton("Edit JSON")
         json_btn.setToolTip("Open raw enchant data as editable JSON — full control")
         json_btn.clicked.connect(self._eb_json_edit)
@@ -5905,11 +5954,6 @@ class ItemBuffsTab(QWidget):
             "name": "Max Stacks",
             "description": "Set the max stack size of an item to 999999.",
             "max_stack_count": 999999  
-        },
-        "max_stacks": {
-            "name": "Max Stacks",
-            "description": "Set the max stack size of an item to 999999.",
-            "max_stack_count": 999999,
         },
         "shadow_boots": {
             "name": "Shadow Boots",
