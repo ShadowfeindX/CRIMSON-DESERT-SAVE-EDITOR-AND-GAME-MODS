@@ -323,30 +323,46 @@ class ItemCreatorDialog(QDialog):
         bottom = QHBoxLayout()
         bottom.addStretch()
 
-        self._swap_vendor_btn = QPushButton("Swap to Vendor")
-        self._swap_vendor_btn.setStyleSheet(
+        self._dropset_btn = QPushButton("Deliver via Money Bag")
+        self._dropset_btn.setStyleSheet(
             "background-color:#1565C0;color:white;font-weight:bold;"
             "font-size:14px;padding:10px 24px;")
-        self._swap_vendor_btn.setToolTip(
-            "Swap an existing item in a vendor's store to this custom item.\n"
-            "Uses the donor's key — no new item key needed.\n"
-            "The vendor will sell this item with your custom stats.\n"
-            "Visit the vendor in-game and buy it.")
-        self._swap_vendor_btn.setEnabled(False)
-        self._swap_vendor_btn.clicked.connect(lambda: self._on_finish('swap'))
-        bottom.addWidget(self._swap_vendor_btn)
+        self._dropset_btn.setToolTip(
+            "Add this item to the Copper Money Bag drop table.\n"
+            "Open any copper money pouch in your inventory to receive it.\n\n"
+            "No save editing required — works purely through game data.\n"
+            "Uses dropsetinfo overlay (default group 0036).")
+        self._dropset_btn.setEnabled(False)
+        self._dropset_btn.clicked.connect(lambda: self._on_finish('dropset'))
+        bottom.addWidget(self._dropset_btn)
 
-        self._create_btn = QPushButton("Apply to Game (New Item)")
-        self._create_btn.setStyleSheet(
+        self._stage_btn = QPushButton("Stage Item")
+        self._stage_btn.setStyleSheet(
             "background-color:#FF4466;color:white;font-weight:bold;"
             "font-size:14px;padding:10px 24px;")
-        self._create_btn.setToolTip(
-            "Create a brand new item with a unique key (999001+).\n"
-            "Deploys as an overlay — use Save Editor Repurchase\n"
-            "tab to acquire it in-game.")
-        self._create_btn.setEnabled(False)
-        self._create_btn.clicked.connect(lambda: self._on_finish('new'))
-        bottom.addWidget(self._create_btn)
+        self._stage_btn.setToolTip(
+            "Stage this item into the ItemBuffs edit session.\n"
+            "The item's stats are applied to the donor key in memory.\n"
+            "Use 'Apply to Game' in ItemBuffs to deploy alongside\n"
+            "all your other edits (sockets, buffs, UP, abyss, etc.).\n\n"
+            "This is the safest option — nothing gets clobbered.")
+        self._stage_btn.setEnabled(False)
+        self._stage_btn.clicked.connect(lambda: self._on_finish('stage'))
+        bottom.addWidget(self._stage_btn)
+
+        self._export_single_btn = QPushButton("Export as Single-Item Mod")
+        self._export_single_btn.setStyleSheet(
+            "background-color:#2E7D32;color:white;font-weight:bold;"
+            "font-size:14px;padding:10px 24px;")
+        self._export_single_btn.setToolTip(
+            "Export a clean standalone folder mod containing ONLY this item.\n"
+            "Built against vanilla iteminfo (not your current modded state),\n"
+            "so the mod is shareable and doesn't include your other edits.\n\n"
+            "Output folder can be imported by any mod loader (JMM, CDUMM)\n"
+            "or re-imported back into this tool via Import Mod.")
+        self._export_single_btn.setEnabled(False)
+        self._export_single_btn.clicked.connect(lambda: self._on_finish('export_single'))
+        bottom.addWidget(self._export_single_btn)
 
         self._export_single_btn = QPushButton("Export as Single-Item Mod")
         self._export_single_btn.setStyleSheet(
@@ -459,8 +475,9 @@ class ItemCreatorDialog(QDialog):
         self._load_gimmick()
         self._load_raw_fields()
         self._update_preview()
-        self._create_btn.setEnabled(True)
+        self._stage_btn.setEnabled(True)
         self._export_single_btn.setEnabled(True)
+        self._dropset_btn.setEnabled(True)
 
     # ── Identity tab ──────────────────────────────────────────────────
 
@@ -950,15 +967,12 @@ class ItemCreatorDialog(QDialog):
 
         donor_key = self._selected_donor.get('key', 0)
 
-        if mode == 'swap':
-            # Swap to Vendor — use DONOR key, pick which vendor + which item to replace
-            store_key, replace_key = self._pick_vendor_swap()
-            if store_key <= 0:
-                return
-            self.swap_store_key = store_key
-            self.swap_replace_item_key = replace_key
-            self.created_key = donor_key  # reuse donor key
-            self.finish_mode = 'swap'
+        if mode == 'stage':
+            self.created_key = donor_key
+            self.finish_mode = 'stage'
+        elif mode == 'dropset':
+            self.created_key = donor_key
+            self.finish_mode = 'dropset'
         elif mode == 'export_single':
             # Same key-selection flow as 'new' but will be written as a
             # standalone shareable folder mod, not installed to the live game.
