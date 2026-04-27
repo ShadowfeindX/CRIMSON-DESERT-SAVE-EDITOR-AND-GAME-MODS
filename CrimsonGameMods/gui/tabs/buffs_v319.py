@@ -14,7 +14,7 @@ import traceback
 import textwrap
 from typing import Callable, List, Optional, Tuple
 
-from PySide6.QtCore import Qt, QSize, QTimer, Signal
+from PySide6.QtCore import QItemSelection, Qt, QSize, QTimer, Signal
 from PySide6.QtGui import QAction, QBrush, QColor, QFont, QIcon
 from PySide6.QtWidgets import (
     QAbstractItemView, QApplication, QCheckBox, QComboBox, QDialog,
@@ -647,7 +647,7 @@ class ItemBuffsTab(QWidget):
             self._buff_items_table.setHorizontalHeaderLabels(["", "Name", "Type", "Tier", "Enchants", "Stack"])
             self._buff_items_table.setEditTriggers(QAbstractItemView.NoEditTriggers)
             self._buff_items_table.setSelectionBehavior(QAbstractItemView.SelectRows)
-            self._buff_items_table.setSelectionMode(QAbstractItemView.SingleSelection)
+            self._buff_items_table.setSelectionMode(QAbstractItemView.SelectionMode.SingleSelection)
             hdr_items = self._buff_items_table.horizontalHeader()
             hdr_items.setSectionResizeMode(0, QHeaderView.Interactive)
             self._buff_items_table.setColumnWidth(0, 0)
@@ -697,7 +697,7 @@ class ItemBuffsTab(QWidget):
             ])
             self._buff_stats_table.setEditTriggers(QAbstractItemView.NoEditTriggers)
             self._buff_stats_table.setSelectionBehavior(QAbstractItemView.SelectRows)
-            self._buff_stats_table.setSelectionMode(QAbstractItemView.SingleSelection)
+            self._buff_stats_table.setSelectionMode(QAbstractItemView.SelectionMode.SingleSelection)
             self._buff_stats_table.setContextMenuPolicy(Qt.CustomContextMenu)
             self._buff_stats_table.customContextMenuRequested.connect(self._buff_stats_context_menu)
             hdr_stats = self._buff_stats_table.horizontalHeader()
@@ -5527,58 +5527,7 @@ class ItemBuffsTab(QWidget):
         if not rust_info:
             return
 
-        kind = kind_data[0]
-        
-        def paste_from_copy_buffer(rust_info: dict):
-            if not hasattr(self, '_copy_buffer') or not self._copy_buffer:
-                return
-            
-            btype, bdata = self._copy_buffer.values()
-            match btype:
-                case 'passive':
-                    i = self._eb_passive_combo.findData(bdata['skill'])
-                    self._eb_passive_combo.setCurrentIndex(i)
-                    self._eb_level_spin.setValue(bdata['level'])
-                    self._eb_apply()
-                case 'buff':
-                    i = self._eb_buff_combo.findData(bdata['buff'])
-                    self._eb_buff_combo.setCurrentIndex(i)
-                    self._eb_buff_level.setValue(bdata['level'])
-                    self._eb_add_buff()
-                case 'stat': "STUB"
-                case 'passives_list':
-                    psl = rust_info['equip_passive_skill_list']
-                    merged = {s['skill']: s for s in psl} | {s['skill']: s for s in bdata}
-                    final = list(merged.values())
-                    print(final)
-                    rust_info['equip_passive_skill_list'] = final
-                    self._buff_modified = True
-                    self._buff_refresh_stats()
-                case 'buffs_list':
-                    edl = rust_info.get('enchant_data_list', [])
-                    if edl:
-                        ed0 = edl[0]
-                        merged = {b['buff']: b for b in ed0.get('equip_buffs', [])} | {b['buff']: b for b in bdata}
-                        final = list(merged.values())
-                        print(final)
-                        for ed in edl:
-                            ed["equip_buffs"] = final
-                    self._buff_modified = True
-                    self._buff_refresh_stats()
-                case 'sockets_list':
-                    ddd = rust_info['drop_default_data']
-                    ddd['socket_item_list'] = bdata
-                    if len(ddd['add_socket_material_item_list']) < len(bdata):
-                        count = self._eb_socket_count.value()
-                        valid = self._eb_socket_valid.value()
-                        self._eb_socket_count.setValue(max(count, len(bdata)))
-                        self._eb_socket_valid.setValue(max(valid, len(bdata)))
-                        self._eb_extend_sockets()
-                    self._buff_modified = True
-                    self._buff_refresh_stats()
-                case _:
-                    log.warning("Unknown copy buffer type: %s\n%s", btype, bdata)
-            
+        kind = kind_data[0]     
 
         act_paste = "STUB"
         if kind == 'passive':
@@ -5614,7 +5563,7 @@ class ItemBuffsTab(QWidget):
                     log.info(f"Passive ({skill_id}) added to copy buffer")
                     self._buff_status_label.setText(f"Copied passive {name}")
             elif action == act_paste:
-                paste_from_copy_buffer(rust_info)
+                self._paste_from_copy_buffer(rust_info)
             elif action == act_remove:
                 rust_info['equip_passive_skill_list'] = [p for p in psl if p['skill'] != skill_id]
                 self._buff_modified = True
@@ -5653,7 +5602,7 @@ class ItemBuffsTab(QWidget):
                     log.info(f"Buff ({buff_id}) added to copy buffer")
                     self._buff_status_label.setText(f"Copied buff {name}")
             elif action == act_paste:
-                paste_from_copy_buffer(rust_info)
+                self._paste_from_copy_buffer(rust_info)
             elif action == act_remove:
                 removed_levels = 0
                 for ed in edl:
@@ -5720,7 +5669,7 @@ class ItemBuffsTab(QWidget):
                     
             action = menu.exec(table.viewport().mapToGlobal(pos))
             if action in (act_paste, act_paste_all):
-                paste_from_copy_buffer(rust_info)
+                self._paste_from_copy_buffer(rust_info)
             elif action == act_sim:
                 self._show_similar_items(rust_info, header)
             elif action == act_copy_all:
@@ -11945,6 +11894,315 @@ class ItemBuffsTab(QWidget):
             log.exception("Item creator deploy failed")
             QMessageBox.critical(self, "Deploy Failed", str(e))
 
+
+    def _paste_from_copy_buffer(self, rust_info: dict):
+        if not hasattr(self, '_copy_buffer') or not self._copy_buffer:
+            return
+        
+        btype, bdata = self._copy_buffer.values()
+        match btype:
+            case 'passive':
+                i = self._eb_passive_combo.findData(bdata['skill'])
+                self._eb_passive_combo.setCurrentIndex(i)
+                self._eb_level_spin.setValue(bdata['level'])
+                self._eb_apply()
+            case 'buff':
+                i = self._eb_buff_combo.findData(bdata['buff'])
+                self._eb_buff_combo.setCurrentIndex(i)
+                self._eb_buff_level.setValue(bdata['level'])
+                self._eb_add_buff()
+            case 'stat': "STUB"
+            case 'passives_list':
+                psl = rust_info['equip_passive_skill_list']
+                merged = {s['skill']: s for s in psl} | {s['skill']: s for s in bdata}
+                final = list(merged.values())
+                print(final)
+                rust_info['equip_passive_skill_list'] = final
+                self._buff_modified = True
+                self._buff_refresh_stats()
+            case 'buffs_list':
+                edl = rust_info.get('enchant_data_list', [])
+                if edl:
+                    ed0 = edl[0]
+                    merged = {b['buff']: b for b in ed0.get('equip_buffs', [])} | {b['buff']: b for b in bdata}
+                    final = list(merged.values())
+                    print(final)
+                    for ed in edl:
+                        ed["equip_buffs"] = final
+                self._buff_modified = True
+                self._buff_refresh_stats()
+            case 'sockets_list':
+                ddd = rust_info['drop_default_data']
+                ddd['socket_item_list'] = bdata
+                if len(ddd['add_socket_material_item_list']) < len(bdata):
+                    count = self._eb_socket_count.value()
+                    valid = self._eb_socket_valid.value()
+                    self._eb_socket_count.setValue(max(count, len(bdata)))
+                    self._eb_socket_valid.setValue(max(valid, len(bdata)))
+                    self._eb_extend_sockets()
+                self._buff_modified = True
+                self._buff_refresh_stats()
+            case _:
+                log.warning("Unknown copy buffer type: %s\n%s", btype, bdata)
+       
+    def _open_item_copy_dialog(self, rust_info: dict) -> None:
+        def init() -> tuple[Callable[[],dict[int,ItemRecord]], Callable]:
+            """
+            Re-use existing tables to save virtual resources
+            and keep users inside familiar UI
+            """ 
+            
+            current_item: ItemRecord = self._buff_current_item
+            search: QLineEdit = self._buff_search
+            bit: QTableWidget = self._buff_items_table
+            bst: QTableWidget = self._buff_stats_table
+            
+            def set_item():
+                self._buff_current_item = current_item
+                self._buff_refresh_stats()
+                
+            def refresh() -> tuple[list,dict[int,ItemRecord]]:
+                return (
+                    list(map(lambda row: bst.item(row.row(), 0).data(Qt.UserRole + 1), bst.selectionModel().selectedRows())),
+                    {item.item_key: item for item in map(lambda row: bit.item(row.row(), 1).data(Qt.UserRole), bit.selectionModel().selectedRows())}
+                )
+                        
+            search_parent: QWidget = search.parentWidget()
+            search_parent_layout: QHBoxLayout = search_parent.layout()
+            search_idx = search_parent_layout.indexOf(search)
+            search.returnPressed.connect(set_item)
+            search_parent.setVisible(False)
+                 
+            bit_parent: QFrame = bit.parentWidget()
+            bit_parent_layout: QVBoxLayout = bit_parent.layout()  # QVBoxLayout
+            bit_idx = bit_parent_layout.indexOf(bit)
+            bit_sm = bit.selectionMode()
+            bit.clearSelection()
+            bit.setSelectionMode(QAbstractItemView.SelectionMode.MultiSelection)
+            bit.selectionModel().selectionChanged.disconnect(self._buff_item_selected)
+            bit.customContextMenuRequested.disconnect(self._buff_items_context_menu)
+            bit_parent.setVisible(False)
+
+            bst_parent: QFrame = bst.parentWidget()
+            bst_parent_layout: QVBoxLayout = bst_parent.layout()  # QVBoxLayout
+            bst_idx = bst_parent_layout.indexOf(bst)
+            bst_sm = bst.selectionMode()
+            bst.clearSelection()
+            bst.setSelectionMode(QAbstractItemView.SelectionMode.MultiSelection)
+            bst.customContextMenuRequested.disconnect(self._buff_stats_context_menu)
+            bst_parent.setVisible(False)
+            
+            def cleanup():
+                "Restore original UI state"
+                search_parent_layout.insertWidget(search_idx, search)
+                search.returnPressed.disconnect(set_item)
+                search_parent.setVisible(True)
+                bit.setSelectionMode(bit_sm)
+                bit.selectionModel().selectionChanged.connect(self._buff_item_selected)
+                bit.customContextMenuRequested.connect(self._buff_items_context_menu)
+                bit_parent_layout.insertWidget(bit_idx, bit)
+                bit_parent.setVisible(True)
+                bst.setSelectionMode(bst_sm)
+                bst.customContextMenuRequested.connect(self._buff_stats_context_menu)
+                bst_parent_layout.insertWidget(bst_idx, bst)
+                bst_parent.setVisible(True)
+                self._rebuild_index()
+                
+            return refresh, cleanup
+                
+        refresh, cleanup = init()
+        current_item: ItemRecord = self._buff_current_item
+        display_name: Callable[[ItemRecord],str] = lambda i: self._name_db.get_name(i.item_key) if hasattr(self, '_name_db') else i.name
+        
+        dlg = QDialog(self)
+        dlg.setWindowTitle("Copy Item Data")
+        dlg.setMinimumHeight(750)
+        selected_items: dict[int, ItemRecord] = {}
+        selected_items_view = QListWidget()
+        selected_items_view.setMaximumHeight(120)
+        def reload_selected():
+            selected_items_view.clear()
+            self._buff_items_table.clearSelection()
+            selected_items_view.addItems(map(lambda i: f"{display_name(i)} (ID: {i.item_key}, Internal Name: {i.name})", [i for i in selected_items.values() if i.item_key != self._buff_current_item.item_key]))
+        
+        root = QVBoxLayout(dlg)
+        splitter = QSplitter(Qt.Orientation.Horizontal)
+        top_bar_wrap = QWidget()
+        top_bar = QHBoxLayout(top_bar_wrap)
+        bottom_bar_wrap = QWidget()
+        bottom_bar = QHBoxLayout(bottom_bar_wrap)
+        add_btn = QPushButton("Add Selected")
+        add_btn.clicked.connect(lambda: [selected_items.update(refresh()[1]), reload_selected()])
+        remove_btn = QPushButton("Remove Selected")
+        remove_btn.clicked.connect(lambda: [[selected_items.pop(k, None) for k in refresh()[1].keys()], reload_selected()])
+                 
+        def copy_data(donor: dict, copy_type=None, skip=False):   
+            if not skip:
+                warn = ""
+                if copy_type == "data":
+                    warn = (
+                        "\n\nWARNING: Copying RAW data from one item to another is"
+                        " dangerous, undefined behaviour! Do NOT proceed if"
+                        " you do not absolutely know what you're doing!\n\n"
+                        "(key and string_key from original item will be preserved)"
+                    )
+                elif copy_type == 'stats':
+                    warn = (
+                        "Stats from selected items will be overwritten at all"
+                        " enchant levels."
+                    )
+                reply = QMessageBox.question(
+                    dlg, "Replace Item Data",
+                    f"All {copy_type if copy_type != 'selected' else 'data'}"
+                    " in the selected items will be overwritten by the"
+                    f" {copy_type if copy_type != 'selected' else 'selected data'}"
+                    f" from the donor item.{warn}\n\n"   
+                    f"Are you sure you want to continue?",
+                    QMessageBox.Yes | QMessageBox.No, QMessageBox.No,
+                )
+                if reply != QMessageBox.Yes:
+                    return
+            
+            skipped_items = 0
+            clone = lambda data: json.loads(json.dumps(data))
+            for key in selected_items:
+                rust_info: dict = self._buff_rust_lookup.get(key)
+                if not rust_info:
+                    skipped_items += 1
+                    continue
+                
+                match copy_type:
+                    case 'passives':
+                        rust_info['equip_passive_skill_list'] = clone(donor['equip_passive_skill_list'])
+                    case 'buffs':
+                        source_edl = donor.get('enchant_data_list', [])
+                        if source_edl:
+                            source_buffs = clone(source_edl[0].get('equip_buffs', []))
+                            edl = rust_info.setdefault('enchant_data_list', [{"level":0,"equip_buffs":[]}])
+                            for ed in edl:
+                                ed['equip_buffs'] = source_buffs
+                    case 'stats':
+                        source_edl = clone(donor.get('enchant_data_list', []))
+                        edl = rust_info.get('enchant_data_list', [])
+                        if len(source_edl) > len(edl):
+                            rust_info['enchant_data_list'] = [
+                                {"level":i,'enchant_stat_data':ed['enchant_stat_data']} for i,ed in enumerate(source_edl)
+                            ]
+                        else:
+                            for i,ed in enumerate(source_edl):
+                                edl[i]['enchant_stat_data'] = ed['enchant_stat_data']
+                    case 'sockets':
+                        source_ddd = clone(donor.get('drop_default_data'))
+                        ddd = rust_info.setdefault('drop_default_data', {})
+                        if source_ddd:
+                            ddd['socket_item_list'] = source_ddd['socket_item_list']
+                            ddd['add_socket_material_item_list'] = source_ddd['add_socket_material_item_list']
+                            ddd['socket_valid_count'] = source_ddd['socket_valid_count']
+                            ddd['use_socket'] = source_ddd['use_socket']
+                    case 'data':
+                        new_data = clone(donor)
+                        new_data['key'] = rust_info['key']
+                        new_data['string_key'] = rust_info['string_key']
+                        self._safely_replace_buff_item(key, new_data)
+                    case 'selected':
+                        sl = []
+                        sp = []
+                        sb = []
+                        ss = {}
+                        new_data = dict()
+                        selected_data = refresh()[0]
+                        data_types: set[str] = set()
+                        for data in selected_data:
+                            if not data or data[0] == 'header': continue
+                            data_types.add(data[0])
+                            match data[0]:
+                                case 'socket':
+                                    sl.append(data[1])
+                                case 'passive':
+                                    sp.append(data[1])
+                                case 'stat':
+                                    ss.setdefault(data[2], []).append(data[1])
+                                case 'buff':
+                                    sb.append(data[1])  
+                        edl = clone(donor['enchant_data_list'])
+                        bl = [b for b in edl[0]['equip_buffs'] if b['buff'] in sb] if edl else []
+                        if edl: new_data['enchant_data_list'] = []
+                        for ed in edl:
+                            esd = ed['enchant_stat_data']
+                            new_data['enchant_data_list'].append({
+                                "level": ed['level'],
+                                "enchant_stat_data": {
+                                    "max_stat_list": [s for s in esd.get('max_stat_list', []) if s['stat'] in ss.get('max_stat_list',[])],
+                                    "regen_stat_list": [s for s in esd.get('regen_stat_list', []) if s['stat'] in ss.get('regen_stat_list',[])],
+                                    "stat_list_static": [s for s in esd.get('stat_list_static', []) if s['stat'] in ss.get('stat_list_static',[])],
+                                    "stat_list_static_level": [s for s in esd.get('stat_list_static_level', []) if s['stat'] in ss.get('stat_list_static_level',[])]
+                                },
+                                "equip_buffs": bl
+                            })
+                        new_data['equip_passive_skill_list'] = [
+                            p for p in clone(donor['equip_passive_skill_list']) if p['skill'] in sp
+                        ]
+                        if sl:
+                            ddd = dict()
+                            ddd["socket_item_list"] = sl
+                            ddd["socket_valid_count"] = len(sl)
+                            ddd['use_socket'] = 1
+                            ddd["add_socket_material_item_list"] = donor['drop_default_data']['add_socket_material_item_list'][:len(sl)]
+                            new_data['drop_default_data'] = ddd
+                        for dtype in data_types:
+                            copy_data(new_data,copy_type=f"{dtype}s",skip=True)
+                    case _:
+                        "STUB"
+            
+            if not skip:
+                QMessageBox.information(dlg, "Copy Successful",
+                    f"Item Data Replaced for {len(selected_items)} items\n"
+                    f"Items Skipped: ({skipped_items}/{len(selected_items)})\n\n"
+                    f"Every change is now visible in the items table.\n"
+                    f"Export or Apply to Game to write."
+                )
+
+        selected_btn = QPushButton("Copy Selected Data")
+        selected_btn.clicked.connect(lambda: copy_data(rust_info, "selected"))
+        sockets_btn = QPushButton("Copy Socket Data")
+        sockets_btn.clicked.connect(lambda: copy_data(rust_info, "sockets"))
+        passive_btn = QPushButton("Copy Passive Data")
+        passive_btn.clicked.connect(lambda: copy_data(rust_info, "passives"))
+        stat_btn = QPushButton("Copy Stat Data")
+        stat_btn.clicked.connect(lambda: copy_data(rust_info, "stats"))
+        buff_btn = QPushButton("Copy Buff Data")
+        buff_btn.clicked.connect(lambda: copy_data(rust_info, "buffs"))
+        raw_btn = QPushButton("Copy RAW Data")
+        raw_btn.clicked.connect(lambda: copy_data(rust_info, "data"))
+
+        # Build Top Bar
+        top_bar.addWidget(self._buff_search)
+        top_bar.addWidget(add_btn)
+        top_bar.addWidget(remove_btn)
+        
+        # Build Bottom Bar
+        bottom_bar.addWidget(selected_btn)
+        bottom_bar.addWidget(sockets_btn)
+        bottom_bar.addWidget(passive_btn)
+        bottom_bar.addWidget(stat_btn)
+        bottom_bar.addWidget(buff_btn)
+        bottom_bar.addWidget(raw_btn)
+        
+        # Build Splitter
+        splitter.addWidget(self._buff_stats_table)
+        splitter.addWidget(self._buff_items_table)
+        label = QLabel(f"Copying from {display_name(current_item)} to target items:")
+        
+        # Build Dialog Window
+        root.addWidget(top_bar_wrap)
+        root.addWidget(splitter, 1)
+        root.addWidget(label)
+        root.addWidget(selected_items_view)
+        root.addWidget(bottom_bar_wrap)
+        
+        dlg.exec()
+        cleanup()
+
     def _goto_stacker_legacy_export(self) -> None:
         """Switch to Stacker Tool tab for legacy JSON export."""
         self.navigate_requested.emit("stacker")
@@ -12748,13 +13006,14 @@ class ItemBuffsTab(QWidget):
         add_action = menu.addAction("Add to Equipment Set...")
 
         # "Find similar" submenu — shows category/equip_type/item_type peers.
-        similar_menu = None
-        sim_cat_action = sim_equip_action = sim_type_action = None
-        sim_passive_action = sim_buff_action = None
-        diff_action = dump_action = None
+        similar_menu = "STUB"
+        sim_cat_action = sim_equip_action = sim_type_action = "STUB"
+        sim_passive_action = sim_buff_action = "STUB"
+        diff_action = dump_action = "STUB"
         rust_info = self._buff_rust_lookup.get(item.item_key) if self._buff_rust_lookup else None
         if rust_info and self._index is not None:
             menu.addSeparator()
+            copy_action = menu.addAction("Copy data to items")
             similar_menu = menu.addMenu("Find similar items")
             cat_label = self._index.category_label(rust_info.get("category_info") or 0)
             sim_cat_action = similar_menu.addAction(f"In same category ({cat_label})")
@@ -12795,6 +13054,8 @@ class ItemBuffsTab(QWidget):
                 self._buff_open_item_diff_dialog(initial_a=rust_info["key"])
             elif action == dump_action:
                 self._dump_item_info(rust_info)
+            elif action == copy_action:
+                self._open_item_copy_dialog(rust_info)
 
     def _add_to_favorites(self, item) -> None:
         self._buff_status_label.setText(f"{item.name}({item.item_key}) added to favorites.")
