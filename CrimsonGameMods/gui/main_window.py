@@ -9,6 +9,7 @@ import struct
 import sys
 import traceback
 
+
 log = logging.getLogger(__name__)
 from typing import List, Optional, Tuple
 
@@ -115,6 +116,7 @@ def find_save_files() -> List[dict]:
 from gui.tabs.items import DatabaseBrowserTab
 from gui.tabs.buffs_v319 import ItemBuffsTab
 from gui.tabs.stacker import StackerTab
+from gui.tabs.browser import GameBrowserTab
 try:
     from gui.tabs.dmm_webview import DmmWebViewTab, HAS_WEBENGINE
 except ImportError:
@@ -701,6 +703,16 @@ class MainWindow(QMainWindow):
         _real_tabs = self._tabs
 
         self._tabs = self._mods_tabs
+        self._game_browser_tab = GameBrowserTab(
+            config=self._config
+        )
+        self._game_browser_tab.status_message.connect(self._update_status)
+        self._game_browser_tab.game_path_changed.connect(self._set_game_path)
+        self._game_browser_tab.config_save_requested.connect(self._save_config)
+        if self._config.get('browser'):
+            self._mods_tabs.addTab(self._game_browser_tab, tr("GameBrowser"))
+
+
         self._patches_tab = GamePatchesTab(
             config=self._config,
             paz_manager=self._paz_manager,
@@ -2472,6 +2484,8 @@ QCheckBox::indicator {{
             self._load_manager_tab.set_game_path(path)
         if hasattr(self, '_quest_mods_tab'):
             self._quest_mods_tab.set_game_path(path)
+        if hasattr(self, '_game_browser_tab'):
+            self._game_browser_tab.set_game_path(path)
 
     def _validate_game_path(self, path: str) -> bool:
         paz = os.path.join(path, "0008", "0.paz")
