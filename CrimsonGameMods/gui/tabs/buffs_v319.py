@@ -3672,9 +3672,8 @@ class ItemBuffsTab(QWidget):
             1000026: "Stamina", 1000027: "MP",
             1000037: "Stamina Cost Reduction", 1000043: "Guard PV Rate",
             1000035: "Max Damage Rate", 1000036: "Pressure",
-            1000043: "Guard PV Rate", 1000046: "MP Cost Reduction",
             1000047: "Money Drop Rate", 1000049: "Equip Drop Rate",
-            1000050: "DPV Rate",
+            1000046: "MP Cost Reduction", 1000050: "DPV Rate",
         }
 
         rust_info = self._buff_rust_lookup.get(item.item_key) if hasattr(self, '_buff_rust_lookup') else None
@@ -3745,6 +3744,7 @@ class ItemBuffsTab(QWidget):
             gi_sep.setForeground(QBrush(QColor("#FF8A65")))
             gi_sep.setFont(QFont("Consolas", 9, QFont.Bold))
             gi_sep.setFlags(gi_sep.flags() & ~Qt.ItemIsSelectable)
+            gi_sep.setData(Qt.UserRole + 1, ('header', 'gimmick_info'))
             table.setRowCount(row + 1)
             table.setItem(row, 0, gi_sep)
             table.setItem(row, 1, QTableWidgetItem(""))
@@ -3754,12 +3754,14 @@ class ItemBuffsTab(QWidget):
             if gi:
                 c1 = QTableWidgetItem(f"  gimmick_info")
                 c1.setForeground(QBrush(QColor("#FF8A65")))
+                c1.setData(Qt.UserRole + 1, ('gimmick_info', gi))
                 _gn = getattr(self, '_gimmick_names', {}).get(gi, '')
                 gi_display = f"{gi}  ({_gn})" if _gn else str(gi)
                 c2 = QTableWidgetItem(gi_display)
                 c2.setFont(QFont("Consolas", 10))
                 c2.setToolTip(gi_display)
                 c2.setForeground(QBrush(QColor("#FF8A65")))
+                c2.setData(Qt.UserRole + 1, ('gimmick_info', gi))
                 table.setRowCount(row + 1)
                 table.setItem(row, 0, c1)
                 table.setItem(row, 1, c2)
@@ -3771,9 +3773,11 @@ class ItemBuffsTab(QWidget):
                     gs_text = f"state {gs}" if isinstance(gs, int) else str(gs)
                     c1 = QTableWidgetItem(f"  gimmick_state")
                     c1.setForeground(QBrush(QColor("#FF8A65")))
+                    c1.setData(Qt.UserRole + 1, ('gimmick_state', gs))
                     c2 = QTableWidgetItem(gs_text)
                     c2.setFont(QFont("Consolas", 10))
                     c2.setForeground(QBrush(QColor("#FF8A65")))
+                    c2.setData(Qt.UserRole + 1, ('gimmick_state', gs))
                     table.setRowCount(row + 1)
                     table.setItem(row, 0, c1)
                     table.setItem(row, 1, c2)
@@ -3793,6 +3797,7 @@ class ItemBuffsTab(QWidget):
                 gv_sep.setForeground(QBrush(QColor("#FF8A65")))
                 gv_sep.setFont(QFont("Consolas", 9, QFont.Bold))
                 gv_sep.setFlags(gv_sep.flags() & ~Qt.ItemIsSelectable)
+                gv_sep.setData(Qt.UserRole + 1, ('header', 'gimmick_visuals'))
                 table.setRowCount(row + 1)
                 table.setItem(row, 0, gv_sep)
                 table.setItem(row, 1, QTableWidgetItem(""))
@@ -3894,6 +3899,7 @@ class ItemBuffsTab(QWidget):
                     sep.setForeground(QBrush(QColor(color)))
                     sep.setFont(QFont("Consolas", 9, QFont.Bold))
                     sep.setFlags(sep.flags() & ~Qt.ItemIsSelectable)
+                    sep.setData(Qt.UserRole + 1, ('header', list_name))
                     table.setRowCount(row + 1)
                     table.setItem(row, 0, sep)
                     table.setItem(row, 1, QTableWidgetItem(""))
@@ -3927,6 +3933,7 @@ class ItemBuffsTab(QWidget):
             eb_sep.setForeground(QBrush(QColor("#AB47BC")))
             eb_sep.setFont(QFont("Consolas", 9, QFont.Bold))
             eb_sep.setFlags(eb_sep.flags() & ~Qt.ItemIsSelectable)
+            eb_sep.setData(Qt.UserRole + 1, ('header', 'buffs'))
             table.setRowCount(row + 1)
             table.setItem(row, 0, eb_sep)
             table.setItem(row, 1, QTableWidgetItem(""))
@@ -6139,11 +6146,22 @@ class ItemBuffsTab(QWidget):
                 1000011: "Move Speed",
             }
             name = _STAT_NAMES.get(stat_key, f"Stat {stat_key}")
+            act_copy = act_paste = act_remove_all = "STUB"
+            # act_copy = menu.addAction(f"Copy stat: {name}")
+            # if hasattr(self, '_copy_buffer') and self._copy_buffer.get('type') == 'stat':
+            #     copy_id = self._copy_buffer['data']
+            # act_paste = menu.addAction(f"Paste stat: {1}")
             act_remove = menu.addAction(f"Remove stat: {name}")
+            act_remove_all = menu.addAction("Remove ALL stats")
 
             action = menu.exec(table.viewport().mapToGlobal(pos))
-            if action == act_remove:
-                edl = rust_info.get('enchant_data_list', [])
+            edl = rust_info.get('enchant_data_list', [])
+            if action == act_copy:
+
+                "STUB"
+            elif action == act_paste:
+                "STUB"
+            elif action == act_remove:
                 removed = 0
                 for ed in edl:
                     sd = ed.get('enchant_stat_data', {})
@@ -6155,6 +6173,86 @@ class ItemBuffsTab(QWidget):
                 self._buff_modified = True
                 self._buff_refresh_stats()
                 self._buff_status_label.setText(f"Removed stat {name} ({removed} levels)")
+            elif action == act_remove_all:
+                "STUB"
+
+        elif kind == 'header':
+            header = kind_data[1]
+            act_sim = act_paste = act_paste_all = "STUB"
+            if header == 'passives':
+                act_sim = menu.addAction(f"Show items with similar {header}")
+                if hasattr(self, '_copy_buffer') and self._copy_buffer.get('type') == 'passive':
+                    copy_id = self._copy_buffer['data']['skill']
+                    act_paste = menu.addAction(
+                        f"Paste passive: "
+                        f"{self._PASSIVE_SKILL_NAMES.get(copy_id, f"Skill {copy_id}")}"
+                    )
+            elif header == 'buffs':
+                act_sim = menu.addAction(f"Show items with similar {header}")
+                if hasattr(self, '_copy_buffer') and self._copy_buffer.get('type') == 'buff':
+                    copy_id = self._copy_buffer['data']['buff']
+                    act_paste = menu.addAction(
+                        f"Paste buff: "
+                        f"{self._EQUIP_BUFF_NAMES.get(copy_id, f"Buff {copy_id}")}"
+                    )
+            menu.addSeparator()
+            act_copy_all = menu.addAction(f"Copy ALL {header}")
+            if hasattr(self, '_copy_buffer') and \
+                self._copy_buffer.get('type') == f"{header}_list":
+                    act_paste_all = menu.addAction(f"Paste ALL {header}")
+            act_remove_all = menu.addAction(f"Remove ALL {header}")
+                    
+            action = menu.exec(table.viewport().mapToGlobal(pos))
+            if action in (act_paste, act_paste_all):
+                self._paste_from_copy_buffer(rust_info)
+            elif action == act_sim:
+                self._show_similar_items(rust_info, header)
+            elif action == act_copy_all:
+                new_buffer = {
+                    "type": f"{header}_list",
+                    "data": None
+                }
+                match header:
+                    case 'passives':
+                        new_buffer['data'] = rust_info.get('equip_passive_skill_list', [])
+                    case 'buffs':
+                        edl = rust_info.get('enchant_data_list', [])
+                        if edl:
+                            new_buffer['data'] = edl[0].get('equip_buffs', [])
+                    case 'sockets':
+                        ddd = rust_info.get('drop_default_data')
+                        if ddd:
+                            new_buffer['data'] = ddd.get('socket_item_list', [])
+                    case 'gimmick_info':
+                        new_buffer['data'] = {
+                            "gimmick_info": rust_info.get('gimmick_info', 0),
+                            "gimmick_state_list": rust_info.get('gimmick_state_list', [])
+                        }
+                    case 'gimmick_visuals':
+                        new_buffer['data'] = rust_info.get('gimmick_visual_prefab_data_list', [])
+                    case _:
+                        log.info(header)
+                if new_buffer['data']:
+                    self._copy_buffer = new_buffer
+            elif action == act_remove_all:
+                match header:
+                    case 'passives':
+                        rust_info['equip_passive_skill_list'] = []
+                    case 'buffs':
+                        for ed in rust_info.get('enchant_data_list', []):
+                            ed['equip_buffs'] = []
+                    case 'sockets':
+                        rust_info['drop_default_data']['socket_item_list'] = []
+                    case 'gimmick_info':
+                        rust_info['gimmick_info'] = 0
+                        rust_info['gimmick_state_list'] = []
+                    case 'gimmick_visuals':
+                        rust_info['gimmick_visual_prefab_data_list'] = []
+                    case _:
+                        log.info(f'Removing {header} data')
+                self._buff_modified = True
+                self._buff_refresh_stats()
+                self._buff_status_label.setText(f"Removed all {header}")
 
 
     def _eb_remove_passive(self) -> None:
@@ -6200,6 +6298,7 @@ class ItemBuffsTab(QWidget):
             QMessageBox.warning(self, "God Mode", "Item not found in Rust data.")
             return
 
+        display_name = self._name_db.get_name(self._buff_current_item.item_key)
         edl = rust_info.get('enchant_data_list', [])
         # enchant_data_list may be empty for unenchanted equippable items.
         # Confirm via equip_type / item_type before rejecting.
@@ -6218,9 +6317,8 @@ class ItemBuffsTab(QWidget):
             # so downstream code can inject buffs/stats normally.
             edl = []
 
-        if not skip:
-            display_name = self._name_db.get_name(self._buff_current_item.item_key)
 
+        if not skip:
             reply = QMessageBox.warning(
                 self, "Potter's God Mode",
                 f"Apply God Mode to {display_name}?\n\n"
@@ -14958,12 +15056,15 @@ class ItemBuffsTab(QWidget):
                 self._eb_buff_combo.setCurrentIndex(i)
                 self._eb_buff_level.setValue(bdata['level'])
                 self._eb_add_buff()
+            case 'stat':
+                i = self._eb_stat_combo.findData(bdata['stat'])
+                self._eb_stat_combo.setCurrentIndex(i)
+                self._eb_stat_value.setValue(bdata['value'])
+                self._eb_add_stat()
             case 'passives_list':
                 psl = rust_info['equip_passive_skill_list']
                 merged = {s['skill']: s for s in psl} | {s['skill']: s for s in bdata}
                 rust_info['equip_passive_skill_list'] = list(merged.values())
-                self._buff_modified = True
-                self._buff_refresh_stats()
             case 'buffs_list':
                 edl = rust_info.get('enchant_data_list', [])
                 if edl:
@@ -14971,8 +15072,6 @@ class ItemBuffsTab(QWidget):
                     merged = {b['buff']: b for b in ed0.get('equip_buffs', [])} | {b['buff']: b for b in bdata}
                     for ed in edl:
                         ed["equip_buffs"] = list(merged.values())
-                self._buff_modified = True
-                self._buff_refresh_stats()
             case 'sockets_list':
                 ddd = rust_info['drop_default_data']
                 ddd['socket_item_list'] = bdata
@@ -14982,10 +15081,16 @@ class ItemBuffsTab(QWidget):
                     self._eb_socket_count.setValue(max(count, len(bdata)))
                     self._eb_socket_valid.setValue(max(valid, len(bdata)))
                     self._eb_extend_sockets()
-                self._buff_modified = True
-                self._buff_refresh_stats()
+            case 'gimmick_info_list':
+                rust_info['gimmick_info'] = bdata['gimmick_info']
+                rust_info['gimmick_state_list'] = bdata['gimmick_state_list']
+            case 'gimmick_visuals_list':
+                rust_info['gimmick_visual_prefab_data_list'] = bdata
             case _:
                 log.warning("Unknown copy buffer type: %s\n%s", btype, bdata)
+
+        self._buff_modified = True
+        self._buff_refresh_stats()
 
     def _open_item_copy_dialog(self, rust_info: dict) -> None:
         from PySide6.QtWidgets import QAbstractItemView
@@ -15119,6 +15224,11 @@ class ItemBuffsTab(QWidget):
                             ddd['add_socket_material_item_list'] = src_ddd['add_socket_material_item_list']
                             ddd['socket_valid_count'] = src_ddd['socket_valid_count']
                             ddd['use_socket'] = src_ddd['use_socket']
+                    case 'gimmick':
+                        target['gimmick_info'] = donor.get('gimmick_info', 0)
+                        target['docking_child_data'] = clone(donor.get('docking_child_data'))
+                        target['gimmick_state_list'] = clone(donor.get('gimmick_state_list'))
+                        target['gimmick_visual_prefab_data_list'] = clone(donor.get('gimmick_visual_prefab_data_list'))
                     case 'data':
                         new_data = clone(donor)
                         new_data['key'] = target['key']
@@ -15175,6 +15285,8 @@ class ItemBuffsTab(QWidget):
 
         selected_btn = QPushButton("Copy Selected Data")
         selected_btn.clicked.connect(lambda: copy_data(rust_info, "selected"))
+        gimmick_btn = QPushButton("Copy Gimmick Data")
+        gimmick_btn.clicked.connect(lambda: copy_data(rust_info, "gimmick"))
         sockets_btn = QPushButton("Copy Socket Data")
         sockets_btn.clicked.connect(lambda: copy_data(rust_info, "sockets"))
         passive_btn = QPushButton("Copy Passive Data")
@@ -15190,6 +15302,7 @@ class ItemBuffsTab(QWidget):
         top_bar.addWidget(add_btn)
         top_bar.addWidget(remove_btn)
         bottom_bar.addWidget(selected_btn)
+        bottom_bar.addWidget(gimmick_btn)
         bottom_bar.addWidget(sockets_btn)
         bottom_bar.addWidget(passive_btn)
         bottom_bar.addWidget(stat_btn)
