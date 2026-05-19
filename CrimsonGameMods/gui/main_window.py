@@ -115,6 +115,7 @@ def find_save_files() -> List[dict]:
 
 from gui.tabs.items import DatabaseBrowserTab
 from gui.tabs.buffs_v319 import ItemBuffsTab
+from gui.tabs.item_editor import ItemEditorTab
 from gui.tabs.stacker import StackerTab
 from gui.tabs.browser import GameBrowserTab
 try:
@@ -251,8 +252,8 @@ class MainWindow(QMainWindow):
         if app is not None:
             apply_theme(app, saved_theme)
 
-        db_path = self._name_db.load_auto()
-        self._name_db.apply_localization()
+        # db_path = self._name_db.load_auto()
+        # self._name_db.apply_localization()
 
         self._build_menu()
         self._build_main_layout()
@@ -714,140 +715,144 @@ class MainWindow(QMainWindow):
         self._patches_tab.game_path_changed.connect(self._set_game_path)
         self._patches_tab.config_save_requested.connect(self._save_config)
 
-        self._field_edit_tab_obj = FieldEditTab(
-            config=self._config,
-            rebuild_papgt_fn=self._rebuild_papgt_without,
-            show_guide_fn=self._show_guide,
-        )
-        self._field_edit_tab_obj.status_message.connect(self._update_status)
-        self._field_edit_tab_obj.config_save_requested.connect(self._save_config)
-        _saved_gp_fe = self._config.get("game_install_path", "")
-        if _saved_gp_fe:
-            try:
-                self._field_edit_tab_obj.set_game_path(_saved_gp_fe)
-            except Exception:
-                pass
-        self._mods_tabs.addTab(self._field_edit_tab_obj, tr("FieldEdit"))
+        self._item_editor_tab = ItemEditorTab(config=self._config)
+        if self._config['item_editor']:
+            self._tabs.addTab(self._item_editor_tab, tr("ItemEditor"))
 
-        self._iteminfo_cache = ItemInfoCache()
-        self._iteminfo_cache.set_game_path(self._config.get("game_install_path", ""))
+        # self._field_edit_tab_obj = FieldEditTab(
+        #     config=self._config,
+        #     rebuild_papgt_fn=self._rebuild_papgt_without,
+        #     show_guide_fn=self._show_guide,
+        # )
+        # self._field_edit_tab_obj.status_message.connect(self._update_status)
+        # self._field_edit_tab_obj.config_save_requested.connect(self._save_config)
+        # _saved_gp_fe = self._config.get("game_install_path", "")
+        # if _saved_gp_fe:
+        #     try:
+        #         self._field_edit_tab_obj.set_game_path(_saved_gp_fe)
+        #     except Exception:
+        #         pass
+        # self._mods_tabs.addTab(self._field_edit_tab_obj, tr("FieldEdit"))
 
-        self._buffs_tab = ItemBuffsTab(
-            name_db=self._name_db,
-            icon_cache=self._icon_cache,
-            config=self._config,
-            show_guide_fn=self._show_guide,
-            paz_manager=self._paz_manager,
-            set_manager=getattr(self, "_set_manager", None),
-        )
-        self._buffs_tab.status_message.connect(self._update_status)
-        self._buffs_tab.config_save_requested.connect(self._save_config)
-        self._buffs_tab.paz_refresh_requested.connect(
-            lambda: self._patches_tab._paz_refresh_status() if hasattr(self, "_patches_tab") else None
-        )
-        self._buffs_tab.dirty.connect(lambda: setattr(self, "_dirty", True))
-        if hasattr(self, "_undo_stack"):
-            self._buffs_tab.undo_entry_added.connect(self._undo_stack.append)
-        self._buffs_tab.navigate_requested.connect(self._on_tab_navigate_requested)
-        if hasattr(self, "_scan_items"):
-            self._buffs_tab.scan_requested.connect(self._scan_items)
+        # self._iteminfo_cache = ItemInfoCache()
+        # self._iteminfo_cache.set_game_path(self._config.get("game_install_path", ""))
 
-        def _pop_save_browser() -> None:
-            if hasattr(self, "_save_dock"):
-                self._save_dock.setFloating(True)
-                self._save_dock.show()
-                self._save_dock.raise_()
-                self._save_dock.activateWindow()
-        self._buffs_tab.open_save_browser_requested.connect(_pop_save_browser)
-        _saved_gp_for_buffs = self._config.get("game_install_path", "")
-        if _saved_gp_for_buffs:
-            try:
-                self._buffs_tab.set_game_path(_saved_gp_for_buffs)
-            except Exception:
-                pass
-        self._mods_tabs.addTab(self._buffs_tab, tr("tab.itembuffs"))
+        # self._buffs_tab = ItemBuffsTab(
+        #     name_db=self._name_db,
+        #     icon_cache=self._icon_cache,
+        #     config=self._config,
+        #     show_guide_fn=self._show_guide,
+        #     paz_manager=self._paz_manager,
+        #     set_manager=getattr(self, "_set_manager", None),
+        # )
+        # self._buffs_tab.status_message.connect(self._update_status)
+        # self._buffs_tab.config_save_requested.connect(self._save_config)
+        # self._buffs_tab.paz_refresh_requested.connect(
+        #     lambda: self._patches_tab._paz_refresh_status() if hasattr(self, "_patches_tab") else None
+        # )
+        # self._buffs_tab.dirty.connect(lambda: setattr(self, "_dirty", True))
+        # if hasattr(self, "_undo_stack"):
+        #     self._buffs_tab.undo_entry_added.connect(self._undo_stack.append)
+        # self._buffs_tab.navigate_requested.connect(self._on_tab_navigate_requested)
+        # if hasattr(self, "_scan_items"):
+        #     self._buffs_tab.scan_requested.connect(self._scan_items)
+
+        # def _pop_save_browser() -> None:
+        #     if hasattr(self, "_save_dock"):
+        #         self._save_dock.setFloating(True)
+        #         self._save_dock.show()
+        #         self._save_dock.raise_()
+        #         self._save_dock.activateWindow()
+        # self._buffs_tab.open_save_browser_requested.connect(_pop_save_browser)
+        # _saved_gp_for_buffs = self._config.get("game_install_path", "")
+        # if _saved_gp_for_buffs:
+        #     try:
+        #         self._buffs_tab.set_game_path(_saved_gp_for_buffs)
+        #     except Exception:
+        #         pass
+        # self._mods_tabs.addTab(self._buffs_tab, tr("tab.itembuffs"))
 
         # Stacker Tool — multi-mod iteminfo.pabgb merger. Single sink for
         # all mod changes targeting iteminfo: external mods (folder PAZ,
         # loose pabgb, legacy JSON) + ItemBuffs tab edits pulled on demand.
         # Produces ONE overlay instead of N fighting-each-other overlays.
-        self._stacker_tab = StackerTab(
-            name_db=self._name_db,
-            icon_cache=self._icon_cache,
-            config=self._config,
-            show_guide_fn=self._show_guide,
-            buffs_tab=self._buffs_tab,
-        )
-        self._stacker_tab.status_message.connect(self._update_status)
-        self._stacker_tab.config_save_requested.connect(self._save_config)
-        _saved_gp_for_stacker = self._config.get("game_install_path", "")
-        if _saved_gp_for_stacker:
-            try:
-                self._stacker_tab.set_game_path(_saved_gp_for_stacker)
-            except Exception:
-                pass
-        self._mods_tabs.addTab(self._stacker_tab, "Stacker Tool")
+        # self._stacker_tab = StackerTab(
+        #     name_db=self._name_db,
+        #     icon_cache=self._icon_cache,
+        #     config=self._config,
+        #     show_guide_fn=self._show_guide,
+        #     # buffs_tab=self._buffs_tab,
+        # )
+        # self._stacker_tab.status_message.connect(self._update_status)
+        # self._stacker_tab.config_save_requested.connect(self._save_config)
+        # _saved_gp_for_stacker = self._config.get("game_install_path", "")
+        # if _saved_gp_for_stacker:
+        #     try:
+        #         self._stacker_tab.set_game_path(_saved_gp_for_stacker)
+        #     except Exception:
+        #         pass
+        # self._mods_tabs.addTab(self._stacker_tab, "Stacker Tool")
 
-        self._store_tab = StoreEditorTab(
-            name_db=self._name_db,
-            icon_cache=self._icon_cache,
-            config=self._config,
-            rebuild_papgt_fn=self._rebuild_papgt_without,
-            show_guide_fn=self._show_guide,
-        )
-        self._store_tab.status_message.connect(self._update_status)
-        self._store_tab.config_save_requested.connect(self._save_config)
-        self._store_tab.paz_refresh_requested.connect(
-            lambda: self._patches_tab._paz_refresh_status() if hasattr(self, "_patches_tab") else None
-        )
-        _saved_gp = self._config.get("game_install_path", "")
-        if _saved_gp:
-            try:
-                self._store_tab.set_game_path(_saved_gp)
-            except Exception:
-                pass
-        self._mods_tabs.addTab(self._store_tab, tr("tab.stores"))
+        # self._store_tab = StoreEditorTab(
+        #     name_db=self._name_db,
+        #     icon_cache=self._icon_cache,
+        #     config=self._config,
+        #     rebuild_papgt_fn=self._rebuild_papgt_without,
+        #     show_guide_fn=self._show_guide,
+        # )
+        # self._store_tab.status_message.connect(self._update_status)
+        # self._store_tab.config_save_requested.connect(self._save_config)
+        # self._store_tab.paz_refresh_requested.connect(
+        #     lambda: self._patches_tab._paz_refresh_status() if hasattr(self, "_patches_tab") else None
+        # )
+        # _saved_gp = self._config.get("game_install_path", "")
+        # if _saved_gp:
+        #     try:
+        #         self._store_tab.set_game_path(_saved_gp)
+        #     except Exception:
+        #         pass
+        # self._mods_tabs.addTab(self._store_tab, tr("tab.stores"))
 
-        self._bagspace_tab = BagSpaceTab(
-            config=self._config,
-            rebuild_papgt_fn=self._rebuild_papgt_without,
-        )
-        self._bagspace_tab.status_message.connect(self._update_status)
-        self._bagspace_tab.config_save_requested.connect(self._save_config)
-        _saved_gp_bagspace = self._config.get("game_install_path", "")
-        if _saved_gp_bagspace:
-            try:
-                self._bagspace_tab.set_game_path(_saved_gp_bagspace)
-            except Exception:
-                pass
-        self._mods_tabs.addTab(self._bagspace_tab, "BagSpace")
+        # self._bagspace_tab = BagSpaceTab(
+        #     config=self._config,
+        #     rebuild_papgt_fn=self._rebuild_papgt_without,
+        # )
+        # self._bagspace_tab.status_message.connect(self._update_status)
+        # self._bagspace_tab.config_save_requested.connect(self._save_config)
+        # _saved_gp_bagspace = self._config.get("game_install_path", "")
+        # if _saved_gp_bagspace:
+        #     try:
+        #         self._bagspace_tab.set_game_path(_saved_gp_bagspace)
+        #     except Exception:
+        #         pass
+        # self._mods_tabs.addTab(self._bagspace_tab, "BagSpace")
 
-        self._dropset_tab = DropsetTab(
-            name_db=self._name_db,
-            icon_cache=self._icon_cache,
-            config=self._config,
-            rebuild_papgt_fn=self._rebuild_papgt_without,
-        )
-        self._dropset_tab.status_message.connect(self._update_status)
-        self._mods_tabs.addTab(self._dropset_tab, "DropSets")
+        # self._dropset_tab = DropsetTab(
+        #     name_db=self._name_db,
+        #     icon_cache=self._icon_cache,
+        #     config=self._config,
+        #     rebuild_papgt_fn=self._rebuild_papgt_without,
+        # )
+        # self._dropset_tab.status_message.connect(self._update_status)
+        # self._mods_tabs.addTab(self._dropset_tab, "DropSets")
 
-        self._spawn_tab = SpawnTab(config=self._config, show_guide_fn=self._show_guide)
-        self._spawn_tab.status_message.connect(self._update_status)
-        self._mods_tabs.addTab(self._spawn_tab, "SpawnEdit")
+        # self._spawn_tab = SpawnTab(config=self._config, show_guide_fn=self._show_guide)
+        # self._spawn_tab.status_message.connect(self._update_status)
+        # self._mods_tabs.addTab(self._spawn_tab, "SpawnEdit")
 
-        self._skill_tree_tab = SkillTreeTab(
-            config=self._config,
-            rebuild_papgt_fn=self._rebuild_papgt_without,
-        )
-        self._skill_tree_tab.status_message.connect(self._update_status)
-        self._skill_tree_tab.config_save_requested.connect(self._save_config)
-        _saved_gp_st = self._config.get("game_install_path", "")
-        if _saved_gp_st:
-            try:
-                self._skill_tree_tab.set_game_path(_saved_gp_st)
-            except Exception:
-                pass
-        self._mods_tabs.addTab(self._skill_tree_tab, "SkillTree")
+        # self._skill_tree_tab = SkillTreeTab(
+        #     config=self._config,
+        #     rebuild_papgt_fn=self._rebuild_papgt_without,
+        # )
+        # self._skill_tree_tab.status_message.connect(self._update_status)
+        # self._skill_tree_tab.config_save_requested.connect(self._save_config)
+        # _saved_gp_st = self._config.get("game_install_path", "")
+        # if _saved_gp_st:
+        #     try:
+        #         self._skill_tree_tab.set_game_path(_saved_gp_st)
+        #     except Exception:
+        #         pass
+        # self._mods_tabs.addTab(self._skill_tree_tab, "SkillTree")
 
         # PAS Editor disabled — uses byte-level npc_swap, needs migration to field-level.
         # self._pas_editor_tab = PasEditorTab(
@@ -899,22 +904,22 @@ class MainWindow(QMainWindow):
         self._tabs = _real_tabs
 
         self._tabs = self._items_tabs
-        self._database_tab = DatabaseBrowserTab(
-            name_db=self._name_db,
-            icon_cache=self._icon_cache,
-            get_items_fn=lambda: self._items,
-            icons_enabled=self._icons_enabled,
-            goto_knowledge_fn=None,
-            goto_quest_fn=None,
-            app_dir_fn=self._app_dir,
-            show_guide_fn=self._show_guide,
-            config=self._config,
-        )
-        self._database_tab.toggle_icons_requested.connect(self._toggle_icons)
-        self._database_tab.status_message.connect(self._update_status)
-        self._database_tab.items_changed.connect(self._scan_and_populate)
-        self._items_tabs.addTab(self._database_tab, tr("tab.database"))
-        self._db_tab_widget = self._database_tab
+        # self._database_tab = DatabaseBrowserTab(
+        #     name_db=self._name_db,
+        #     icon_cache=self._icon_cache,
+        #     get_items_fn=lambda: self._items,
+        #     icons_enabled=self._icons_enabled,
+        #     goto_knowledge_fn=None,
+        #     goto_quest_fn=None,
+        #     app_dir_fn=self._app_dir,
+        #     show_guide_fn=self._show_guide,
+        #     config=self._config,
+        # )
+        # self._database_tab.toggle_icons_requested.connect(self._toggle_icons)
+        # self._database_tab.status_message.connect(self._update_status)
+        # self._database_tab.items_changed.connect(self._scan_and_populate)
+        # self._items_tabs.addTab(self._database_tab, tr("tab.database"))
+        # self._db_tab_widget = self._database_tab
 
         self._tabs = _real_tabs
         self._real_tabs = _real_tabs
