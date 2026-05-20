@@ -145,6 +145,7 @@ def _is_game_running() -> bool:
 
 from gui.tabs.item_editor.ui import ItemEditorLayout
 from gui.tabs.item_editor.ui.helpers import find_game_path
+import dmm_parser as dmm
 
 
 class ItemEditorTab(QWidget):
@@ -180,10 +181,22 @@ class ItemEditorTab(QWidget):
 
             case "vanilla":
                 log.info("extracting vanilla...")
-                data = ItemEditorInfo(
-                    [{"item_name": "Test Item Vanilla", "key": 101}]
+
+                pabgb = dmm.extract_file(
+                    game_dir=self._game_path,
+                    group_name="0008",
+                    dir_path="gamedata/binary__/client/bin",
+                    file_name="iteminfo.pabgb",
                 )
-                self.s_iteminfo_extracted.emit(data)
-                "stub"
+                data = dmm.parse_table("iteminfo", pabgb, shape="v3.1")
+
+                iteminfo = ItemEditorInfo(data)
+                self.s_iteminfo_extracted.emit(iteminfo)
+
+                with open("./data/sample.json", "w") as f:
+                    json.dump(data[0], f)
+
+                log.info(f"extracted {len(data)} items from vanilla pabgb...")
+                log.info(f"sample item data written to data/sample.json")
             case _:
                 log.critical("Invalid extract type: %s", type)

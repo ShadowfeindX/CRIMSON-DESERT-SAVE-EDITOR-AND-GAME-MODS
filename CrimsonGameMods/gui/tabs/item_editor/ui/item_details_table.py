@@ -21,6 +21,7 @@ from PySide6.QtCore import (
     QSize,
     QTimer,
     Signal,
+    QModelIndex,
 )
 from PySide6.QtGui import QAction, QBrush, QColor, QFont, QIcon
 from PySide6.QtWidgets import (
@@ -58,6 +59,8 @@ from PySide6.QtWidgets import (
     QVBoxLayout,
     QWidget,
 )
+
+from .models import ItemEditorInfoDetails
 
 from .dmm_types import ItemInfo
 from .search_bar import SearchBar
@@ -123,33 +126,58 @@ log = logging.getLogger(__name__)
 
 
 class ItemDetailsTableModel(QAbstractTableModel):
-    def __init__(self, parent, data: list[ItemInfo] = []):
+    def __init__(
+        self, parent, data: ItemEditorInfoDetails = ItemEditorInfoDetails()
+    ):
         super().__init__(parent)
 
+        self.load(data)
+
+    def load(self, details: ItemEditorInfoDetails):
+        data = []
+
+        data = [
+            (key, json.dumps(detail)) for key, detail in details._data.items()
+        ]
+
+        self._details = details
         self._data = data
 
-    def data(self, index, role):
+    def data(self, index: QModelIndex, role: int):
         match role:
-            case Qt.ItemDataRole.DisplayRole:
-                return self._data[index.row()]["item_name"]
             case Qt.ItemDataRole.UserRole:
+                return self._details
+            case Qt.ItemDataRole.DisplayRole:
+                match index.column():
+                    case 0:
+                        "stub"
+                    case 1:
+                        "stub"
+                    case _:
+                        log.info(
+                            "Item Details Table: Invalid index column %s",
+                            index.column(),
+                        )
                 return self._data[index.row()]
 
     def headerData(self, idx, orientation, role):
-        if role == Qt.ItemDataRole.DisplayRole:
-            match orientation:
-                case Qt.Orientation.Horizontal:
-                    return "Name"
-                case Qt.Orientation.Vertical:
-                    return self._data[idx]["key"]
+        if (
+            role == Qt.ItemDataRole.DisplayRole
+            and orientation == Qt.Orientation.Horizontal
+        ):
+            match idx:
+                case 0:
+                    return "Key"
+                case 1:
+                    return "Details"
 
         return None
 
-    def rowCount(self, index):
+    def rowCount(self, _):
         return len(self._data)
 
-    def columnCount(self, index):
-        return 1
+    def columnCount(self, _):
+        return 2
 
 
 class ItemDetailsTableModelProxy(QSortFilterProxyModel):
@@ -172,9 +200,16 @@ class ItemDetailsTable(QFrame):
         model = ItemDetailsTableModel(self)
         proxy = ItemDetailsTableModelProxy(self, model)
         table.setModel(proxy)
+
         table.setMinimumWidth(120)
         table.setColumnWidth(1, 180)
+        table.verticalHeader().setVisible(False)
         table.setSortingEnabled(True)
+        table.sortByColumn(0, Qt.SortOrder.AscendingOrder)
+        table.setSelectionBehavior(
+            QAbstractItemView.SelectionBehavior.SelectRows
+        )
+
         table.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
         table.customContextMenuRequested.connect(self._show_context_menu)
 
@@ -194,7 +229,6 @@ class ItemDetailsTable(QFrame):
     def refresh_view(self):
         "Stub"
 
-    def load(self, data):
-        self.model.beginResetModel()
-        self.model.data = data
-        self.model.endResetModel()
+    def load(self, details: ItemEditorInfoDetails):
+        self.model.load(details)
+        self.model.layoutChanged.emit()

@@ -6,15 +6,18 @@ from PySide6.QtCore import (
     QAbstractTableModel,
     QSortFilterProxyModel,
     Qt,
+    QModelIndex,
 )
 from PySide6.QtWidgets import (
     QFrame,
     QPushButton,
     QTableView,
     QVBoxLayout,
+    QAbstractItemView,
 )
 
-from .models import ItemEditorInfo
+from .models import ItemEditorInfo, ItemEditorInfoDetails
+from .dmm_types import ItemInfo
 
 # from gui.theme import COLORS, CATEGORY_COLORS
 
@@ -41,6 +44,7 @@ def _safe_iv(v, default=0):
     except Exception:
         return default
 
+
 try:
     from gui.utils import make_help_btn
 except Exception:
@@ -60,30 +64,38 @@ class ItemTableModel(QAbstractTableModel):
     def __init__(self, parent, info: ItemEditorInfo = ItemEditorInfo()):
         super().__init__(parent)
 
+        self.load(info)
+
+    def load(self, info: ItemEditorInfo):
         self._data = info._data
 
-    def data(self, index, role):
+    def data(self, index: QModelIndex, role):
         match role:
-            case Qt.ItemDataRole.DisplayRole:
-                return self._data[index.row()]["item_name"]
             case Qt.ItemDataRole.UserRole:
-                return self._data[index.row()]
+                return ItemEditorInfoDetails(self._data[index.row()])
+            case Qt.ItemDataRole.DisplayRole:
+                match index.column():
+                    case 0:
+                        return self._data[index.row()]["_key"]
+                    case 1:
+                        return self._data[index.row()]["_stringKey"]
+                return self._data[index.row()]["_itemName"]
 
     def headerData(self, idx, orientation, role):
         if role == Qt.ItemDataRole.DisplayRole:
-            match orientation:
-                case Qt.Orientation.Horizontal:
+            match idx:
+                case 0:
+                    return "Key"
+                case 1:
                     return "Name"
-                case Qt.Orientation.Vertical:
-                    return self._data[idx]["key"]
-
-        return None
+                case _:
+                    return None
 
     def rowCount(self, index):
         return len(self._data)
 
     def columnCount(self, index):
-        return 1
+        return 2
 
 
 class ItemTableModelProxy(QSortFilterProxyModel):
@@ -92,6 +104,27 @@ class ItemTableModelProxy(QSortFilterProxyModel):
 
         if model:
             self.setSourceModel(model)
+
+    def lessThan(self, left_index: QModelIndex, right_index: QModelIndex):
+        left: ItemInfo = self.sourceModel().data(
+            left_index, Qt.ItemDataRole.UserRole
+        )._data
+        right: ItemInfo = self.sourceModel().data(
+            right_index, Qt.ItemDataRole.UserRole
+        )._data
+
+        match left_index.column():
+            case 0:
+                return left["_key"] < right["_key"]
+            case 1:
+                return left["_stringKey"] < right["_stringKey"]
+            case _:
+                print(left_index.column())
+                return super().lessThan(left_index, right_index)
+
+    def sort(self, column, /, order=...):
+        print((column, order))
+        return super().sort(column, order)
 
 
 class ItemTable(QFrame):
@@ -106,9 +139,16 @@ class ItemTable(QFrame):
         model = ItemTableModel(self)
         proxy = ItemTableModelProxy(self, model)
         table.setModel(proxy)
+
         table.setMinimumWidth(120)
         table.setColumnWidth(1, 180)
+        table.verticalHeader().setVisible(False)
         table.setSortingEnabled(True)
+        table.sortByColumn(0, Qt.SortOrder.AscendingOrder)
+        table.setSelectionBehavior(
+            QAbstractItemView.SelectionBehavior.SelectRows
+        )
+
         table.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
         table.customContextMenuRequested.connect(self._show_context_menu)
 
@@ -129,12 +169,5 @@ class ItemTable(QFrame):
         "Stub"
 
     def load(self, info: ItemEditorInfo):
-        self.model._data = info._data
+        self.model.load(info)
         self.model.layoutChanged.emit()
-
-
-
-    # def load(self, info: ItemEditorInfo):
-    #     self.model = ItemTableModel(self, info)
-    #     self.proxy = ItemTableModelProxy(self, self.model)
-    #     self.table.setModel(self.proxy)
