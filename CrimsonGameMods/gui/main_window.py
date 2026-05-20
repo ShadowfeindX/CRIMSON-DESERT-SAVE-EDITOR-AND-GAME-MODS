@@ -716,6 +716,9 @@ class MainWindow(QMainWindow):
         self._patches_tab.config_save_requested.connect(self._save_config)
 
         self._item_editor_tab = ItemEditorTab(config=self._config)
+        self._item_editor_tab.s_status_message.connect(self._update_status)
+        self._item_editor_tab.s_config_save_requested.connect(self._save_config)
+
         if self._config['item_editor']:
             self._tabs.addTab(self._item_editor_tab, tr("ItemEditor"))
 
@@ -2494,6 +2497,8 @@ QCheckBox::indicator {{
             self._quest_mods_tab.set_game_path(path)
         if hasattr(self, '_game_browser_tab'):
             self._game_browser_tab.set_game_path(path)
+        if hasattr(self, '_item_editor_tab'):
+            self._item_editor_tab.set_game_path(path)
 
     def _validate_game_path(self, path: str) -> bool:
         paz = os.path.join(path, "0008", "0.paz")

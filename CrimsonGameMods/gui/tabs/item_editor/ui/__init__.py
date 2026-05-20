@@ -14,7 +14,7 @@ import traceback
 import textwrap
 from typing import Callable, List, Optional, Tuple
 
-from PySide6.QtCore import Qt, QSize, QTimer, Signal, Slot
+from PySide6.QtCore import Qt, QSize, QTimer, Signal
 from PySide6.QtGui import QAction, QBrush, QColor, QFont, QIcon
 from PySide6.QtWidgets import (
     QAbstractItemView,
@@ -51,9 +51,15 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
-from .ui.models import ItemEditorInfo
+from .item_details_table import ItemDetailsTable
 
-from .ui.dmm_types import ItemInfo
+from .item_table import ItemTable
+
+from .search_bar import SearchBar
+
+from .action_bar import ActionBar
+
+from .editor_controls import EditorControls
 from gui.theme import COLORS, CATEGORY_COLORS
 from gui.iteminfo_index import IteminfoIndex
 
@@ -111,79 +117,27 @@ except Exception:
 log = logging.getLogger(__name__)
 
 
-def _can_write_game_dir(game_path: str) -> bool:
-    try:
-        _t = os.path.join(game_path, ".se_write_test")
-        with open(_t, "w") as _f:
-            _f.write("t")
-        os.remove(_t)
-        return True
-    except Exception:
-        return False
-
-
-def _is_game_running() -> bool:
-    try:
-        out = subprocess.check_output(
-            [
-                "tasklist",
-                "/FI",
-                "IMAGENAME eq CrimsonDesert.exe",
-                "/FO",
-                "CSV",
-                "/NH",
-            ],
-            stderr=subprocess.DEVNULL,
-            text=True,
-            timeout=3,
-            creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0),
-        )
-        return "CrimsonDesert.exe" in out
-    except Exception:
-        return False
-
-
-from gui.tabs.item_editor.ui import ItemEditorLayout
-from gui.tabs.item_editor.ui.helpers import find_game_path
-
-
-class ItemEditorTab(QWidget):
-    s_status_message = Signal()
-    s_config_save_requested = Signal()
-    s_iteminfo_extracted = Signal(ItemEditorInfo)
-
-    def __init__(self, path="", config: Optional[dict] = None, parent=None):
+class ItemEditorLayout(QVBoxLayout):
+    def __init__(self, parent: QWidget):
         super().__init__(parent)
 
-        ui = ItemEditorLayout(self)
-        ui.action_bar.s_extract.connect(self._extract)
+        self._build_ui(parent)
+    
+    def _build_ui(self, parent: QWidget):
+        self.setContentsMargins(0, 0, 0, 0)
+        self.setSpacing(0)
 
-        self.s_iteminfo_extracted.connect(ui.items_table.load)
+        self.action_bar = ActionBar(parent)
+        self.search_bar = SearchBar(parent)
+        self.items_table = ItemTable(parent)
+        self.item_details_table = ItemDetailsTable(parent)
+        self.editor_controls = EditorControls(parent)
 
-        self._game_path = (
-            path or config["game_install_path"] or find_game_path()
-        )
+        layout = QHBoxLayout()
+        layout.addWidget(self.items_table)
+        layout.addWidget(self.item_details_table)
+        layout.addWidget(self.editor_controls)
 
-    @Slot(str)
-    def set_game_path(self, path: str):
-        self.game_path = path
-
-    @Slot(str)
-    def _extract(self, type: str = "overlay"):
-        match type:
-            case "overlay":
-                log.info("extracting...")
-
-                data = ItemEditorInfo([{"item_name": "Test Item", "key": 100}])
-                self.s_iteminfo_extracted.emit(data)
-                "stub"
-
-            case "vanilla":
-                log.info("extracting vanilla...")
-                data = ItemEditorInfo(
-                    [{"item_name": "Test Item Vanilla", "key": 101}]
-                )
-                self.s_iteminfo_extracted.emit(data)
-                "stub"
-            case _:
-                log.critical("Invalid extract type: %s", type)
+        self.addWidget(self.action_bar)
+        self.addWidget(self.search_bar)
+        self.addLayout(layout, 1)
