@@ -2874,7 +2874,15 @@ class StackerTab(QWidget):
                 elif m.kind == "field_json":
                     with open(m.path, encoding="utf-8") as f:
                         doc = json.load(f)
+                    # Check v3
                     intents = doc.get("intents", [])
+                    # Check v3.1
+                    if not intents:
+                        for target in doc.get("targets", []):
+                            if target['file'] == "iteminfo.pabgb":
+                                intents = target['intents']
+                                break
+
                     items = copy.deepcopy(vanilla_items)
                     items_by_key = {it['string_key']: it for it in items}
                     applied_count = 0
