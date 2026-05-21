@@ -380,6 +380,61 @@ class ItemBuffsTab(QWidget):
             )
             return warn_label
 
+
+        def build_reset_menu() -> QMenu:
+            menu = QMenu(self)
+
+            def confirm_remove(msg):
+                if not hasattr(self, '_buff_data') or self._buff_data is None:
+                    QMessageBox.warning(self, "No Data",
+                        "No data has been modified.")
+                    return True
+                
+                reply = QMessageBox.question(
+                    self, "Remove Staged Changes",
+                    f"Would you like to remove {msg}?",
+                    QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
+                return reply != QMessageBox.Yes
+
+            def remove_equip():
+                if confirm_remove("staged equipinfo changes"): return
+                self._staged_equip_files = {}
+            def remove_char():
+                if confirm_remove("staged charinfo changes"): return
+                self._staged_charinfo_files = {}
+            def remove_buff():
+                if confirm_remove("staged buffinfo changes"): return
+                self._buffinfo_dmm_items = []
+            def remove_kliff():
+                if confirm_remove("Kliff Gun Fix"): return
+                self._staged_kliff_runtime = False
+            def remove_up():
+                if confirm_remove("Universal Proficiency"): return
+                self._staged_equip_files = {}
+                self._staged_charinfo_files = {}
+                self._staged_kliff_runtime = False
+
+            act_reset_all = menu.addAction("Reset All")
+            act_reset_all.setToolTip("Discard all in-memory changes, re-extract from disk")
+            act_reset_all.triggered.connect(self._buff_remove_all)
+            menu.addSeparator()
+
+            act_remove_up = menu.addAction("Remove Universal Proficiency")
+            act_remove_up.triggered.connect(remove_up)
+            act_remove_kliff = menu.addAction("Remove Kliff Gun Fix")
+            act_remove_kliff.triggered.connect(remove_kliff)
+            menu.addSeparator()
+
+            act_remove_equip = menu.addAction("Remove Staged equipinfo Changes")
+            act_remove_equip.triggered.connect(remove_equip)
+            act_remove_char = menu.addAction("Remove Staged charinfo Changes")
+            act_remove_char.triggered.connect(remove_char)
+            act_remove_buff = menu.addAction("Remove Staged buffinfo Changes")
+            act_remove_buff.triggered.connect(remove_buff)
+
+            return menu
+
+
         def build_more_menu() -> QMenu:
             more_menu = QMenu(self)
             more_menu.setToolTipsVisible(True)
@@ -431,8 +486,9 @@ class ItemBuffsTab(QWidget):
             action_row.addWidget(extract_vanilla_btn)
             
             reset_btn = QPushButton("Reset")
-            reset_btn.setToolTip("Discard all in-memory changes, re-extract from disk")
-            reset_btn.clicked.connect(self._buff_remove_all)
+            reset_menu = build_reset_menu()
+            reset_btn.setMenu(reset_menu)
+            reset_menu.setToolTipsVisible(True)
             action_row.addWidget(reset_btn)
 
 
@@ -15045,6 +15101,7 @@ class ItemBuffsTab(QWidget):
             inspect_action = menu.addAction("Inspect (full field tree)...")
             diff_action = menu.addAction("Diff against another item...")
             dump_action = menu.addAction("Dump item info to disk...")
+            reset_action = menu.addAction("Reset item to vanilla...")
 
         action = menu.exec(self._buff_items_table.viewport().mapToGlobal(pos))
         if action == fav_action:
@@ -15070,6 +15127,30 @@ class ItemBuffsTab(QWidget):
                 self._dump_item_info(rust_info)
             elif action == copy_action:
                 self._open_item_copy_dialog(rust_info)
+            elif action == reset_action:
+                self._reset_item_to_vanilla(rust_info["key"])
+
+    def _reset_item_to_vanilla(self, key):
+        reply = QMessageBox.question(
+            self, "Reset Item Data",
+            f"All data in the selected item (key {key}) will be overwritten by "
+            "the vanilla item data.\n\nContinue?",
+            QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
+        if reply != QMessageBox.Yes:
+            return
+
+        vanilla_items: list = self._restore_original_items()
+        vanilla_item = next((item for item in vanilla_items if item['key'] == key), None)
+        if vanilla_item:
+            clone = json.loads(json.dumps(vanilla_item))
+            self._safely_replace_buff_item(key, clone)
+            del vanilla_items
+            self._buff_modified = True
+            self._buff_refresh_stats()
+        
+        QMessageBox.information(self, "Vanilla Data Restored", 
+            f"Item (key{key}) has been reset to vanilla status."
+        )
 
     def _paste_from_copy_buffer(self, rust_info: dict):
         if not hasattr(self, '_copy_buffer') or not self._copy_buffer:
