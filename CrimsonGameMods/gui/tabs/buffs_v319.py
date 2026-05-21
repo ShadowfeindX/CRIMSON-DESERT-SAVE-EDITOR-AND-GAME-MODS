@@ -727,8 +727,8 @@ class ItemBuffsTab(QWidget):
                 self._build_buff_hero_presets_page(), "Presets")
             self._buff_action_tabs.addTab(
                 self._build_buff_quick_edit_page(), "Quick Edit")
-            self._buff_action_tabs.addTab(
-                self._build_buff_drop_data_page(), "Drop Data")
+            # self._buff_action_tabs.addTab(
+            #     self._build_buff_drop_data_page(), "Drop Data")
             self._buff_action_tabs.addTab(
                 self._build_buff_effects_page(), "Passives & Effects")
             self._buff_action_tabs.addTab(
@@ -1471,11 +1471,6 @@ class ItemBuffsTab(QWidget):
         self._eb_passive_combo.lineEdit().setPlaceholderText("Type to search passives...")
         self._eb_passive_combo.completer().setCompletionMode(QCompleter.PopupCompletion)
         self._eb_passive_combo.completer().setFilterMode(Qt.MatchContains)
-        for sk in sorted(self._PASSIVE_SKILL_NAMES.keys()):
-            name = self._PASSIVE_SKILL_NAMES[sk]
-            desc = self._buff_skill_descs.get(str(sk), {}).get("description", "")
-            label = f"{name} ({sk})" + (f" \u2014 {desc}" if desc else "")
-            self._eb_passive_combo.addItem(label, sk)
         passive_row.addWidget(self._eb_passive_combo, 1)
 
         passive_row.addWidget(QLabel("Lv:"))
@@ -1498,13 +1493,48 @@ class ItemBuffsTab(QWidget):
         remove_pass_btn.clicked.connect(self._eb_remove_passive)
         passive_row.addWidget(remove_pass_btn)
 
-        god_mode_btn = QPushButton("God Mode")
+        god_mode_btn = QPushButton()
         god_mode_btn.setToolTip(
             "Inject full God Mode stats: Invincible + Great Thief, max DDD/DPV, "
             "max regen, max speed/crit/resist, 8 equipment buffs.")
         god_mode_btn.setStyleSheet(
             "background-color: #cc3333; color: white; font-weight: bold;")
-        god_mode_btn.clicked.connect(self._eb_god_mode)
+        
+        def enable_normal_mode_list():
+            self._eb_passive_combo.clear()
+            for sk in sorted(self._PASSIVE_SKILL_NAMES.keys()):
+                name = self._PASSIVE_SKILL_NAMES[sk]
+                desc = self._buff_skill_descs.get(str(sk), {}).get("description", "")
+                label = f"{name} ({sk})" + (f" \u2014 {desc}" if desc else "")
+                self._eb_passive_combo.addItem(label, sk)
+            god_mode_btn.setText("Adv Mode")
+
+        def enable_advance_mode_list():
+            try:
+                import imbue
+            except Exception as e:
+                QMessageBox.critical(self, "Imbue", f"Import failed: {e}")
+                return
+            
+            catalog = imbue._load_json('passive_skill_catalog.json').get('full_skill_index', None)
+            if catalog is None:
+                QMessageBox.critical(self, "Catalog", "Catalog import failed.")
+                return
+            
+            self._eb_passive_combo.clear()
+            for key, label in catalog.items():
+                self._eb_passive_combo.addItem(f"{key}: {label}", int(key))
+            god_mode_btn.setText("Normal Mode")
+
+        def toggle_mode_list():
+            if god_mode_btn.text() == "Adv Mode":
+                enable_advance_mode_list()
+            else:
+                enable_normal_mode_list()
+
+        enable_normal_mode_list()
+        god_mode_btn.clicked.connect(toggle_mode_list)
+        # god_mode_btn.clicked.connect(self._eb_god_mode)
         passive_row.addWidget(god_mode_btn)
 
         self._eb_status = QLabel("")
