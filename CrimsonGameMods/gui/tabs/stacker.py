@@ -4239,6 +4239,30 @@ class StackerTab(QWidget):
                         f"  + {len(target_intents)} {entry['label']} "
                         f"intent(s)")
 
+
+        # ── Extra targets via the loaded v3/v3.1 JSON mods ──
+        # Check every loaded/enabled field json mod for intents then merge them 
+        field_intents: dict[str,list] = {}
+        for mod in self._mods:
+            if mod.kind == "field_json" and mod.enabled:
+                with open(mod.path, encoding="utf-8") as f:
+                    doc: dict = json.load(f)
+                    targets = doc.get('targets', [])
+                    for target in targets:
+                        file: str = target.get('file')
+                        intents: list = target.get('intents')
+
+                        existing: list = field_intents.setdefault(file, [])
+                        field_intents[file] = existing + intents
+
+        # Merge existing targets with priority
+        for file, intents in extra_targets:
+                existing = field_intents.setdefault(file, [])
+                field_intents[file] = intents + existing
+
+        # Replace extra_targets with merged intents to pass to doc builder
+        extra_targets = [(file, intents) for file, intents in field_intents.items()]
+
         # ── Catch-all: every .pabgb/.pabgh pair in _merged_other_files
         # that no registry entry already handled. Uses the generic
         # blob-table diff (key/string_key/is_blocked + per-record
