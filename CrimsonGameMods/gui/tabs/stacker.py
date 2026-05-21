@@ -30,7 +30,7 @@ from . import iteminfo_inspector
 from PySide6.QtCore import Qt, Signal, QSize
 from PySide6.QtGui import QDragEnterEvent, QDropEvent, QFontMetrics, QColor
 from PySide6.QtWidgets import (
-    QWidget, QVBoxLayout, QHBoxLayout, QPushButton, QLabel,
+    QDialog, QDoubleSpinBox, QSpinBox, QWidget, QVBoxLayout, QHBoxLayout, QPushButton, QLabel,
     QTableWidget, QTableWidgetItem, QTextEdit, QLineEdit, QFileDialog,
     QMessageBox, QGroupBox, QHeaderView, QAbstractItemView, QSplitter,
     QApplication, QSizePolicy, QFrame, QListWidget, QListWidgetItem,
@@ -1569,7 +1569,17 @@ class StackerTab(QWidget):
             "Compatible with legacy mod loaders (CrimsonWings style).\n"
             "Run PREVIEW first, then click this to export the diff.")
         self._export_legacy_btn.clicked.connect(self._export_legacy_json)
-        bl.addWidget(self._export_legacy_btn)
+        # bl.addWidget(self._export_legacy_btn)
+
+        self._merge_field_json_btn = _size_button(QPushButton("📄 MERGE FIELD JSON"))
+        self._merge_field_json_btn.setObjectName("btnExport")
+        self._merge_field_json_btn.setToolTip(
+            "Merge multiple v3 field json files.\n"
+            "Export the merged result as a Format 3.1 semantic JSON file.\n"
+            "PREVIEW not needed."
+        )
+        self._merge_field_json_btn.clicked.connect(self._merge_field_json)
+        bl.addWidget(self._merge_field_json_btn)
 
         bl.addStretch(1)
 
@@ -4048,6 +4058,217 @@ class StackerTab(QWidget):
     _FIELD_RENAMES = {'unk_texture_path': 'default_texture_path'}
     _FIELD_REMOVED = {'usable_alert'}
 
+    def _ask_author_config(self):
+        dlg = QDialog(self)
+        dlg.setWindowTitle("Configure Mod Author Information?")
+        layout = QVBoxLayout(dlg)
+        buttons = QHBoxLayout()
+
+        layout.addWidget(QLabel("Would you like to configure your mod details?"))
+        
+        yes_btn = QPushButton("Yes")
+        no_btn = QPushButton("No")
+        no_more_btn = QPushButton("Don't Ask Again")
+        no_more_btn.setObjectName("btnDestructive")
+
+        buttons.addWidget(yes_btn)
+        buttons.addWidget(no_btn)
+        buttons.addWidget(no_more_btn)
+        layout.addLayout(buttons)
+
+        def set_no_ask():
+            self._config['stacker_author_ask'] = False
+            self.config_save_requested.emit()
+            dlg.close()
+
+        def show_mod_details_editor():
+            _dlg = QDialog(dlg)
+            _dlg.setWindowTitle("Mod Details")
+            
+            _layout = QVBoxLayout(_dlg)
+
+            title = QLineEdit()
+            title.setPlaceholderText("Merged Stack")
+            author = QLineEdit()
+            author.setPlaceholderText("CrimsonGameMods Stacker")
+            version = QDoubleSpinBox()
+            version.setValue(1.0)
+            version.setSingleStep(0.01)
+            version.setRange(0.01, 100)
+            description = QTextEdit()
+            description.setPlaceholderText("Mod Description")
+            note = QTextEdit()
+            note.setPlaceholderText("Author Notes")
+            _buttons = QHBoxLayout()
+            save_btn = QPushButton("Save")
+            discard_btn = QPushButton("Discard Changes")
+            _buttons.addWidget(save_btn)
+            _buttons.addWidget(discard_btn)
+
+            details = self._config.get('last_mod_details')
+            if details:
+                title.setText(details['title'])
+                author.setText(details['author'])
+                title.setText(details['title'])
+                version.setValue(float(details['version']))
+                description.setText(details['description'])
+                note.setText(details['note'])
+
+
+            _layout.addWidget(QLabel("Title"))
+            _layout.addWidget(title)
+            _layout.addWidget(QLabel("Author"))
+            _layout.addWidget(author)
+            _layout.addWidget(QLabel("Version"))
+            _layout.addWidget(version)
+            _layout.addWidget(description)
+            _layout.addWidget(note)
+            _layout.addLayout(_buttons)
+            _dlg.setLayout(_layout)
+
+            def save_mod_details():
+                self._config['last_mod_details'] = {
+                    'title': title.text(),
+                    'version': version.text(),
+                    'author': author.text(),
+                    'description': description.toPlainText(),
+                    'note': note.toPlainText(),
+                }
+                self.config_save_requested.emit()
+                _dlg.close()
+
+            save_btn.clicked.connect(save_mod_details)
+            discard_btn.clicked.connect(_dlg.close)
+            _dlg.exec()
+            dlg.close()
+
+        yes_btn.clicked.connect(show_mod_details_editor)
+        no_btn.clicked.connect(dlg.close)
+        no_more_btn.clicked.connect(set_no_ask)
+        dlg.exec()
+
+    def _merge_field_json(self):
+        def merge_intents(primary: list[dict], secondary: list[dict]):
+            primary_lookup = {intent['entry']: intent for intent in primary}
+            merged = []
+            for sintent in secondary:
+                pintent = primary_lookup.get(sintent['entry'])
+                if pintent is None or pintent['field'] != sintent['field']:
+                    merged.append(sintent)
+            return primary + merged
+
+        # Check every loaded/enabled field json mod for intents then merge them 
+        field_intents: dict[str,list] = {}
+        for mod in self._mods:
+            if mod.kind == "field_json" and mod.enabled:
+                with open(mod.path, encoding="utf-8") as f:
+                    doc: dict = json.load(f)
+                    # Check for v3.1
+                    _targets = doc.get('targets')
+
+                    # Fallback check for v3
+                    if _targets is None:
+                        if doc.get('target') and doc.get('intents'):
+                            _targets = [
+                                {'file': doc.get('target'),
+                                 'intents': doc.get('intents')}
+                            ]
+
+                    for target in _targets:
+                        _file: str = target.get('file')
+                        _intents: list = target.get('intents')
+
+                        existing: list = field_intents.setdefault(_file, [])
+                        field_intents[_file] = merge_intents(_intents, existing)
+
+        # # Replace extra_targets with merged intents to pass to doc builder
+        targets = [(_file, _intents) for _file, _intents in field_intents.items()]
+        if not targets:
+            QMessageBox.critical(self, "No Intents Found", "No Intents Found in Mod Files!")
+            return
+
+        # Optionally configure merged mod details
+        if not self._config.get('stacker_author_ask'):
+            self._ask_author_config()
+
+        # Build the doc. Multi-target shape when ANY non-iteminfo target
+        # has intents (the 1.1.4 spec extension consumed by DMM 1.3.3+).
+        # Single-target legacy shape otherwise — preserves byte-for-byte
+        # compatibility with older DMM releases for the common case.
+        total = sum(len(it) for _, it in targets)
+        target_count = len(targets)
+        target_summary = ', '.join(
+            [f'{len(it)} {name.split(".")[0]}' for name, it in targets]
+        )
+        targets_array: list[dict] = []
+
+        for tname, t_intents in targets:
+            targets_array.append({'file': tname, 'intents': t_intents})
+
+        doc = {
+            "modinfo": self._config.get(
+                "last_mod_details",
+                {
+                    "title": "Merged Stack",
+                    "version": "1.0",
+                    "author": "CrimsonGameMods Stacker",
+                    "description": (
+                        f"{total} field-level intent(s) across "
+                        f"{target_count} target(s) — {target_summary}"
+                    ),
+                    "note": (
+                        "Field JSON v3.1 (multi-target field patching) "
+                        "— uses field names, survives game updates. "
+                        "Requires DMM 1.3.4+ for non-iteminfo targets; "
+                        "older DMM versions will apply iteminfo intents "
+                        "only. See FIELD_JSON_V3_1_SPEC.md."
+                    ),
+                },
+            ),
+            "format": 3,
+            "format_minor": 1,
+            "targets": targets_array,
+        }
+
+        # Pick save path
+        default_name = doc["modinfo"]['title'].replace(' ', '_') + ".field.json"
+        self._log_line(f"  → opening save dialog ({len(targets)} extra targets)...")
+        dialog = QFileDialog(self, "Export Field JSON", default_name,
+                             "Field JSON (*.field.json *.json);;All Files (*)")
+        dialog.setAcceptMode(QFileDialog.AcceptSave)
+        dialog.setOption(QFileDialog.DontUseNativeDialog, False)
+        dialog.raise_()
+        dialog.activateWindow()
+        if dialog.exec() != QFileDialog.Accepted:
+            self._log_line("  → save dialog cancelled or failed")
+            return
+        selected = dialog.selectedFiles()
+        path = selected[0] if selected else ""
+        if not path:
+            self._log_line("  → no path selected")
+            return
+        self._log_line(f"  → saving to: {path}")
+
+        ui_lines = [f"  • {len(t_intents)} {tname} intents" for tname, t_intents in targets]
+        log_msg = (
+            f"✔ Exported {total} field-level intents across "
+            f"{target_count} target(s) (multi-target) to {path}")
+        ui_msg = (
+            f"Exported {total} field-level intents across "
+            f"{target_count} targets:\n"
+            + '\n'.join(ui_lines)
+            + "\n\nThis file uses field names — survives game updates.\n"
+            + "Requires DMM 1.3.3+ for the non-iteminfo target(s) to apply.\n"
+            + f"File: {path}")
+
+        try:
+            with open(path, 'w', encoding='utf-8') as f:
+                json.dump(doc, f, indent=2, ensure_ascii=False, default=str)
+            self._log_line(log_msg)
+            QMessageBox.information(self, "Export Merged Field JSON", ui_msg)
+        except Exception as e:
+            QMessageBox.critical(self, "Export Failed", str(e))
+
     def _export_field_json(self):
         """Export as Format 3 semantic JSON (field names, not bytes).
 
@@ -4239,30 +4460,6 @@ class StackerTab(QWidget):
                         f"  + {len(target_intents)} {entry['label']} "
                         f"intent(s)")
 
-
-        # ── Extra targets via the loaded v3/v3.1 JSON mods ──
-        # Check every loaded/enabled field json mod for intents then merge them 
-        field_intents: dict[str,list] = {}
-        for mod in self._mods:
-            if mod.kind == "field_json" and mod.enabled:
-                with open(mod.path, encoding="utf-8") as f:
-                    doc: dict = json.load(f)
-                    targets = doc.get('targets', [])
-                    for target in targets:
-                        file: str = target.get('file')
-                        intents: list = target.get('intents')
-
-                        existing: list = field_intents.setdefault(file, [])
-                        field_intents[file] = existing + intents
-
-        # Merge existing targets with priority
-        for file, intents in extra_targets:
-                existing = field_intents.setdefault(file, [])
-                field_intents[file] = intents + existing
-
-        # Replace extra_targets with merged intents to pass to doc builder
-        extra_targets = [(file, intents) for file, intents in field_intents.items()]
-
         # ── Catch-all: every .pabgb/.pabgh pair in _merged_other_files
         # that no registry entry already handled. Uses the generic
         # blob-table diff (key/string_key/is_blocked + per-record
@@ -4428,6 +4625,9 @@ class StackerTab(QWidget):
             QMessageBox.information(self, "Export Field JSON",
                 "No field-level changes found. Nothing to export.")
             return
+        
+        if not self._config.get('stacker_author_ask'):
+            self._ask_author_config()
 
         # Pick save path
         default_name = mod_title.replace(' ', '_') + ".field.json"
@@ -4468,22 +4668,28 @@ class StackerTab(QWidget):
                 targets_array.append({'file': tname, 'intents': t_intents})
 
             doc = {
-                'modinfo': {
-                    'title': mod_title,
-                    'version': '1.0',
-                    'author': 'CrimsonGameMods Stacker',
-                    'description': (
-                        f'{total} field-level intent(s) across '
-                        f'{target_count} target(s) — {target_summary}'),
-                    'note': ('Field JSON v3.1 (multi-target field patching) '
-                             '— uses field names, survives game updates. '
-                             'Requires DMM 1.3.4+ for non-iteminfo targets; '
-                             'older DMM versions will apply iteminfo intents '
-                             'only. See FIELD_JSON_V3_1_SPEC.md.'),
-                },
-                'format': 3,
-                'format_minor': 1,
-                'targets': targets_array,
+                "modinfo": self._config.get(
+                    "last_mod_details",
+                    {
+                        "title": "Merged Stack",
+                        "version": "1.0",
+                        "author": "CrimsonGameMods Stacker",
+                        "description": (
+                            f"{total} field-level intent(s) across "
+                            f"{target_count} target(s) — {target_summary}"
+                        ),
+                        "note": (
+                            "Field JSON v3.1 (multi-target field patching) "
+                            "— uses field names, survives game updates. "
+                            "Requires DMM 1.3.4+ for non-iteminfo targets; "
+                            "older DMM versions will apply iteminfo intents "
+                            "only. See FIELD_JSON_V3_1_SPEC.md."
+                        ),
+                    },
+                ),
+                "format": 3,
+                "format_minor": 1,
+                "targets": targets_array,
             }
             ui_lines = []
             if intents:
@@ -4502,16 +4708,19 @@ class StackerTab(QWidget):
                 + f"File: {path}")
         else:
             doc = {
-                'modinfo': {
-                    'title': mod_title,
-                    'version': '1.0',
-                    'author': 'CrimsonGameMods Stacker',
-                    'description': f'{len(intents)} field-level intent(s)',
-                    'note': 'Format 3 — uses field names, survives game updates',
-                },
-                'format': 3,
-                'target': 'iteminfo.pabgb',
-                'intents': intents,
+                "modinfo": self._config.get(
+                    "last_mod_details",
+                    {
+                        "title": mod_title,
+                        "version": "1.0",
+                        "author": "CrimsonGameMods Stacker",
+                        "description": f"{len(intents)} field-level intent(s)",
+                        "note": "Format 3 — uses field names, survives game updates",
+                    },
+                ),
+                "format": 3,
+                "target": "iteminfo.pabgb",
+                "intents": intents,
             }
             log_msg = f"✔ Exported {len(intents)} intents to {path}"
             ui_msg = (f"Exported {len(intents)} field-level intents.\n\n"
