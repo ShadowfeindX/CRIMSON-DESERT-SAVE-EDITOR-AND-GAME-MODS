@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 import logging
 from i18n import tr
 import dmm_parser as dmm
@@ -34,6 +35,24 @@ except Exception:
 
 
 log = logging.getLogger(__name__)
+
+
+def extract_file_data(
+    game_dir: str = "",
+    group_name: str = "",
+    dir_path: str = "",
+    file_name: str = "",
+) -> bytes:
+    try:
+        file_data = dmm.extract_file(game_dir, group_name, dir_path, file_name)
+    except IOError:
+        log.error("Error: The PAZ file cannot be read!")
+    except ValueError:
+        log.error("Error: File not found in PAMT!")
+    except Exception as e:
+        log.error(f"Error: {e}")
+    else:
+        return file_data
 
 
 class GameBrowserTab(QWidget):
@@ -113,39 +132,75 @@ class GameBrowserTab(QWidget):
         if first_dot_index != 0:
             found_match = node.name[first_dot_index:]
 
+        extract_custom = extract_json = "STUB"
         if found_match and found_match in VirtualNode.KNOWN_FORMATS:
             custom_type = VirtualNode.KNOWN_FORMATS[found_match]
-            action = QAction(f"Extract as {custom_type}", self._tree_view)
-            menu.addAction(action)
+            extract_custom = QAction(
+                f"Extract as {custom_type}", self._tree_view
+            )
+            menu.addAction(extract_custom)
+
+            if found_match in ("pabgb", "pabgh"):
+                extract_json = QAction("Extract as JSON", self._tree_view)
+                menu.addAction(extract_json)
 
         if found_match and menu.actions():
 
-            def handle_action(_):
-                print(f"Extract requested: {node.absolute_path}")
+            def handle_action(action: QAction):
+                log.info(f"Extract requested: {node.absolute_path}")
+
                 segments = [
                     s for s in node.absolute_path.split("/") if s != node.name
                 ]
-                try:
-                    file_data = dmm.extract_file(
-                        game_dir=self._game_path,
-                        group_name=segments.pop(0),
-                        dir_path="/".join(segments),
-                        file_name=node.name,
-                    )
-                except IOError:
-                    log.error("Error: The PAZ file cannot be read!")
-                except ValueError:
-                    log.error("Error: File not found in PAMT!")
-                except Exception as e:
-                    log.error(f"Error: {e}")
-                else:
+                game_dir = self._game_path
+                group_name = segments.pop(0)
+                dir_path = "/".join(segments)
+                file_name = node.name
+
+                file_data = extract_file_data(
+                    game_dir, group_name, dir_path, file_name
+                )
+                if action == extract_custom:
                     with open(f"data/{node.name}", "wb") as f:
                         f.write(file_data)
+
                     QMessageBox.information(
                         self._tree_view,
                         "File Extracted",
                         f"{node.name} was successfully extracted to the data folder.",
                     )
+                elif action == extract_json:
+                    no_ext = node.name[:-6]
+                    try:
+                        if found_match == "pabgb":
+                            pabgh = extract_file_data(
+                                game_dir,
+                                group_name,
+                                dir_path,
+                                f"{no_ext}.pabgh",
+                            )
+                            pabgb = file_data
+                        else:
+                            pabgb = extract_file_data(
+                                game_dir,
+                                group_name,
+                                dir_path,
+                                f"{no_ext}.pabgb",
+                            )
+                            pabgh = file_data
+
+                        table = dmm.parse_table(no_ext, pabgb, pabgh)
+                        with open(f"data/{no_ext}.json", "w") as f:
+                            json.dump(table, f)
+
+                    except Exception as e:
+                        log.error(f"Exception: {e}")
+                    else:
+                        QMessageBox.information(
+                            self._tree_view,
+                            "File Extracted",
+                            f"{no_ext}.json was successfully extracted to the data folder.",
+                        )
 
             menu.triggered.connect(handle_action)
             menu.exec(self._tree_view.mapToGlobal(position))
