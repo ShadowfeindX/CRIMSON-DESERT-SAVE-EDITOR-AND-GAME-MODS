@@ -132,7 +132,7 @@ class GameBrowserTab(QWidget):
         if first_dot_index != 0:
             found_match = node.name[first_dot_index:]
 
-        extract_custom = extract_json = "STUB"
+        extract_custom = extract_json = extract_unknown = "STUB"
         if found_match and found_match in VirtualNode.KNOWN_FORMATS:
             custom_type = VirtualNode.KNOWN_FORMATS[found_match]
             extract_custom = QAction(
@@ -143,6 +143,11 @@ class GameBrowserTab(QWidget):
             if found_match in ("pabgb", "pabgh"):
                 extract_json = QAction("Extract as JSON", self._tree_view)
                 menu.addAction(extract_json)
+        else:
+            extract_unknown = QAction(
+                "Extract as Unregistered Type (Experimental)"
+            )
+            menu.addAction(extract_unknown)
 
         if found_match and menu.actions():
 
@@ -160,7 +165,7 @@ class GameBrowserTab(QWidget):
                 file_data = extract_file_data(
                     game_dir, group_name, dir_path, file_name
                 )
-                if action == extract_custom:
+                if action in (extract_custom, extract_unknown):
                     with open(f"data/{node.name}", "wb") as f:
                         f.write(file_data)
 
@@ -195,6 +200,9 @@ class GameBrowserTab(QWidget):
 
                     except Exception as e:
                         log.error(f"Exception: {e}")
+                        QMessageBox.critical(
+                            self._tree_view, "Error", f"Exception: {e}"
+                        )
                     else:
                         QMessageBox.information(
                             self._tree_view,

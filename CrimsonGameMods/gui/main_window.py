@@ -703,15 +703,6 @@ class MainWindow(QMainWindow):
         _real_tabs = self._tabs
 
         self._tabs = self._mods_tabs
-        self._game_browser_tab = GameBrowserTab(
-            config=self._config
-        )
-        self._game_browser_tab.status_message.connect(self._update_status)
-        self._game_browser_tab.game_path_changed.connect(self._set_game_path)
-        self._game_browser_tab.config_save_requested.connect(self._save_config)
-        if self._config.get('browser'):
-            self._mods_tabs.addTab(self._game_browser_tab, tr("GameBrowser"))
-
 
         self._patches_tab = GamePatchesTab(
             config=self._config,
@@ -874,15 +865,6 @@ class MainWindow(QMainWindow):
         self._mods_tabs.addTab(self._quest_mods_tab, "Quest Mods")
 
         try:
-            from gui.tabs.load_manager import LoadManagerTab
-            self._load_manager_tab = LoadManagerTab(config=self._config)
-            self._load_manager_tab.status_message.connect(self._update_status)
-            self._load_manager_tab.config_save_requested.connect(self._save_config)
-            self._mods_tabs.addTab(self._load_manager_tab, "Load Manager")
-        except Exception as e:
-            log.warning("LoadManager tab load failed: %s", e)
-
-        try:
             from gui.tabs.mercpets import MercPetsTab
             self._mercpets_tab = MercPetsTab(
                 self._config,
@@ -892,6 +874,27 @@ class MainWindow(QMainWindow):
             self._mods_tabs.addTab(self._mercpets_tab, "MercPets")
         except Exception as e:
             log.warning("MercPets tab load failed: %s", e)
+
+        try:
+            from gui.tabs.load_manager import LoadManagerTab
+            self._load_manager_tab = LoadManagerTab(config=self._config)
+            self._load_manager_tab.status_message.connect(self._update_status)
+            self._load_manager_tab.config_save_requested.connect(self._save_config)
+            self._mods_tabs.addTab(self._load_manager_tab, "Load Manager")
+        except Exception as e:
+            log.warning("LoadManager tab load failed: %s", e)
+
+        self._game_browser_tab = GameBrowserTab(
+            config=self._config
+        )
+        self._game_browser_tab.status_message.connect(self._update_status)
+        self._game_browser_tab.game_path_changed.connect(self._set_game_path)
+        self._game_browser_tab.config_save_requested.connect(self._save_config)
+        # if self._config.get('browser'):
+        self._mods_tabs.addTab(self._game_browser_tab, tr("Game Browser"))
+
+
+
 
         self._tabs = _real_tabs
 
