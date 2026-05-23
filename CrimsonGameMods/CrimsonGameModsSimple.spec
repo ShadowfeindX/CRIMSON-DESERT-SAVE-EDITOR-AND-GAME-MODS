@@ -3,10 +3,11 @@
 a = Analysis(
     ['simple_launcher.py'],
     pathex=[],
-    binaries=[],
-    datas=[('crimson_rs', 'crimson_rs'), ('crimson_data.db.gz', '.'), ('parc_parser.dll', '.')],
+    binaries=[('dmm_parser/dmm_parser.pyd', 'dmm_parser')],
+    datas=[('crimson_rs', 'crimson_rs'), ('dmm_parser', 'dmm_parser'), ('crimson_data.db.gz', '.'), ('parc_parser.dll', '.')],
     hiddenimports=[
         'lz4', 'lz4.block',
+        'dmm_parser', 'dmm_parser.dmm_parser', 'dmm_parser.enums',
         'crimson_rs', 'crimson_rs.enums', 'crimson_rs.create_pack', 'crimson_rs.pack_mod',
         'crimson_rs.validate_game_dir',
         'paz_patcher', 'paz_parse', 'pabgb_field_parsers', 'data_db',

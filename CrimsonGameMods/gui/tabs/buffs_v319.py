@@ -230,6 +230,7 @@ class ItemBuffsTab(QWidget):
                         _pnxt = struct.unpack_from('<I', _pabgh, _pnxt_rec + (_prs - 4))[0]
                 _order.append((_pk, _psoff, _pnxt - _psoff))
 
+        _patch_docking_108(self._buff_rust_items)
         _parsed_ser = {}
         for it in self._buff_rust_items:
             _parsed_ser[int(it['key'])] = crimson_rs.serialize_iteminfo([it])
@@ -4519,7 +4520,7 @@ class ItemBuffsTab(QWidget):
             return 0
         if not self._buff_rust_lookup:
             log.warning("Transmog: _buff_rust_lookup is empty — Extract first")
-            from PyQt5.QtWidgets import QMessageBox
+            from PySide6.QtWidgets import QMessageBox
             QMessageBox.warning(None, "Transmog",
                 "Transmog swaps are queued but iteminfo is not extracted.\n"
                 "Click Extract first, then Apply to Game again.")
@@ -4557,10 +4558,20 @@ class ItemBuffsTab(QWidget):
             for field in VISUAL_FIELDS:
                 src_val = src_ri.get(field)
                 if src_val is None:
-                    # Field absent on source — leave target untouched for this field
                     continue
-                tgt_ri[field] = _cp.deepcopy(src_val)
-                copied_fields.append(f"{field}({len(src_val)})")
+                tgt_val = tgt_ri.get(field, [])
+                if field == 'prefab_data_list' and tgt_val and src_val:
+                    # Swap only prefab_names hashes — preserve the target's
+                    # tribe_gender_list / equip_slot_list so the game still
+                    # finds a matching entry for the current character.
+                    for ti, tgt_entry in enumerate(tgt_val):
+                        src_entry = src_val[ti % len(src_val)]
+                        tgt_entry['prefab_names'] = _cp.deepcopy(
+                            src_entry.get('prefab_names', []))
+                    copied_fields.append(f"{field}(swapped {len(tgt_val)} hashes)")
+                else:
+                    tgt_ri[field] = _cp.deepcopy(src_val)
+                    copied_fields.append(f"{field}({len(src_val)})")
             if copied_fields:
                 log.info("Transmog: %s -> %s copied %s",
                          src_key, tgt_key, ', '.join(copied_fields))
@@ -14158,6 +14169,7 @@ class ItemBuffsTab(QWidget):
                     rpt.stage("inf_durability", f"set max_endurance=65535 on {dura_count} items")
                     rpt.expect('inf_dura', {'target': 65535, 'items': dura_keys})
                 try:
+                    _patch_docking_108(self._buff_rust_items)
                     final_data = self._rebuild_full_iteminfo()
                     log.info("Rebuilt iteminfo: %d bytes, pabgh %d entries",
                              len(final_data),
@@ -14166,6 +14178,7 @@ class ItemBuffsTab(QWidget):
                 except Exception as _ser_err:
                     log.warning("Rebuild failed (%s), trying direct serialize", _ser_err)
                     try:
+                        _patch_docking_108(self._buff_rust_items)
                         final_data = bytearray(crimson_rs.serialize_iteminfo(
                             self._buff_rust_items))
                         unparsed = getattr(self, '_buff_unparsed_raw', []) or []
@@ -14178,7 +14191,7 @@ class ItemBuffsTab(QWidget):
                     except Exception as _ser2:
                         log.error("Direct serialize also failed (%s)", _ser2)
                         QMessageBox.critical(self, "Serialize Failed",
-                            f"Cannot serialize 1.0.5 iteminfo — durability/cooldown/stack changes will NOT apply.\n\n"
+                            f"Cannot serialize iteminfo — durability/cooldown/stack changes will NOT apply.\n\n"
                             f"Error: {_ser2}\n\n"
                             f"This usually means the crimson_rs parser needs updating for the latest game version.\n"
                             f"Stat buff changes (passives/enchants) that use byte patches may still work.")
