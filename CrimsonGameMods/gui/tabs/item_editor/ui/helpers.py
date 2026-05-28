@@ -1,9 +1,8 @@
 from __future__ import annotations
 
-import string
-import os
 
-from PySide6.QtCore import Qt
+# from PySide6 import QtCore
+from PySide6.QtCore import Qt, QPoint
 from PySide6.QtWidgets import (
     QPushButton,
     QVBoxLayout,
@@ -96,25 +95,21 @@ def make_collapsible(
     return wrapper
 
 
-def find_game_path() -> str:
-    candidates = []
+def center_window_in_parent(window: QWidget, parent: QWidget, embedded = False):
+    # --- CENTERING LOGIC START ---
+    # Get dimensions of the main window
+    main_geo = parent.geometry()
+    # Get dimensions of the sub-window
+    sub_geo = window.geometry()
+    # Get absolute position of main window
+    abs_geo = parent.mapToGlobal(QPoint(0, 0))
 
-    for letter in string.ascii_uppercase:
-        candidates.append(
-            f"{letter}:\\SteamLibrary\\steamapps\\common\\Crimson Desert"
-        )
+    (x, y) = (abs_geo.x(), abs_geo.y()) if embedded else (main_geo.x(), main_geo.y())
 
-    candidates.extend(
-        [
-            r"C:\Program Files (x86)\Steam\steamapps\common\Crimson Desert",
-            r"C:\Program Files\Steam\steamapps\common\Crimson Desert",
-            r"C:\Program Files\Epic Games\CrimsonDesert",
-        ]
-    )
+    # Calculate the new X and Y coordinates to perfectly center it
+    new_x = x + (main_geo.width() - sub_geo.width()) // 2
+    new_y = y + (main_geo.height() - sub_geo.height()) // 2
 
-    for path in candidates:
-        papgt = os.path.join(path, "meta", "0.papgt")
-        if os.path.isfile(papgt):
-            return path
-
-    return ""
+    # Move the window to the calculated position
+    window.move(new_x, new_y)
+    # --- CENTERING LOGIC END ---

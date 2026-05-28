@@ -14,6 +14,7 @@ import traceback
 import textwrap
 from typing import Callable, List, Optional, Tuple
 
+from PySide6 import QtCore
 from PySide6.QtCore import Qt, QSize, QTimer, Signal
 from PySide6.QtGui import QAction, QBrush, QColor, QFont, QIcon
 from PySide6.QtWidgets import (
@@ -51,33 +52,12 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
-from gui.tabs.item_editor.ui.helpers import make_collapsible
+
+
+from .presets import PresetsWindow
+from gui.tabs.item_editor.ui.helpers import center_window_in_parent, make_collapsible
 from gui.theme import COLORS, CATEGORY_COLORS
 from gui.iteminfo_index import IteminfoIndex
-
-
-def _safe_iv(v, default=0):
-    """Safely extract int from plain int, float, or dmm_parser nested dict.
-    dmm_parser returns numeric structs as {'a': int, 'b': int, 'c': int}.
-    """
-    if v is None:
-        return default
-    if isinstance(v, (int, float, bool)):
-        return int(v)
-    if isinstance(v, dict):
-        for k in ("a", "value", "_v", "v", "val", "n", "data"):
-            if k in v:
-                sub = v[k]
-                if isinstance(sub, (int, float, bool)):
-                    return int(sub)
-                if sub is None:
-                    return default
-        return default
-    try:
-        return int(v)
-    except Exception:
-        return default
-
 
 from models import SaveItem, SaveData, UndoEntry
 from item_db import ItemNameDB
@@ -113,9 +93,14 @@ from gui.iteminfo_index import IteminfoIndex
 
 
 class EditorControls(QFrame):
-    def __init__(self, parent):
+    s_config_save_requested = Signal()
+
+    WINDOW_REGISTRY = {"preset": PresetsWindow}
+
+    def __init__(self, parent: QWidget, config):
         super().__init__(parent)
 
+        self._windows: dict[str, QWidget] = {}
         self._build_ui(parent)
 
     def _build_ui(self, parent: QWidget):
@@ -123,17 +108,31 @@ class EditorControls(QFrame):
         layout.setContentsMargins(8, 8, 8, 8)
         layout.setSpacing(8)
 
-        grid = self._build_standard_grid()
+        std_grid = self._build_standard_grid()
         adv_grid = self._build_advanced_grid()
+        dev_grid = self._build_dev_grid()
+        std_grid_collapsible = make_collapsible(
+            "Standard Options",
+            std_grid,
+            start_open=False,
+            config_key="itemeditor_standard",
+        )
         adv_grid_collapsible = make_collapsible(
             "Advanced Options",
             adv_grid,
             start_open=False,
             config_key="itemeditor_advanced",
         )
+        dev_grid_collapsible = make_collapsible(
+            "Dev Options",
+            dev_grid,
+            start_open=False,
+            config_key="itemeditor_dev",
+        )
 
-        layout.addWidget(grid)
+        layout.addWidget(std_grid_collapsible)
         layout.addWidget(adv_grid_collapsible)
+        layout.addWidget(dev_grid_collapsible)
         layout.addStretch(1)
 
     def _build_standard_grid(self):
@@ -144,24 +143,23 @@ class EditorControls(QFrame):
         btns: dict[str, QPushButton] = {}
 
         btns["preset"] = QPushButton("Presets")
+        btns["preset"].clicked.connect(lambda: self._open_window('preset'))
         btns["preview"] = QPushButton("Show Preview")
-        btns["passive"] = QPushButton("Edit Passives")
-        btns["buff"] = QPushButton("Edit Buffs")
-        btns["stat"] = QPushButton("Edit Stats")
-        btns["drop"] = QPushButton("Edit Drop Data")
-        btns["effect"] = QPushButton("Edit Effects")
-        btns["imbue"] = QPushButton("Edit Imbues")
+
         btns["transmog"] = QPushButton("Transmog")
         btns["custom"] = QPushButton("Custom Item")
+
         btns["bulk"] = QPushButton("Bulk Options")
         btns["global"] = QPushButton("Global Options")
 
         self._standard_controls = btns
 
-        for i, btn in enumerate(btns.values()):
+        for i, (id, btn) in enumerate(btns.items()):
             # bc,fc = styles[i % len(styles)]
             r, c = divmod(i, cols)
             # btn.setStyleSheet(gen_styles(fc,bc))
+            # if id == "presets":
+            #     btn.clicked.connect(lambda: self._open_window(id))
             layout.addWidget(btn, r, c)
 
         return grid
@@ -173,9 +171,12 @@ class EditorControls(QFrame):
         cols = 3
         btns = {}
 
-        btns["json"] = QPushButton("Edit JSON")
-        btns["dump"] = QPushButton("Dump ITEMINFO")
-        btns["diff"] = QPushButton("Show Item Diff")
+        btns["passive"] = QPushButton("Edit Passives")
+        btns["buff"] = QPushButton("Edit Buffs")
+        btns["stat"] = QPushButton("Edit Stats")
+        btns["drop"] = QPushButton("Edit Drop Data")
+        btns["effect"] = QPushButton("Edit Effects")
+        btns["imbue"] = QPushButton("Edit Imbues")
 
         self._advanced_controls = btns
 
@@ -186,3 +187,66 @@ class EditorControls(QFrame):
             layout.addWidget(btn, r, c)
 
         return grid
+
+    def _build_dev_grid(self):
+        grid = QWidget()
+        layout = QGridLayout(grid)
+        layout.setSpacing(8)
+        cols = 3
+        btns = {}
+
+        btns["json"] = QPushButton("Edit JSON")
+        btns["dump"] = QPushButton("Dump ITEMINFO")
+        btns["diff"] = QPushButton("Show Item Diff")
+        # btns["inspect"] = QPushButton("Inspect Item")
+
+        self._dev_controls = btns
+
+        for i, btn in enumerate(btns.values()):
+            # bc,fc = styles[i % len(styles)]
+            r, c = divmod(i, cols)
+            # btn.setStyleSheet(gen_styles(fc,bc))
+            layout.addWidget(btn, r, c)
+
+        return grid
+
+    def _open_window(self, id: str):
+        # Look up the class from the dictionary
+        cls = self.WINDOW_REGISTRY.get(id)
+
+        # Log error and return if class not found
+        if not cls:
+            log.error(f"Error: '{id}' Window not found in registry.")
+            return
+
+
+        # Check if the window is already open and active
+        if id in self._windows:
+            center_window_in_parent(self._windows[id], self, True)
+            self._windows[id].raise_()
+            self._windows[id].activateWindow()
+            return
+
+        # Instantiate the class dynamically
+        new_window = cls()
+
+        def cleanup():
+            self._windows.pop(id, None)
+
+
+        # Hook into the close event to clean up memory when closed
+        new_window.setAttribute(QtCore.Qt.WidgetAttribute.WA_DeleteOnClose)
+        new_window.destroyed.connect(lambda: )
+
+        # Store reference in the active dictionary using the ID as the key
+        self._windows[id] = new_window
+        new_window.show()
+        center_window_in_parent(self._windows[id], self, True)
+
+    def closeEvent(self, event):
+        print("closing....")
+        active_instances = list(self._windows.values())
+        for sub_window in active_instances:
+            if sub_window.isVisible():
+                sub_window.close()
+        event.accept()

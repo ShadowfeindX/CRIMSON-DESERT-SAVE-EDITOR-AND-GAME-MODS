@@ -21,6 +21,7 @@ from PySide6.QtCore import (
     QSize,
     QTimer,
     Signal,
+    Slot,
     QModelIndex,
 )
 from PySide6.QtGui import QAction, QBrush, QColor, QFont, QIcon
@@ -60,9 +61,9 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
-from .models import ItemEditorInfoDetails
+from ..models import ItemEditorInfoDetails
 
-from .dmm_types import ItemInfo
+from ..dmm_types import ItemInfo
 from .search_bar import SearchBar
 
 from .action_bar import ActionBar
@@ -134,31 +135,46 @@ class ItemDetailsTableModel(QAbstractTableModel):
         self.load(data)
 
     def load(self, details: ItemEditorInfoDetails):
-        data = []
+        self.beginResetModel()
 
-        data = [
-            (key, json.dumps(detail)) for key, detail in details._data.items()
+        # data = [(key, detail) for key, detail in details._data.items()]
+        display_data = [
+            (
+                key,
+                json.dumps(detail),
+            )
+            for key, detail in details.editable()
         ]
 
-        self._details = details
-        self._data = data
+        self._data = details
+        self._display = display_data
+
+        self.endResetModel()
 
     def data(self, index: QModelIndex, role: int):
+        if not index.isValid():
+            return None
+
+        if role == Qt.ItemDataRole.UserRole:
+            return self._data
+
         match role:
-            case Qt.ItemDataRole.UserRole:
-                return self._details
             case Qt.ItemDataRole.DisplayRole:
+                key, detail = self._display[index.row()]
                 match index.column():
                     case 0:
-                        "stub"
+                        return key
                     case 1:
-                        "stub"
+                        return detail
                     case _:
                         log.info(
                             "Item Details Table: Invalid index column %s",
                             index.column(),
                         )
-                return self._data[index.row()]
+                # return self._data[index.row()]
+
+    def display(self, key: str):
+        "stub"
 
     def headerData(self, idx, orientation, role):
         if (
@@ -174,7 +190,7 @@ class ItemDetailsTableModel(QAbstractTableModel):
         return None
 
     def rowCount(self, _):
-        return len(self._data)
+        return len(self._display)
 
     def columnCount(self, _):
         return 2
@@ -204,8 +220,8 @@ class ItemDetailsTable(QFrame):
         table.setMinimumWidth(120)
         table.setColumnWidth(1, 180)
         table.verticalHeader().setVisible(False)
-        table.setSortingEnabled(True)
-        table.sortByColumn(0, Qt.SortOrder.AscendingOrder)
+        # table.setSortingEnabled(True)
+        # table.sortByColumn(0, Qt.SortOrder.AscendingOrder)
         table.setSelectionBehavior(
             QAbstractItemView.SelectionBehavior.SelectRows
         )
@@ -213,13 +229,12 @@ class ItemDetailsTable(QFrame):
         table.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
         table.customContextMenuRequested.connect(self._show_context_menu)
 
-        self.refresh_view()
-
         self.table = table
         self.model = model
         self.proxy = proxy
 
         layout.addWidget(table)
+        self.refresh_view()
 
     def _show_context_menu(self, pos):
         index = self.table.indexAt(pos)
@@ -227,8 +242,15 @@ class ItemDetailsTable(QFrame):
             log.info("showing context menu for: %s", index.data())
 
     def refresh_view(self):
-        "Stub"
+        self.table.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+        self.table.horizontalHeader().setStretchLastSection(False)
+        self.table.horizontalHeader().setSectionResizeMode(
+            0, QHeaderView.ResizeMode.ResizeToContents
+        )
+        self.table.horizontalHeader().setSectionResizeMode(
+            1, QHeaderView.ResizeMode.Stretch
+        )
 
     def load(self, details: ItemEditorInfoDetails):
         self.model.load(details)
-        self.model.layoutChanged.emit()
+        self.refresh_view()

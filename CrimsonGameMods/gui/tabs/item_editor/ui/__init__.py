@@ -14,7 +14,7 @@ import traceback
 import textwrap
 from typing import Callable, List, Optional, Tuple
 
-from PySide6.QtCore import Qt, QSize, QTimer, Signal
+from PySide6.QtCore import QRegularExpression, Qt, QSize, QTimer, Signal
 from PySide6.QtGui import QAction, QBrush, QColor, QFont, QIcon
 from PySide6.QtWidgets import (
     QAbstractItemView,
@@ -118,21 +118,19 @@ log = logging.getLogger(__name__)
 
 
 class ItemEditorLayout(QVBoxLayout):
+    s_config_save_requested = Signal()
+
     def __init__(self, parent: QWidget):
         super().__init__(parent)
 
         self._build_ui(parent)
-
-        def load_details(curr, prev):
-            i_model = self.items_table.model
-            d_table = self.item_details_table
-
-            details = i_model.data(curr, Qt.ItemDataRole.UserRole)
-            d_table.load(details)
+        
 
         self.items_table.table.selectionModel().currentRowChanged.connect(
-            load_details
+            self._load_details
         )
+
+        self.search_bar.s_search.connect(self.items_table.search)
 
     def _build_ui(self, parent: QWidget):
         self.setContentsMargins(0, 0, 0, 0)
@@ -152,3 +150,13 @@ class ItemEditorLayout(QVBoxLayout):
         self.addWidget(self.action_bar)
         self.addWidget(self.search_bar)
         self.addLayout(layout, 1)
+
+    def _load_details(self, curr, _):
+        i_model = self.items_table.model
+        d_table = self.item_details_table
+
+        details = i_model.data(curr, Qt.ItemDataRole.UserRole)
+        d_table.load(details)
+    
+    def closeEvent(self, event):
+        self.editor_controls.closeEvent(event)

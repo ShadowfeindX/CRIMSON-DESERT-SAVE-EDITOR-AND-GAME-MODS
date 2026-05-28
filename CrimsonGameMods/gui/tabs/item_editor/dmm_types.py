@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+# from dataclasses import dataclass
 from typing import TypedDict
 
 class LocalizableString(TypedDict):
@@ -321,186 +322,225 @@ class DockingChildData(TypedDict):
     """u8"""
     docking_slot_key: str
 
+class CoolTimeData(TypedDict):
+    """Represents cool time values for different character slots."""
+    a: int
+    """Cool time value for slot 'a'."""
+    b: int
+    """Cool time value for slot 'b'."""
+    c: int
+    """Cool time value for slot 'c'."""
+
+class MaxedChargedUseableData(TypedDict):
+    """Represents max charge values for different character slots."""
+    a: int
+    """Max charge value for slot 'a'."""
+    b: int
+    """Max charge value for slot 'b'."""
+    c: int
+    """Max charge value for slot 'c'."""
+
 
 class ItemInfo(TypedDict):
     """A single item parsed from the iteminfo binary file."""
 
     # Identity
-    _key: int
+    key: int
     """Unique item ID. ItemKey (u32)."""
-    _stringKey: str
+    string_key: str
     """String identifier, e.g. ``"Pyeonjeon_Arrow"``."""
-    _isBlocked: int
+    is_blocked: int
     """u8"""
-    _maxStackCount: int
+    max_stack_count: int
     """u64"""
-    _itemName: LocalizableString
-    _brokenItemPrefixString: int
+    item_name: LocalizableString
+    broken_item_prefix_string: int
     """LocalStringInfoKey (u32)."""
 
     # Inventory & Equipment
-    _inventoryInfo: int
+    inventory_info: int
     """InventoryKey (u16)."""
-    _equipTypeInfo: int
+    equip_type_info: int
     """EquipTypeKey (u32)."""
-    _occupiedEquipSlotDataList: list[OccupiedEquipSlotData]
-    _itemTagList: list[int]
+    occupied_equip_slot_data_list: list[OccupiedEquipSlotData]
+    item_tag_list: list[int]
     """u32 list."""
-    _equipableHash: int
+    equipable_hash: int
     """u32"""
-    _consumableTypeList: list[int]
+    consumable_type_list: list[int]
     """u32 list."""
-    _itemUseInfoList: list[int]
+    item_use_info_list: list[int]
     """ItemUseKey list (u32)."""
-    _itemIconList: list[ItemIconData]
-    _mapIconPath: int
+    item_icon_list: list[ItemIconData]
+    map_icon_path: int
     """StringInfoKey (u32)."""
-    _moneyIconPath: int
+    money_icon_path: int
     """StringInfoKey (u32)."""
-    _useMapIconAlert: int
+    use_map_icon_alert: int
     """u8"""
-    _itemType: int
+    item_type: int
     """u8"""
-    _materialKey: int
+    material_key: int
     """u32"""
-    _materialMatchInfo: int
+    material_match_info: int
     """MaterialMatchKey (u32)."""
-    _itemDesc: LocalizableString
-    _itemDesc2: LocalizableString
-    _equipableLevel: int
+    item_desc: LocalizableString
+    item_desc2: LocalizableString
+    equipable_level: int
     """u32"""
-    _categoryInfo: int
+    category_info: int
     """CategoryKey (u16)."""
-    _knowledgeInfo: int
+    knowledge_info: int
     """KnowledgeKey (u32)."""
-    _knowledgeObtainType: int
+    knowledge_obtain_type: int
     """u8"""
-    _destroyEffecInfo: int
+    destroy_effec_info: int
     """EffectKey (u32)."""
-    _equipPassiveSkillList: list[PassiveSkillLevel]
-    _useImmediately: int
+    equip_passive_skill_list: list[PassiveSkillLevel]
+    use_immediately: int
     """u8"""
-    _applyMaxStackCap: int
+    apply_max_stack_cap: int
     """u8"""
-    _extractMultiChangeInfo: int
+    extract_multi_change_info: int
     """MultiChangeKey (u32)."""
-    _itemMemo: str
-    _filterType: str
-    _gimmickInfo: int
+    item_memo: str
+    filter_type: str
+    gimmick_info: int
     """GimmickInfoKey (u32)."""
-    _gimmickTagList: list[str]
-    _maxDropResultSubItemCount: int
+    gimmick_tag_list: list[str]
+    max_drop_result_sub_item_count: int
     """u32"""
-    _useDropSetTarget: int
+    use_drop_set_target: int
     """u8"""
-    _isAllGimmickSealable: int
+    is_all_gimmick_sealable: int
     """u8"""
-    _sealableItemInfoList: list[SealableItemInfo]
-    _sealableCharacterInfoList: list[SealableItemInfo]
-    _sealableGimmickInfoList: list[SealableItemInfo]
-    _sealableGimmickTagList: list[SealableItemInfo]
-    _sealableTribeInfoList: list[SealableItemInfo]
-    _sealableMoneyInfoList: list[int]
+    sealable_item_info_list: list[SealableItemInfo]
+    sealable_character_info_list: list[SealableItemInfo]
+    sealable_gimmick_info_list: list[SealableItemInfo]
+    sealable_gimmick_tag_list: list[SealableItemInfo]
+    sealable_tribe_info_list: list[SealableItemInfo]
+    sealable_money_info_list: list[int]
     """ItemKey list (u32)."""
-    _deleteByGimmickUnlock: int
+    delete_by_gimmick_unlock: int
     """u8"""
-    _gimmickUnlockMessageLocalStringInfo: int
+    gimmick_unlock_message_local_string_info: int
     """LocalStringInfoKey (u32)."""
-    _canDisassemble: int
+    can_disassemble: int
     """u8"""
-    _transmutationMaterialGimmickList: list[int]
+    transmutation_material_gimmick_list: list[int]
     """GimmickInfoKey list (u32)."""
-    _transmutationMaterialItemList: list[int]
+    transmutation_material_item_list: list[int]
     """ItemKey list (u32)."""
-    _transmutationMaterialItemGroupList: list[int]
+    transmutation_material_group_list: list[int]
     """ItemGroupKey list (u16)."""
-    _isRegisterTradeMarket: int
+    is_register_trade_market: int
     """u8"""
-    _multiChangeInfoList: list[int]
+    multi_change_info_list: list[int]
     """MultiChangeKey list (u32)."""
-    _isEditorUsable: int
+    is_editor_usable: int
     """u8"""
-    _discardable: int
+    discardable: int
     """u8"""
-    _isDyeable: int
+    is_dyeable: int
     """u8"""
-    _isEditableGrime: int
+    is_editable_grime: int
     """u8"""
-    _isDestroyWhenBroken: int
+    is_destroy_when_broken: int
     """u8"""
-    _quickSlotIndex: int
+    quick_slot_index: int
     """u8"""
-    _reserveSlotTargetDataList: list[ReserveSlotTargetData]
-    _itemTier: int
+    reserve_slot_target_data_list: list[ReserveSlotTargetData]
+    item_tier: int
     """u8"""
-    _isImportantItem: int
+    is_important_item: int
     """u8"""
-    _applyDropStatType: int
+    apply_drop_stat_type: int
     """u8"""
-    _dropDefaultData: DropDefaultData
-    _prefabDataList: list[PrefabData]
-    _enchantDataList: list[EnchantData]
-    _gimmickVisualPrefabDataList: list[GimmickVisualPrefabData]
-    _priceList: list[ItemPriceInfo]
-    _dockingChildData: DockingChildData | None
-    _inventoryChangeData: InventoryChangeData | None
-    _fixedPageDataList: list[PageData]
-    _dynamicPageDataList: list[PageData]
-    _inspectDataList: list[InspectData]
-    _inspectAction: InspectAction
-    _defaultSubItem: SubItem
-    _cooltime: int
-    """i64"""
-    _itemChargeType: int
+    drop_default_data: DropDefaultData
+    prefab_data_list: list[PrefabData]
+    enchant_data_list: list[EnchantData]
+    gimmick_visual_prefab_data_list: list[GimmickVisualPrefabData]
+    price_list: list[ItemPriceInfo]
+    docking_child_data: DockingChildData | None
+    inventory_change_data: InventoryChangeData | None
+    fixed_page_data_list: list[PageData]
+    dynamic_page_data_list: list[PageData]
+    inspect_data_list: list[InspectData]
+    inspect_action: InspectAction
+    default_sub_item: SubItem
+    cooltime: CoolTimeData # ADDED PROPERTY
+    discard_attach_terrain: int # ADDED PROPERTY
+    item_charge_type: int
     """u8"""
-    _sharpnessData: ItemInfoSharpnessData
-    _maxChargedUseableCount: int
-    """u32"""
-    _hackableCharacterGroupInfoList: list[int]
+    sharpness_data: ItemInfoSharpnessData
+    max_charged_useable_count: MaxedChargedUseableData
+    hackable_character_group_info_list: list[int]
     """CharacterGroupKey list (u16)."""
-    _itemGroupInfoList: list[int]
+    item_group_info_list: list[int]
     """ItemGroupKey list (u16)."""
-    _discardOffsetY: float
+    discard_offset_y: float
     """f32"""
-    _hideFromInventoryOnPopItem: int
+    hide_from_inventory_on_pop_item: int
     """u8"""
-    _isShieldItem: int
+    is_shield_item: int
     """u8"""
-    _isTowerShieldItem: int
+    is_tower_shield_item: int
     """u8"""
-    _isWild: int
+    is_wild: int
     """u8"""
-    _packedItemInfo: int
+    packed_item_info: int
     """ItemKey (u32)."""
-    _unpackedItemInfo: int
+    unpacked_item_info: int
     """ItemKey (u32)."""
-    _convertItemInfoByDropNpc: int
+    convert_item_info_by_drop_npc: int
     """ItemKey (u32)."""
-    _lookDetailGameAdviceInfoWrapper: int
+    look_detail_game_advice_info_wrapper: int
     """GameAdviceInfoKey (u32)."""
-    _lookDetailMissionInfo: int
+    look_detail_mission_info: int
     """MissionKey (u32)."""
-    _enableAlertSystemToUi: int
+    enable_alert_system_to_ui: int
     """u8"""
-    _usableAlertType: int
+    usable_alert_type: int
     """u8"""
-    _isSaveGameDataAtUseItem: int
+    is_save_game_data_at_use_item: int
     """u8"""
-    _isLogoutAtUseItem: int
+    is_logout_at_use_item: int
     """u8"""
-    _sharedCoolTimeGroupNameHash: int
+    shared_cool_time_group_name_hash: int
     """u32"""
-    _itemBundleDataList: list[ItemBundleData]
-    _moneyTypeDefine: MoneyTypeDefine | None
-    _emojiTextureId: str
-    _enableEquipInCloneActor: int
+    item_bundle_data_list: list[ItemBundleData]
+    money_type_define: MoneyTypeDefine | None
+    emoji_texture_id: str
+    enable_equip_in_clone_actor: int
     """u8"""
-    _isBlockedStoreSell: int
+    is_blocked_store_sell: int
     """u8"""
-    _isPreorderItem: int
+    is_preorder_item: int
     """u8"""
-    _respawnTimeSeconds: int
+    respawn_time_seconds: int
     """i64"""
-    _maxEndurance: int
+    max_endurance: int
     """u16"""
-    _repairDataList: list[RepairData]
+    repair_data_list: list[RepairData]
+
+def _safe_iv(v, default=0):
+    """Safely extract int from plain int, float, or dmm_parser nested dict.
+    dmm_parser returns numeric structs as {'a': int, 'b': int, 'c': int}.
+    """
+    if v is None:
+        return default
+    if isinstance(v, (int, float, bool)):
+        return int(v)
+    if isinstance(v, dict):
+        for k in ("a", "value", "_v", "v", "val", "n", "data"):
+            if k in v:
+                sub = v[k]
+                if isinstance(sub, (int, float, bool)):
+                    return int(sub)
+                if sub is None:
+                    return default
+        return default
+    try:
+        return int(v)
+    except Exception:
+        return default

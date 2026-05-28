@@ -4197,3 +4197,7 @@ QCheckBox::indicator {{
 
         # Shared state / overlay coordinator disabled — not used yet.
         # QTimer.singleShot(2000, self._run_startup_audit)
+    
+    def closeEvent(self, event):
+        self._item_editor_tab.closeEvent(event)
+        return super().closeEvent(event)

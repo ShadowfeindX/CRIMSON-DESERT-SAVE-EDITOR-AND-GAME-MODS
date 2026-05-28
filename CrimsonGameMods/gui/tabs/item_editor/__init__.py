@@ -7,7 +7,6 @@ import os
 import re
 import shutil
 import struct
-import subprocess
 import sys
 import tempfile
 import traceback
@@ -51,34 +50,11 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
-from .ui.models import ItemEditorInfo
+from .models import ItemEditorInfo
 
-from .ui.dmm_types import ItemInfo
+from .dmm_types import ItemInfo
 from gui.theme import COLORS, CATEGORY_COLORS
 from gui.iteminfo_index import IteminfoIndex
-
-
-def _safe_iv(v, default=0):
-    """Safely extract int from plain int, float, or dmm_parser nested dict.
-    dmm_parser returns numeric structs as {'a': int, 'b': int, 'c': int}.
-    """
-    if v is None:
-        return default
-    if isinstance(v, (int, float, bool)):
-        return int(v)
-    if isinstance(v, dict):
-        for k in ("a", "value", "_v", "v", "val", "n", "data"):
-            if k in v:
-                sub = v[k]
-                if isinstance(sub, (int, float, bool)):
-                    return int(sub)
-                if sub is None:
-                    return default
-        return default
-    try:
-        return int(v)
-    except Exception:
-        return default
 
 
 from models import SaveItem, SaveData, UndoEntry
@@ -111,40 +87,8 @@ except Exception:
 log = logging.getLogger(__name__)
 
 
-def _can_write_game_dir(game_path: str) -> bool:
-    try:
-        _t = os.path.join(game_path, ".se_write_test")
-        with open(_t, "w") as _f:
-            _f.write("t")
-        os.remove(_t)
-        return True
-    except Exception:
-        return False
-
-
-def _is_game_running() -> bool:
-    try:
-        out = subprocess.check_output(
-            [
-                "tasklist",
-                "/FI",
-                "IMAGENAME eq CrimsonDesert.exe",
-                "/FO",
-                "CSV",
-                "/NH",
-            ],
-            stderr=subprocess.DEVNULL,
-            text=True,
-            timeout=3,
-            creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0),
-        )
-        return "CrimsonDesert.exe" in out
-    except Exception:
-        return False
-
-
 from gui.tabs.item_editor.ui import ItemEditorLayout
-from gui.tabs.item_editor.ui.helpers import find_game_path
+from gui.tabs.item_editor.helpers import find_game_path
 import dmm_parser as dmm
 
 
@@ -156,7 +100,9 @@ class ItemEditorTab(QWidget):
     def __init__(self, path="", config: Optional[dict] = None, parent=None):
         super().__init__(parent)
 
-        ui = ItemEditorLayout(self)
+        ui = ItemEditorLayout(self, config)
+        ui.s_config_save_requested.connect(self.s_config_save_requested.emit)
+
         ui.action_bar.s_extract.connect(self._extract)
 
         self.s_iteminfo_extracted.connect(ui.items_table.load)
@@ -164,6 +110,8 @@ class ItemEditorTab(QWidget):
         self._game_path = (
             path or config["game_install_path"] or find_game_path()
         )
+
+        self._ui = ui
 
     @Slot(str)
     def set_game_path(self, path: str):
@@ -175,9 +123,28 @@ class ItemEditorTab(QWidget):
             case "overlay":
                 log.info("extracting...")
 
-                data = ItemEditorInfo([{"item_name": "Test Item", "key": 100}])
-                self.s_iteminfo_extracted.emit(data)
-                "stub"
+                try:
+                    with open("data/sample.json", "r+", encoding="utf-8") as f:
+                        data = ItemEditorInfo(
+                            [
+                                json.load(f)
+                                # {
+                                #     "item_name": "Test Item",
+                                #     "string_key": "test_item",
+                                #     "cooltime": {"a": 1, "b": 1, "c": 1},
+                                #     "gimmick_info": 0,
+                                #     "item_tier": 1,
+                                #     "key": 100,
+                                # }
+                            ]
+                        )
+                        self.s_iteminfo_extracted.emit(data)
+                except BaseException as e:
+                    print(e)
+                    log.critical(
+                        "Error: Failed to load test data!\n"
+                        "Please provite a sample.json in your data folder!"
+                    )
 
             case "vanilla":
                 log.info("extracting vanilla...")
@@ -188,7 +155,7 @@ class ItemEditorTab(QWidget):
                     dir_path="gamedata/binary__/client/bin",
                     file_name="iteminfo.pabgb",
                 )
-                data = dmm.parse_table("iteminfo", pabgb, shape="v3.1")
+                data = dmm.parse_table("iteminfo", pabgb)
 
                 iteminfo = ItemEditorInfo(data)
                 self.s_iteminfo_extracted.emit(iteminfo)
@@ -200,3 +167,7 @@ class ItemEditorTab(QWidget):
                 log.info(f"sample item data written to data/sample.json")
             case _:
                 log.critical("Invalid extract type: %s", type)
+
+    def closeEvent(self, event):
+        self._ui.closeEvent(event)
+        return super().closeEvent(event)
