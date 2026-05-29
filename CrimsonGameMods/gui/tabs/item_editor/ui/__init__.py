@@ -118,7 +118,7 @@ log = logging.getLogger(__name__)
 
 
 class ItemEditorLayout(QVBoxLayout):
-    s_config_save_requested = Signal()
+    # s_config_save_requested = Signal()
 
     def __init__(self, parent: QWidget):
         super().__init__(parent)

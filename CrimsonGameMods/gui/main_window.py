@@ -715,9 +715,10 @@ class MainWindow(QMainWindow):
         self._patches_tab.game_path_changed.connect(self._set_game_path)
         self._patches_tab.config_save_requested.connect(self._save_config)
 
-        self._item_editor_tab = ItemEditorTab(config=self._config)
+        # self._save_config()
+        self._item_editor_tab = ItemEditorTab()
         self._item_editor_tab.s_status_message.connect(self._update_status)
-        self._item_editor_tab.s_config_save_requested.connect(self._save_config)
+        # self._item_editor_tab.s_config_save_requested.connect(self._save_config)
 
         if self._config['item_editor']:
             self._tabs.addTab(self._item_editor_tab, tr("ItemEditor"))

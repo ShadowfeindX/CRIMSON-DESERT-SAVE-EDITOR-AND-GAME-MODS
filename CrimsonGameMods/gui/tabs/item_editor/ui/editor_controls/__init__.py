@@ -97,7 +97,7 @@ class EditorControls(QFrame):
 
     WINDOW_REGISTRY = {"preset": PresetsWindow}
 
-    def __init__(self, parent: QWidget, config):
+    def __init__(self, parent: QWidget):
         super().__init__(parent)
 
         self._windows: dict[str, QWidget] = {}
@@ -236,7 +236,7 @@ class EditorControls(QFrame):
 
         # Hook into the close event to clean up memory when closed
         new_window.setAttribute(QtCore.Qt.WidgetAttribute.WA_DeleteOnClose)
-        new_window.destroyed.connect(lambda: )
+        new_window.destroyed.connect(cleanup)
 
         # Store reference in the active dictionary using the ID as the key
         self._windows[id] = new_window

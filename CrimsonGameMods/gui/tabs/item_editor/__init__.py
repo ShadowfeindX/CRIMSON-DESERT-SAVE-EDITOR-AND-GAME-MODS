@@ -50,6 +50,8 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
+from .ui.helpers import CONFIG
+
 from .models import ItemEditorInfo
 
 from .dmm_types import ItemInfo
@@ -94,21 +96,21 @@ import dmm_parser as dmm
 
 class ItemEditorTab(QWidget):
     s_status_message = Signal()
-    s_config_save_requested = Signal()
+    # s_config_save_requested = Signal()
     s_iteminfo_extracted = Signal(ItemEditorInfo)
 
-    def __init__(self, path="", config: Optional[dict] = None, parent=None):
+    def __init__(self, path="", parent=None):
         super().__init__(parent)
 
-        ui = ItemEditorLayout(self, config)
-        ui.s_config_save_requested.connect(self.s_config_save_requested.emit)
+        ui = ItemEditorLayout(self)
+        # ui.s_config_save_requested.connect(self.s_config_save_requested.emit)
 
         ui.action_bar.s_extract.connect(self._extract)
 
         self.s_iteminfo_extracted.connect(ui.items_table.load)
 
         self._game_path = (
-            path or config["game_install_path"] or find_game_path()
+            path or CONFIG["game_install_path"] or find_game_path()
         )
 
         self._ui = ui
@@ -164,7 +166,7 @@ class ItemEditorTab(QWidget):
                     json.dump(data[0], f)
 
                 log.info(f"extracted {len(data)} items from vanilla pabgb...")
-                log.info(f"sample item data written to data/sample.json")
+                log.info("sample item data written to data/sample.json")
             case _:
                 log.critical("Invalid extract type: %s", type)
 
