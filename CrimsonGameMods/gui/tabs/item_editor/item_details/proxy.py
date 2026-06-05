@@ -14,7 +14,16 @@ import traceback
 import textwrap
 from typing import Callable, List, Optional, Tuple
 
-from PySide6.QtCore import QRegularExpression, Qt, QSize, QTimer, Signal
+from PySide6.QtCore import (
+    QAbstractTableModel,
+    QSortFilterProxyModel,
+    Qt,
+    QSize,
+    QTimer,
+    Signal,
+    Slot,
+    QModelIndex,
+)
 from PySide6.QtGui import QAction, QBrush, QColor, QFont, QIcon
 from PySide6.QtWidgets import (
     QAbstractItemView,
@@ -42,6 +51,7 @@ from PySide6.QtWidgets import (
     QSizePolicy,
     QSpinBox,
     QSplitter,
+    QTableView,
     QTableWidget,
     QTableWidgetItem,
     QTabWidget,
@@ -51,15 +61,14 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
-from .item_details_table import ItemDetailsTable
+from ..helpers import ItemEditorInfoDetails
 
-from .item_table import ItemTable
+from ..dmm_types import ItemInfo
+from ..ui.search_bar import SearchBar
 
-from .search_bar import SearchBar
+from ..ui.action_bar import ActionBar
 
-from .action_bar import ActionBar
-
-from .editor_controls import EditorControls
+from ..ui.editor_controls import EditorControls
 from gui.theme import COLORS, CATEGORY_COLORS
 from gui.iteminfo_index import IteminfoIndex
 
@@ -117,46 +126,9 @@ except Exception:
 log = logging.getLogger(__name__)
 
 
-class ItemEditorLayout(QVBoxLayout):
-    # s_config_save_requested = Signal()
-
-    def __init__(self, parent: QWidget):
+class DetailsTableProxy(QSortFilterProxyModel):
+    def __init__(self, parent, model):
         super().__init__(parent)
 
-        self._build_ui(parent)
-        
-
-        self.items_table.table.selectionModel().currentRowChanged.connect(
-            self._load_details
-        )
-
-        self.search_bar.s_search.connect(self.items_table.search)
-
-    def _build_ui(self, parent: QWidget):
-        self.setContentsMargins(0, 0, 0, 0)
-        self.setSpacing(0)
-
-        self.action_bar = ActionBar(parent)
-        self.search_bar = SearchBar(parent)
-        self.items_table = ItemTable(parent)
-        self.item_details_table = ItemDetailsTable(parent)
-        self.editor_controls = EditorControls(parent)
-
-        layout = QHBoxLayout()
-        layout.addWidget(self.items_table)
-        layout.addWidget(self.item_details_table)
-        layout.addWidget(self.editor_controls)
-
-        self.addWidget(self.action_bar)
-        self.addWidget(self.search_bar)
-        self.addLayout(layout, 1)
-
-    def _load_details(self, curr, _):
-        i_model = self.items_table.model
-        d_table = self.item_details_table
-
-        details = i_model.data(curr, Qt.ItemDataRole.UserRole)
-        d_table.load(details)
-    
-    def closeEvent(self, event):
-        self.editor_controls.closeEvent(event)
+        if model:
+            self.setSourceModel(model)

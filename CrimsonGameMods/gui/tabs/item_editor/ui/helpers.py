@@ -12,6 +12,8 @@ from PySide6.QtWidgets import (
 )
 from gui.theme import COLORS
 
+from gui.tabs.item_editor.helpers import CONFIG
+
 
 # def make_collapsible(
 #     label: str,
@@ -54,49 +56,7 @@ from gui.theme import COLORS
 #     vbox.addWidget(content)
 #     return wrapper
 
-class _Config():
-    _CONFIG_FILE = "editor_config.json"
 
-    def __init__(self):
-        self._config: dict = self.load()
-    
-    def path(self) -> str:
-        import sys
-        if getattr(sys, 'frozen', False):
-            return os.path.join(os.path.dirname(os.path.abspath(sys.executable)), self._CONFIG_FILE)
-        return os.path.join(os.path.dirname(os.path.abspath(__file__)), self._CONFIG_FILE)
-
-    def load(self) -> dict:
-        path = self.path()
-        if os.path.isfile(path):
-            try:
-                with open(path, "r") as f:
-                    return json.load(f)
-            except (json.JSONDecodeError, OSError):
-                pass
-        return {}
-
-    def save(self) -> None:
-        try:
-            with open(self.path(), "w") as f:
-                json.dump(self._config, f, indent=2)
-        except OSError:
-            pass
-
-    def __len__(self) -> int :
-        return len(self._config)
-
-    def __getitem__(self, key):
-        return self._config.get(key)
-
-    def __setitem__(self, key, value):
-        self._config[key] = value
-
-    def __contains__(self, key: str) -> bool:
-        return key in self._config
-    
-
-CONFIG = _Config()
 
 def make_collapsible(
     label: str,

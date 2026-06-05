@@ -115,7 +115,7 @@ def find_save_files() -> List[dict]:
 
 from gui.tabs.items import DatabaseBrowserTab
 from gui.tabs.buffs_v319 import ItemBuffsTab
-from gui.tabs.item_editor import ItemEditorTab
+from gui.tabs.item_editor.tab import ItemEditorTab
 from gui.tabs.stacker import StackerTab
 from gui.tabs.browser import GameBrowserTab
 try:
@@ -717,7 +717,7 @@ class MainWindow(QMainWindow):
 
         # self._save_config()
         self._item_editor_tab = ItemEditorTab()
-        self._item_editor_tab.s_status_message.connect(self._update_status)
+        self._item_editor_tab.SIGNALS.s_status_message.connect(self._update_status)
         # self._item_editor_tab.s_config_save_requested.connect(self._save_config)
 
         if self._config['item_editor']:
@@ -3052,7 +3052,19 @@ QCheckBox::indicator {{
         ))
         self._status.addPermanentWidget(discord_btn)
 
-    def _update_status(self, action: str = "") -> None:
+    def _update_status(self, action: str = "", idx: int = None) -> None:
+        if idx is not None:
+            match idx:
+                case 0:
+                    self._status_file_label.setText(action)
+                case 1:
+                    self._status_items_label.setText(action)
+                case 2:
+                    self._status_parc_label.setText(action)
+                case 3:
+                    self._status_action_label.setText(action)
+            return
+        
         if self._loaded_path:
             name = os.path.basename(self._loaded_path)
             dirty_mark = " *" if self._dirty else ""

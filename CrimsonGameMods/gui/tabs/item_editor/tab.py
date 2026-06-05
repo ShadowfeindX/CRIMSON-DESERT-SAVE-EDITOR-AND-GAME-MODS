@@ -52,7 +52,7 @@ from PySide6.QtWidgets import (
 
 from .ui.helpers import CONFIG
 
-from .models import ItemEditorInfo
+from .helpers import ItemEditorInfo
 
 from .dmm_types import ItemInfo
 from gui.theme import COLORS, CATEGORY_COLORS
@@ -86,28 +86,23 @@ except Exception:
         return btn
 
 
-log = logging.getLogger(__name__)
+from gui.tabs.item_editor.helpers import SIGNALS, find_game_path, log
 
-
-from gui.tabs.item_editor.ui import ItemEditorLayout
-from gui.tabs.item_editor.helpers import find_game_path
+from gui.tabs.item_editor.layout import ItemEditorLayout
 import dmm_parser as dmm
 
 
 class ItemEditorTab(QWidget):
-    s_status_message = Signal()
-    # s_config_save_requested = Signal()
-    s_iteminfo_extracted = Signal(ItemEditorInfo)
-
+    SIGNALS = SIGNALS
     def __init__(self, path="", parent=None):
         super().__init__(parent)
+        # _init_helpers()
 
         ui = ItemEditorLayout(self)
-        # ui.s_config_save_requested.connect(self.s_config_save_requested.emit)
 
         ui.action_bar.s_extract.connect(self._extract)
 
-        self.s_iteminfo_extracted.connect(ui.items_table.load)
+        SIGNALS.s_iteminfo_extracted.connect(ui.items_table.load)
 
         self._game_path = (
             path or CONFIG["game_install_path"] or find_game_path()
@@ -140,7 +135,7 @@ class ItemEditorTab(QWidget):
                                 # }
                             ]
                         )
-                        self.s_iteminfo_extracted.emit(data)
+                        SIGNALS.s_iteminfo_extracted.emit(data)
                 except BaseException as e:
                     print(e)
                     log.critical(
@@ -160,7 +155,7 @@ class ItemEditorTab(QWidget):
                 data = dmm.parse_table("iteminfo", pabgb)
 
                 iteminfo = ItemEditorInfo(data)
-                self.s_iteminfo_extracted.emit(iteminfo)
+                SIGNALS.s_iteminfo_extracted.emit(iteminfo)
 
                 with open("./data/sample.json", "w") as f:
                     json.dump(data[0], f)

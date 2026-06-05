@@ -61,7 +61,9 @@ from PySide6.QtWidgets import (
     QVBoxLayout,
     QWidget,
 )
-from ..models import ItemEditorInfo, ItemEditorInfoDetails
+
+from .view import ItemEditorTableView
+from ..helpers import ItemEditorInfo, ItemEditorInfoDetails
 from ..dmm_types import ItemInfo
 
 # from gui.theme import COLORS, CATEGORY_COLORS
@@ -103,7 +105,6 @@ except Exception:
 
 
 log = logging.getLogger(__name__)
-
 
 class ItemTableModel(QAbstractTableModel):
     ITEM_TIERS = ["-", "Common", "Uncommon", "Rare", "Epic", "Legendary"]
@@ -170,102 +171,3 @@ class ItemTableModel(QAbstractTableModel):
 
     def columnCount(self, index):
         return 3
-
-
-class ItemTableModelProxy(QSortFilterProxyModel):
-    def __init__(self, parent, model):
-        super().__init__(parent)
-
-        if model:
-            self.setSourceModel(model)
-
-    def lessThan(self, left_index: QModelIndex, right_index: QModelIndex):
-        left: ItemInfo = self.sourceModel().data(
-            left_index, Qt.ItemDataRole.UserRole
-        )
-        right: ItemInfo = self.sourceModel().data(
-            right_index, Qt.ItemDataRole.UserRole
-        )
-
-        match left_index.column():
-            case 0:
-                return left["key"] < right["key"]
-            case 1:
-                return left["string_key"] < right["string_key"]
-            case 2:
-                return left["item_tier"] < right["item_tier"]
-            case _:
-                log.warning(
-                    "Warning: Sorting unidentified column id: %s",
-                    left_index.column(),
-                )
-                return super().lessThan(left_index, right_index)
-
-    def sort(self, column, /, order=...):
-        return super().sort(column, order)
-
-
-class ItemTable(QFrame):
-    def __init__(self, parent):
-        super().__init__(parent)
-
-        self._build_ui(parent)
-
-    def _build_ui(self, parent):
-        layout = QVBoxLayout(self)
-        table = QTableView()
-        model = ItemTableModel(self)
-        proxy = ItemTableModelProxy(self, model)
-        proxy.setFilterKeyColumn(-1)
-        table.setModel(proxy)
-
-        table.setMinimumWidth(120)
-        table.setColumnWidth(1, 180)
-        table.verticalHeader().setVisible(False)
-        table.setSortingEnabled(True)
-        table.sortByColumn(0, Qt.SortOrder.AscendingOrder)
-        table.setSelectionBehavior(
-            QAbstractItemView.SelectionBehavior.SelectRows
-        )
-
-        table.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
-        table.customContextMenuRequested.connect(self._show_context_menu)
-
-        self.table = table
-        self.model = model
-        self.proxy = proxy
-
-        layout.addWidget(table)
-        self.refresh_view()
-
-    def _show_context_menu(self, pos):
-        index = self.table.indexAt(pos)
-        if index.isValid():
-            log.info("showing context menu for: %s", index.data())
-
-    def refresh_view(self):
-        self.table.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
-        self.table.horizontalHeader().setStretchLastSection(False)
-        self.table.horizontalHeader().setSectionResizeMode(
-            0, QHeaderView.ResizeMode.ResizeToContents
-        )
-        self.table.horizontalHeader().setSectionResizeMode(
-            1, QHeaderView.ResizeMode.Stretch
-        )
-        self.table.horizontalHeader().setSectionResizeMode(
-            2, QHeaderView.ResizeMode.ResizeToContents
-        )
-
-    @Slot(ItemEditorInfo)
-    def load(self, info: ItemEditorInfo):
-        self.model.load(info)
-        self.refresh_view()
-
-    @Slot(str)
-    def search(self, term: str):
-        self.proxy.setFilterRegularExpression(
-            QRegularExpression(
-                term, QRegularExpression.PatternOption.CaseInsensitiveOption
-            )
-        )
-        self.refresh_view()

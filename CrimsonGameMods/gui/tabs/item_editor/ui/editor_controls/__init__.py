@@ -52,10 +52,14 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
+from gui.tabs.item_editor.helpers import ItemEditorInfoDetails, SIGNALS, log
 
 
-from .presets import PresetsWindow
-from gui.tabs.item_editor.ui.helpers import center_window_in_parent, make_collapsible
+from .presets_window import PresetsWindow
+from gui.tabs.item_editor.ui.helpers import (
+    center_window_in_parent,
+    make_collapsible,
+)
 from gui.theme import COLORS, CATEGORY_COLORS
 from gui.iteminfo_index import IteminfoIndex
 
@@ -93,8 +97,6 @@ from gui.iteminfo_index import IteminfoIndex
 
 
 class EditorControls(QFrame):
-    s_config_save_requested = Signal()
-
     WINDOW_REGISTRY = {"preset": PresetsWindow}
 
     def __init__(self, parent: QWidget):
@@ -102,6 +104,14 @@ class EditorControls(QFrame):
 
         self._windows: dict[str, QWidget] = {}
         self._build_ui(parent)
+        self._current_item = None
+        SIGNALS.s_item_selected.connect(self._set_current_item)
+
+    def _set_current_item(self, item: ItemEditorInfoDetails):
+        self._current_item = item
+
+    def get_current_item(self) -> ItemEditorInfoDetails | None:
+        return self._current_item
 
     def _build_ui(self, parent: QWidget):
         layout = QVBoxLayout(self)
@@ -143,7 +153,7 @@ class EditorControls(QFrame):
         btns: dict[str, QPushButton] = {}
 
         btns["preset"] = QPushButton("Presets")
-        btns["preset"].clicked.connect(lambda: self._open_window('preset'))
+        btns["preset"].clicked.connect(lambda: self._open_window("preset"))
         btns["preview"] = QPushButton("Show Preview")
 
         btns["transmog"] = QPushButton("Transmog")
@@ -219,7 +229,6 @@ class EditorControls(QFrame):
             log.error(f"Error: '{id}' Window not found in registry.")
             return
 
-
         # Check if the window is already open and active
         if id in self._windows:
             center_window_in_parent(self._windows[id], self, True)
@@ -228,11 +237,10 @@ class EditorControls(QFrame):
             return
 
         # Instantiate the class dynamically
-        new_window = cls()
+        new_window = cls(self)
 
         def cleanup():
             self._windows.pop(id, None)
-
 
         # Hook into the close event to clean up memory when closed
         new_window.setAttribute(QtCore.Qt.WidgetAttribute.WA_DeleteOnClose)
