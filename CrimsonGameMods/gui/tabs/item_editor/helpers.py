@@ -1,42 +1,57 @@
 from __future__ import annotations
 
+import inspect
 import os
 import json
 import string
 import subprocess
 import logging
+import json
 
 from PySide6.QtCore import (
     QObject,
-    Signal,
-    Slot,
+    QPoint,
+    Qt,
 )
 
 from collections.abc import Sequence
+from typing import Any, Self
 
-from .dmm_types import ItemInfo
+from PySide6.QtWidgets import QPushButton, QVBoxLayout, QWidget
+
+from .signals import SIGNALS
+
+
+from .dmm_types import ItemInfo, PassiveSkillLevel
+from collections import UserDict, UserList
 from enum import StrEnum, auto
 from benedict import benedict
 
 from typing import TYPE_CHECKING
 
+from ...theme import COLORS
+
 
 if TYPE_CHECKING:
-    from .helpers import HistoryEntry, ItemEditorInfo, ItemEditorInfoDetails
+    from .helpers import HistoryEntry, ItemEditorInfoDetails
 
     "STUB"
 
 log = logging.getLogger(__name__)
 
+__all__ = [
+    "CONFIG",
+    "HistoryEntry",
+    "ItemEditorInfo",
+    "ItemEditorInfoDetails",
+    "copy",
+    "can_write_game_dir",
+    "is_game_running",
+    "find_game_path",
+    "safe_iv",
+]
 
-def copy(obj):
-    try:
-        return json.loads(json.dumps(obj))
-    except TypeError:
-        return None
 
-
-# type HistoryEntry = tuple[str, object, str]
 class HistoryEntry:
     class EntryType(StrEnum):
         PRESET = auto()
@@ -64,17 +79,31 @@ type HistoryRegistry = Sequence[HistoryEntry]
 
 
 class ItemEditorInfo:
+    ITEM_REGISTRY: dict[int, ItemEditorInfoDetails] = {}
+
     def __init__(self, data: list[ItemInfo] = []):
         self._data = data
 
     def __len__(self):
         return len(self._data)
 
-    def details(self, idx):
+    def details(self, idx) -> ItemEditorInfoDetails:
         if idx < 0 or idx > len(self._data):
             raise IndexError("Index not in range!")
 
-        return ItemEditorInfoDetails(self._data[idx])
+        details = self.ITEM_REGISTRY.get(idx, None)
+        if details is None:
+            details = self.ITEM_REGISTRY.setdefault(
+                idx, ItemEditorInfoDetails(self._data[idx])
+            )
+        # key: int = data.get("key", None)
+
+        # if key is None:
+        #     raise AttributeError("Key missing from Item Entry!")
+
+        # log.info(f"Getting details for {key}")
+
+        return details
 
 
 class ItemEditorInfoDetails:
@@ -95,12 +124,28 @@ class ItemEditorInfoDetails:
         "price_list",
     ]
 
-    REGISTRY = []
+    HISTORY_REGISTRY = []
 
     def __init__(self, data: ItemInfo = {}):
         # self._item_info = data
         self._data: ItemInfo = benedict(data)
         self._history = []
+        # key = self._data.get("key", None)
+        # if key:
+        #     ItemEditorInfoDetails.ITEM_REGISTRY[key] = self
+        # caller_frame = inspect.stack()[2]
+
+        # self.created_in_file = caller_frame.filename
+        # self.created_at_line = caller_frame.lineno
+        # self.created_by_func = caller_frame.function
+
+        # print(
+        #     f"Object created in '{self.created_in_file}' at line {self.created_at_line} inside '{self.created_by_func}'"
+        # )
+
+        # log.info(f"Creating details object #{ItemEditorInfoDetails._times_called}!")
+        # ItemEditorInfoDetails._times_called += 1
+        # ItemEditorInfoDetails._last_created_item = self
 
     def __getitem__(self, key):
         return self._data.get(key, None)
@@ -129,13 +174,13 @@ class ItemEditorInfoDetails:
         )
 
         self._history.append(entry)
-        self.REGISTRY.append(entry)
-        _SIGNALS_INSTANCE.s_history_entry_added.emit(entry)
+        self.HISTORY_REGISTRY.append(entry)
+        SIGNALS.s_history_entry_added.emit(entry)
 
     def add_history_entry(self, entry: HistoryEntry):
         self._history.append(entry)
-        self.REGISTRY.append(entry)
-        _SIGNALS_INSTANCE.s_history_entry_added.emit(entry)
+        self.HISTORY_REGISTRY.append(entry)
+        SIGNALS.s_history_entry_added.emit(entry)
 
     def editable(self):
         return (
@@ -148,33 +193,12 @@ class ItemEditorInfoDetails:
         return self._history
 
     def get_registry(self) -> HistoryRegistry:
-        return self.REGISTRY
+        return self.HISTORY_REGISTRY
 
-
-class _Slots(QObject):
-    @Slot(HistoryEntry)
-    def log_history(entry: HistoryEntry):
-        log.info(f"History entry added: ({entry.description})")
-
-
-_SLOTS_INSTANCE: _Slots = None
-
-
-class _Signals(QObject):
-    s_status_message = Signal(str, int | None)
-    s_iteminfo_extracted = Signal(ItemEditorInfo)
-    s_item_selected = Signal(ItemEditorInfoDetails)
-    s_history_entry_added = Signal(HistoryEntry)
-
-    def __init__(self):
-        super().__init__()
-
-        log.info("Signals Created!")
-
-        self.s_history_entry_added.connect(_SLOTS_INSTANCE.log_history)
-
-
-_SIGNALS_INSTANCE: _Signals = None
+    def passives(self, new_list: list[PassiveSkillLevel] = None) -> list[PassiveSkillLevel] | None:
+        if new_list is not None:
+            self._data |= {"equip_passive_skill_list": new_list}
+        return self._data.get("equip_passive_skill_list", None)
 
 
 class _Config:
@@ -225,7 +249,14 @@ class _Config:
         return key in self._config
 
 
-_CONFIG_INSTANCE: _Config = None
+CONFIG = _Config()
+
+
+def copy(obj):
+    try:
+        return json.loads(json.dumps(obj))
+    except TypeError:
+        return None
 
 
 def can_write_game_dir(game_path: str) -> bool:
@@ -307,32 +338,150 @@ def safe_iv(v, default=0):
         return default
 
 
-_initialized = False
+def make_collapsible(
+    label: str,
+    content: QWidget,
+    start_open: bool = True,
+    config_key: str = None,
+) -> QWidget:
+    accent = COLORS.get("accent", "#daa850")
+    # if config_key and self._config.get(config_key) is not None:
+    #     start_open = self._config[config_key]
+    wrapper = QWidget()
+    vbox = QVBoxLayout(wrapper)
+    vbox.setContentsMargins(0, 0, 0, 0)
+    vbox.setSpacing(0)
+
+    toggle = QPushButton(("▾ " if start_open else "▸ ") + label)
+    toggle.setStyleSheet(
+        f"QPushButton {{ text-align: left; font-weight: bold; font-size: 11px;"
+        f" padding: 3px 8px; background: transparent;"
+        f" color: {accent}; border: none; border-bottom: 1px solid {accent}; }}"
+        f"QPushButton:hover {{ background: rgba(218,168,80,0.10); }}"
+    )
+    toggle.setCursor(Qt.PointingHandCursor)
+    toggle.setFixedHeight(22)
+
+    content.setVisible(start_open)
+    cfg = CONFIG
+
+    def _on_toggle():
+        vis = not content.isVisible()
+        content.setVisible(vis)
+        toggle.setText(("▾ " if vis else "▸ ") + label)
+        if config_key:
+            cfg[config_key] = vis
+            CONFIG.save()
+
+    toggle.clicked.connect(_on_toggle)
+
+    vbox.addWidget(toggle)
+    vbox.addWidget(content)
+    return wrapper
 
 
-def _init_helpers():
-    global _SIGNALS_INSTANCE, _SLOTS_INSTANCE, _CONFIG_INSTANCE
-    _SIGNALS_INSTANCE, _SLOTS_INSTANCE, _CONFIG_INSTANCE = (
-        _Signals(),
-        _Slots(),
-        _Config(),
+def center_window_in_parent(window: QWidget, parent: QWidget, embedded=False):
+    # --- CENTERING LOGIC START ---
+    # Get dimensions of the main window
+    main_geo = parent.geometry()
+    # Get dimensions of the sub-window
+    sub_geo = window.geometry()
+    # Get absolute position of main window
+    abs_geo = parent.mapToGlobal(QPoint(0, 0))
+
+    (x, y) = (
+        (abs_geo.x(), abs_geo.y())
+        if embedded
+        else (main_geo.x(), main_geo.y())
     )
 
+    # Calculate the new X and Y coordinates to perfectly center it
+    new_x = x + (main_geo.width() - sub_geo.width()) // 2
+    new_y = y + (main_geo.height() - sub_geo.height()) // 2
 
-def __getattr__(name: str):
-    """Intercepts module attribute access."""
-    global _SIGNALS_INSTANCE, _SLOTS_INSTANCE, _CONFIG_INSTANCE
-    if _initialized is False:
-        _init_helpers()
+    # Move the window to the calculated position
+    window.move(new_x, new_y)
 
-    match name:
-        case "SIGNALS":
-            return _SIGNALS_INSTANCE
-        case "SLOTS":
-            return _SLOTS_INSTANCE
-        case "CONFIG":
-            return _CONFIG_INSTANCE
-    raise AttributeError(f"module '{__name__}' has no attribute '{name}'")
+
+# def make_collapsible(
+#     label: str,
+#     content: QWidget,
+#     start_open: bool = True,
+#     config_key: str = None,
+# ) -> QWidget:
+#     accent = COLORS.get("accent", "#daa850")
+#     if config_key and self._config.get(config_key) is not None:
+#         start_open = self._config[config_key]
+#     wrapper = QWidget()
+#     vbox = QVBoxLayout(wrapper)
+#     vbox.setContentsMargins(0, 0, 0, 0)
+#     vbox.setSpacing(0)
+
+#     toggle = QPushButton(("▾ " if start_open else "▸ ") + label)
+#     toggle.setStyleSheet(
+#         f"QPushButton {{ text-align: left; font-weight: bold; font-size: 11px;"
+#         f" padding: 3px 8px; background: transparent;"
+#         f" color: {accent}; border: none; border-bottom: 1px solid {accent}; }}"
+#         f"QPushButton:hover {{ background: rgba(218,168,80,0.10); }}"
+#     )
+#     toggle.setCursor(Qt.PointingHandCursor)
+#     toggle.setFixedHeight(22)
+
+#     content.setVisible(start_open)
+#     cfg = self._config
+
+#     def _on_toggle():
+#         vis = not content.isVisible()
+#         content.setVisible(vis)
+#         toggle.setText(("▾ " if vis else "▸ ") + label)
+#         if config_key:
+#             cfg[config_key] = vis
+#             self.config_save_requested.emit()
+
+#     toggle.clicked.connect(_on_toggle)
+
+#     vbox.addWidget(toggle)
+#     vbox.addWidget(content)
+#     return wrapper
+
+# class _Slots(QObject):
+#     def __init__(self):
+#         super().__init__()
+
+#     @Slot(HistoryEntry)
+#     def log_history(entry: HistoryEntry):
+#         log.info(f"History entry added: ({entry.description})")
+
+
+# _SLOTS_INSTANCE: _Slots = None
+
+
+# def _log_history(entry: HistoryEntry):
+#     log.info(f"History entry added: ({entry.description})")
+
+
+# def _init_helpers():
+#     global _SIGNALS_INSTANCE, _SLOTS_INSTANCE, _CONFIG_INSTANCE
+
+
+# def __getattr__(name: str):
+#     """Intercepts module attribute access."""
+#     global SIGNALS, _SLOTS_INSTANCE, CONFIG
+#     if _SLOTS_INSTANCE is None:
+#         log.info("Initializing Helper Objects")
+#         _SLOTS_INSTANCE = _Slots()
+#         # SIGNALS = _Signals()
+#         CONFIG = _Config()
+
+#     match name:
+#         # case "SIGNALS":
+#         #     return SIGNALS
+#         case "CONFIG":
+#             return CONFIG
+#         case "SLOTS":
+#             return _SLOTS_INSTANCE
+
+#     raise AttributeError(f"module '{__name__}' has no attribute '{name}'")
 
 
 # def __getattr__(name: str):
@@ -348,6 +497,29 @@ def __getattr__(name: str):
 #         return _CONFIG_INSTANCE
 #     raise AttributeError(f"module '{__name__}' has no attribute '{name}'")
 
+
+# def __getattr__(name: str):
+#     """Intercepts module attribute access."""
+#     global _SIGNALS_INSTANCE, _CONFIG_INSTANCE
+#     if name == "SIGNALS":
+#         if _SIGNALS_INSTANCE is None:
+#             _SIGNALS_INSTANCE = _Signals()
+#         return _SIGNALS_INSTANCE
+#     elif name == "CONFIG":
+#         if _CONFIG_INSTANCE is None:
+#             _CONFIG_INSTANCE = _Config()
+#         return _CONFIG_INSTANCE
+#     raise AttributeError(f"module '{__name__}' has no attribute '{name}'")
+
+
+# def _init_helpers():
+#     global SIGNALS
+#     if SIGNALS is None:
+#         SIGNALS = _Signals()
+
+#     global CONFIG
+#     if CONFIG is None:
+#         CONFIG = _Config()
 
 # # Wrap your dictionary
 # data = benedict({

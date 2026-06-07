@@ -13,7 +13,7 @@ import traceback
 import textwrap
 from typing import Callable, List, Optional, Tuple
 
-from PySide6.QtCore import Qt, QSize, QTimer, Signal, Slot
+from PySide6.QtCore import Qt, QSize, QTimer, Signal, SignalInstance, Slot
 from PySide6.QtGui import QAction, QBrush, QColor, QFont, QIcon
 from PySide6.QtWidgets import (
     QAbstractItemView,
@@ -50,9 +50,9 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
-from .ui.helpers import CONFIG
+from gui.tabs.item_editor.signals import SIGNALS
 
-from .helpers import ItemEditorInfo
+from .helpers import HistoryEntry, ItemEditorInfo, CONFIG
 
 from .dmm_types import ItemInfo
 from gui.theme import COLORS, CATEGORY_COLORS
@@ -86,7 +86,7 @@ except Exception:
         return btn
 
 
-from gui.tabs.item_editor.helpers import SIGNALS, find_game_path, log
+from gui.tabs.item_editor.helpers import find_game_path, log
 
 from gui.tabs.item_editor.layout import ItemEditorLayout
 import dmm_parser as dmm
@@ -94,25 +94,44 @@ import dmm_parser as dmm
 
 class ItemEditorTab(QWidget):
     SIGNALS = SIGNALS
+    s_status_message = Signal(str, int | None)
+    s_iteminfo_extracted = Signal(ItemEditorInfo)
+    s_history_entry_added = Signal(HistoryEntry)
+
     def __init__(self, path="", parent=None):
         super().__init__(parent)
-        # _init_helpers()
 
-        ui = ItemEditorLayout(self)
-
-        ui.action_bar.s_extract.connect(self._extract)
-
-        SIGNALS.s_iteminfo_extracted.connect(ui.items_table.load)
+        self._ready_signals()
+        self._build_ui()
+        self._connect_signals()
 
         self._game_path = (
             path or CONFIG["game_install_path"] or find_game_path()
         )
 
-        self._ui = ui
+    def _build_ui(self):
+        self._ui = ItemEditorLayout(self)
+
+    def _ready_signals(self):
+        SIGNALS.s_status_message = self.s_status_message
+        SIGNALS.s_iteminfo_extracted = self.s_iteminfo_extracted
+        SIGNALS.s_history_entry_added = self.s_history_entry_added
+
+    def _connect_signals(self):
+        SIGNALS.s_history_entry_added.connect(self.log_history)
+        SIGNALS.ActionBar.s_extract.connect(self._extract)
+
+    @Slot(HistoryEntry, bool)
+    def log_history(self, entry: HistoryEntry, is_remove: bool = False):
+        log.info(
+            f"History entry removed: ({entry.description})"
+            if is_remove
+            else f"History entry added: ({entry.description})"
+        )
 
     @Slot(str)
     def set_game_path(self, path: str):
-        self.game_path = path
+        self._game_path = path
 
     @Slot(str)
     def _extract(self, type: str = "overlay"):
@@ -155,13 +174,13 @@ class ItemEditorTab(QWidget):
                 data = dmm.parse_table("iteminfo", pabgb)
 
                 iteminfo = ItemEditorInfo(data)
-                SIGNALS.s_iteminfo_extracted.emit(iteminfo)
 
                 with open("./data/sample.json", "w") as f:
                     json.dump(data[0], f)
 
                 log.info(f"extracted {len(data)} items from vanilla pabgb...")
                 log.info("sample item data written to data/sample.json")
+                SIGNALS.s_iteminfo_extracted.emit(iteminfo)
             case _:
                 log.critical("Invalid extract type: %s", type)
 
