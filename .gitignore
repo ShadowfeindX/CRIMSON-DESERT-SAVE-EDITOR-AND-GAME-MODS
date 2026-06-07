@@ -8,5 +8,7 @@ CrimsonSaveEditor/build/
 CrimsonSaveEditor/dist/
 CrimsonSaveEditor/__pycache__/
 CrimsonGameMods/__pycache__/
+CrimsonGameMods/_dmm_parser/
+CrimsonGameMods/dmm_parser/
 .venv/
 .venv_linux/
