@@ -63,6 +63,8 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
+from ..signals import SIGNALS
+
 # from gui.theme import COLORS, CATEGORY_COLORS
 
 from .context_menu import ItemTableContextMenu
@@ -77,11 +79,19 @@ class ItemEditorTableView(QTableView):
         self.setMinimumWidth(120)
         self.setColumnWidth(1, 180)
         self.verticalHeader().setVisible(False)
+        # self.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Fixed)
+        self.verticalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Fixed)
+        self.verticalHeader().setDefaultSectionSize(24)
         # self.setSortingEnabled(True)
-        self.sortByColumn(0, Qt.SortOrder.AscendingOrder)
+        # self.sortByColumn(0, Qt.SortOrder.AscendingOrder)
         self.setSelectionBehavior(
             QAbstractItemView.SelectionBehavior.SelectRows
         )
+        # self.setWordWrap(False)
+        
+        
+        # SIGNALS
+        # self.selectionModel().currentRowChanged.connect(lambda: )
 
         # self.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
         # self.customContextMenuRequested.connect(self._show_context_menu)

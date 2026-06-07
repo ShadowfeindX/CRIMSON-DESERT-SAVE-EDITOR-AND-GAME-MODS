@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import datetime
+from functools import partial, partialmethod
 import json
 import logging
 import os
@@ -16,7 +17,7 @@ from typing import Callable, List, Optional, Tuple
 
 from PySide6 import QtCore
 from PySide6.QtCore import Qt, QSize, QTimer, Signal
-from PySide6.QtGui import QAction, QBrush, QColor, QFont, QIcon
+from PySide6.QtGui import QAction, QBrush, QCloseEvent, QColor, QFont, QIcon
 from PySide6.QtWidgets import (
     QAbstractItemView,
     QApplication,
@@ -52,11 +53,15 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
-from gui.tabs.item_editor.helpers import ItemEditorInfoDetails, SIGNALS, log
+from .json_window import JSONWindow
+
+from .passive_window import PassiveWindow
+from gui.tabs.item_editor.helpers import ItemEditorInfoDetails, log
+from gui.tabs.item_editor.signals import SIGNALS
 
 
 from .presets_window import PresetsWindow
-from gui.tabs.item_editor.ui.helpers import (
+from gui.tabs.item_editor.helpers import (
     center_window_in_parent,
     make_collapsible,
 )
@@ -97,7 +102,11 @@ from gui.iteminfo_index import IteminfoIndex
 
 
 class EditorControls(QFrame):
-    WINDOW_REGISTRY = {"preset": PresetsWindow}
+    WINDOW_REGISTRY = {
+        "preset": PresetsWindow,
+        "passive": PassiveWindow,
+        "json": JSONWindow,
+    }
 
     def __init__(self, parent: QWidget):
         super().__init__(parent)
@@ -107,11 +116,46 @@ class EditorControls(QFrame):
         self._current_item = None
         SIGNALS.s_item_selected.connect(self._set_current_item)
 
-    def _set_current_item(self, item: ItemEditorInfoDetails):
-        self._current_item = item
-
     def get_current_item(self) -> ItemEditorInfoDetails | None:
         return self._current_item
+
+    def open_window(self, id: str):
+        # Look up the class from the dictionary
+        cls = self.WINDOW_REGISTRY.get(id)
+
+        # Log error and return if class not found
+        if not cls:
+            log.error(f"Error: '{id}' Window not found in registry.")
+            return
+
+        # Check if the window is already open and active
+        if id in self._windows:
+            center_window_in_parent(self._windows[id], self, True)
+            self._windows[id].raise_()
+            self._windows[id].activateWindow()
+            return
+
+        # Instantiate the class dynamically
+        new_window = cls(self)
+
+        def cleanup():
+            self._windows.pop(id, None)
+
+        # Hook into the close event to clean up memory when closed
+        new_window.setAttribute(QtCore.Qt.WidgetAttribute.WA_DeleteOnClose)
+        new_window.destroyed.connect(cleanup)
+
+        # Store reference in the active dictionary using the ID as the key
+        self._windows[id] = new_window
+        new_window.show()
+        center_window_in_parent(self._windows[id], self, True)
+
+    def closeEvent(self, event: QCloseEvent):
+        active_instances = list(self._windows.values())
+        for sub_window in active_instances:
+            if sub_window.isVisible():
+                sub_window.close()
+        event.accept()
 
     def _build_ui(self, parent: QWidget):
         layout = QVBoxLayout(self)
@@ -153,7 +197,8 @@ class EditorControls(QFrame):
         btns: dict[str, QPushButton] = {}
 
         btns["preset"] = QPushButton("Presets")
-        btns["preset"].clicked.connect(lambda: self._open_window("preset"))
+        btns["preset"].clicked.connect(self._open_window("preset"))
+        # btns["preset"].clicked.connect(lambda: self._open_window("preset"))
         btns["preview"] = QPushButton("Show Preview")
 
         btns["transmog"] = QPushButton("Transmog")
@@ -182,11 +227,13 @@ class EditorControls(QFrame):
         btns = {}
 
         btns["passive"] = QPushButton("Edit Passives")
+        btns["passive"].clicked.connect(self._open_window("passive"))
+
         btns["buff"] = QPushButton("Edit Buffs")
         btns["stat"] = QPushButton("Edit Stats")
         btns["drop"] = QPushButton("Edit Drop Data")
-        btns["effect"] = QPushButton("Edit Effects")
-        btns["imbue"] = QPushButton("Edit Imbues")
+        btns["effect"] = QPushButton("Edit Gimmick")
+        btns["imbue"] = QPushButton("Edit VFX")
 
         self._advanced_controls = btns
 
@@ -206,6 +253,7 @@ class EditorControls(QFrame):
         btns = {}
 
         btns["json"] = QPushButton("Edit JSON")
+        btns["json"].clicked.connect(self._open_window("json"))
         btns["dump"] = QPushButton("Dump ITEMINFO")
         btns["diff"] = QPushButton("Show Item Diff")
         # btns["inspect"] = QPushButton("Inspect Item")
@@ -221,40 +269,7 @@ class EditorControls(QFrame):
         return grid
 
     def _open_window(self, id: str):
-        # Look up the class from the dictionary
-        cls = self.WINDOW_REGISTRY.get(id)
+        return partial(self.open_window, id)
 
-        # Log error and return if class not found
-        if not cls:
-            log.error(f"Error: '{id}' Window not found in registry.")
-            return
-
-        # Check if the window is already open and active
-        if id in self._windows:
-            center_window_in_parent(self._windows[id], self, True)
-            self._windows[id].raise_()
-            self._windows[id].activateWindow()
-            return
-
-        # Instantiate the class dynamically
-        new_window = cls(self)
-
-        def cleanup():
-            self._windows.pop(id, None)
-
-        # Hook into the close event to clean up memory when closed
-        new_window.setAttribute(QtCore.Qt.WidgetAttribute.WA_DeleteOnClose)
-        new_window.destroyed.connect(cleanup)
-
-        # Store reference in the active dictionary using the ID as the key
-        self._windows[id] = new_window
-        new_window.show()
-        center_window_in_parent(self._windows[id], self, True)
-
-    def closeEvent(self, event):
-        print("closing....")
-        active_instances = list(self._windows.values())
-        for sub_window in active_instances:
-            if sub_window.isVisible():
-                sub_window.close()
-        event.accept()
+    def _set_current_item(self, item: ItemEditorInfoDetails):
+        self._current_item = item

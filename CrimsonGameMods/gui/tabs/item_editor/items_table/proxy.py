@@ -16,6 +16,7 @@ from typing import Callable, List, Optional, Tuple
 
 from PySide6.QtCore import (
     QAbstractTableModel,
+    QRegularExpression,
     QSortFilterProxyModel,
     Qt,
     QSize,
@@ -61,16 +62,13 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
-from ..helpers import ItemEditorInfoDetails
+from .model import ItemTableModel
 
+from .view import ItemEditorTableView
+from ..helpers import ItemEditorInfo, ItemEditorInfoDetails
 from ..dmm_types import ItemInfo
-from ..ui.search_bar import SearchBar
 
-from ..ui.action_bar import ActionBar
-
-from ..ui.editor_controls import EditorControls
-from gui.theme import COLORS, CATEGORY_COLORS
-from gui.iteminfo_index import IteminfoIndex
+# from gui.theme import COLORS, CATEGORY_COLORS
 
 
 def _safe_iv(v, default=0):
@@ -96,21 +94,6 @@ def _safe_iv(v, default=0):
         return default
 
 
-from models import SaveItem, SaveData, UndoEntry
-from item_db import ItemNameDB
-from equipment_sets import SetManager, EquipmentSet, SetItem, StatOperation
-from paz_patcher import (
-    PazPatchManager,
-    PazPatch,
-    ItemBuffPatcher,
-    ItemRecord,
-    StatTriplet,
-    BUFF_HASHES,
-    BUFF_NAMES,
-    ItemEffectPatcher,
-)
-from icon_cache import IconCache, ICON_SIZE
-
 try:
     from gui.utils import make_help_btn
 except Exception:
@@ -126,9 +109,62 @@ except Exception:
 log = logging.getLogger(__name__)
 
 
-class DetailsTableProxy(QSortFilterProxyModel):
+class ItemTableModelProxy(QSortFilterProxyModel):
     def __init__(self, parent, model):
         super().__init__(parent)
 
+        self._search_term = ""
+
         if model:
             self.setSourceModel(model)
+
+    def lessThan(self, left_index: QModelIndex, right_index: QModelIndex):
+        left: ItemInfo = self.sourceModel().display(left_index)
+        right: ItemInfo = self.sourceModel().display(right_index)
+
+        match left_index.column():
+            case 0:
+                return left["key"] < right["key"]
+            case 1:
+                return left["string_key"] < right["string_key"]
+            case 2:
+                return left["item_tier"] < right["item_tier"]
+            case _:
+                log.warning(
+                    "Warning: Sorting unidentified column id: %s",
+                    left_index.column(),
+                )
+                return super().lessThan(left_index, right_index)
+
+    def sort(self, column, order=Qt.SortOrder.AscendingOrder):
+        return super().sort(column, order)
+
+    def apply_filter_text(self, text: str):
+        self._search_term = text.strip().lower()
+        self.invalidateFilter()
+
+    def filterAcceptsRow(self, source_row, source_parent):
+        if not self._search_term:
+            return True
+
+        model: ItemTableModel = self.sourceModel()
+
+        if self._search_term.isdigit():
+            idx0 = model.index(source_row, 0, source_parent)
+            val0 = model.display(idx0, "key")
+            if val0 is not None and self._search_term in str(val0):
+                return True
+
+        idx1 = model.index(source_row, 1, source_parent)
+        val1 = model.display(idx1, "string_key")
+        if val1 is not None and self._search_term in str(val1).lower():
+            return True
+
+        idx2 = model.index(source_row, 2, source_parent)
+        val2 = model.display(idx2, "item_tier")
+        tier = model.ITEM_TIERS_INDEX.get(self._search_term.capitalize(), None)
+        if tier is not None and val2 == tier:
+            return True
+
+        # No match found across any of the 3 columns
+        return False

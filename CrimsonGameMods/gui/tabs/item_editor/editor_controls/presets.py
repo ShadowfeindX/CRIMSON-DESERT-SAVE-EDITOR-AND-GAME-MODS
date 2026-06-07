@@ -1,17 +1,15 @@
 from __future__ import annotations
 
-
 import json
 from pathlib import Path
-from typing import Any
 
 from gui.tabs.item_editor.helpers import (
-    SIGNALS,
     HistoryEntry,
     ItemEditorInfoDetails,
-    log,
     copy,
+    log,
 )
+from gui.tabs.item_editor.signals import SIGNALS
 
 
 class Presets:
@@ -379,6 +377,7 @@ class Presets:
     _current_item: ItemEditorInfoDetails = None
 
     def __init__(self):
+        self._set_current_item(ItemEditorInfoDetails._last_created_item)
         SIGNALS.s_item_selected.connect(self._set_current_item)
 
         custom_path = Path("custom_presets.json")
@@ -392,7 +391,7 @@ class Presets:
             log.error(f"Error loading Custom Presets: {e}")
         else:
             self.Custom = {}
-    
+
     def _set_current_item(self, item):
         self._current_item = item
         if item:
@@ -404,18 +403,10 @@ class Presets:
         log.info("Applying Preset: %s", preset)
 
         preset_data: dict = copy(self.Standard[preset])
-        log.info(f"Testing Data Dump: {preset_data}")
+        # log.info(f"Testing Data Dump: {preset_data}")
         preset_data.pop("name", "")
         preset_data.pop("description", "")
         preset_data.pop("warning", "")
-
-        # for key in ["key"]:
-        #     log.info(key)
-        #     log.info(preset_data[key])
-        #     log.info(self._current_item)
-        #     log.info(self._current_item[key])
-        #     log.info(copy(self._current_item[key]))
-        #     log.info({key: copy(self._current_item[key])})
 
         original_values = {
             key: copy(self._current_item[key]) for key in preset_data.keys()

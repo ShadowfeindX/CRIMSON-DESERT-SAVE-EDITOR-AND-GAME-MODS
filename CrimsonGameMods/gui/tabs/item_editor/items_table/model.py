@@ -106,34 +106,79 @@ except Exception:
 
 log = logging.getLogger(__name__)
 
-class ItemTableModelProxy(QSortFilterProxyModel):
-    def __init__(self, parent, model):
+
+class ItemTableModel(QAbstractTableModel):
+    ITEM_TIERS = ["-", "Common", "Uncommon", "Rare", "Epic", "Legendary"]
+    ITEM_TIERS_INDEX = {
+        "-": 0,
+        "Common": 1,
+        "Uncommon": 2,
+        "Rare": 3,
+        "Epic": 4,
+        "Legendary": 5,
+    }
+
+    def __init__(self, parent, info: ItemEditorInfo = ItemEditorInfo()):
         super().__init__(parent)
 
-        if model:
-            self.setSourceModel(model)
+        self.load(info)
 
-    def lessThan(self, left_index: QModelIndex, right_index: QModelIndex):
-        left: ItemInfo = self.sourceModel().data(
-            left_index, Qt.ItemDataRole.UserRole
-        )
-        right: ItemInfo = self.sourceModel().data(
-            right_index, Qt.ItemDataRole.UserRole
-        )
+    def load(self, info: ItemEditorInfo):
+        self.beginResetModel()
 
-        match left_index.column():
-            case 0:
-                return left["key"] < right["key"]
-            case 1:
-                return left["string_key"] < right["string_key"]
-            case 2:
-                return left["item_tier"] < right["item_tier"]
-            case _:
-                log.warning(
-                    "Warning: Sorting unidentified column id: %s",
-                    left_index.column(),
-                )
-                return super().lessThan(left_index, right_index)
+        self._items = info
 
-    def sort(self, column, /, order=...):
-        return super().sort(column, order)
+        self.endResetModel()
+
+    def details(self, index: QModelIndex, key=None):
+        if not index.isValid():
+            return None
+
+        data = self._items.details(index.row())
+        return data[key] if key else data
+
+    def display(self, index: QModelIndex, key=None):
+        if not index.isValid():
+            return None
+
+        data = self._items._data[index.row()]
+        return data[key] if key else data
+
+    def data(self, index: QModelIndex, role):
+        if not index.isValid():
+            return None
+
+        if role == Qt.ItemDataRole.UserRole:
+            return self.details(index)
+
+        match role:
+            case Qt.ItemDataRole.DisplayRole:
+                match index.column():
+                    case 0:
+                        return self.details(index, "key")
+                    case 1:
+                        return self.details(index, "string_key")
+                    case 2:
+                        return self.ITEM_TIERS[
+                            self.details(index, "item_tier")
+                        ]
+                    case _:
+                        return self.details(index, "item_name")
+
+    def headerData(self, idx, orientation, role):
+        if role == Qt.ItemDataRole.DisplayRole:
+            match idx:
+                case 0:
+                    return "Key"
+                case 1:
+                    return "Name"
+                case 2:
+                    return "Tier"
+                case _:
+                    return None
+
+    def rowCount(self, index):
+        return len(self._items)
+
+    def columnCount(self, index):
+        return 3
