@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from PySide6.QtCore import (
+    QItemSelection,
     QModelIndex,
     QRegularExpression,
     Qt,
@@ -38,19 +39,26 @@ class ItemTable(QFrame):
 
     def _connect_signals(self):
         SIGNALS.s_iteminfo_extracted.connect(self.load)
-        self.table.selectionModel().currentRowChanged.connect(
+        self.table.selectionModel().selectionChanged.connect(
             self._selection_changed
         )
         "STUB"
 
-    @Slot(QModelIndex, QModelIndex)
-    def _selection_changed(self, current: QModelIndex, previous: QModelIndex):
-        print("Selectiong changed...")
-        # details = self.model.details()
-        # print((details["key"], details["string_key"]))
-        SIGNALS.s_item_selected.emit(
-            self.model.details(self.proxy.mapToSource(current))
-        )
+    @Slot(QItemSelection, QItemSelection)
+    def _selection_changed(
+        self, selected: QItemSelection, deselected: QItemSelection
+    ):
+        print("Selection changed...")
+
+        if not selected.isEmpty():
+            SIGNALS.s_item_selected.emit(
+                self.model.details(
+                    self.proxy.mapToSource(selected.indexes()[0])
+                )
+            )
+        else:
+            SIGNALS.s_item_selected.emit(None)
+
         SIGNALS.s_items_selected.emit(
             [
                 self.model.details(self.proxy.mapToSource(index))

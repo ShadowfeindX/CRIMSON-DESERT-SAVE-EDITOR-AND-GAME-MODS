@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import datetime
 from functools import partial, partialmethod
+import gc
 import json
 import logging
 import os
@@ -136,13 +137,15 @@ class EditorControls(QFrame):
             return
 
         # Instantiate the class dynamically
-        new_window = cls(self)
+        new_window: QWidget = cls(self)
 
         def cleanup():
             self._windows.pop(id, None)
+            gc.collect()
+
 
         # Hook into the close event to clean up memory when closed
-        new_window.setAttribute(QtCore.Qt.WidgetAttribute.WA_DeleteOnClose)
+        new_window.setAttribute(QtCore.Qt.WidgetAttribute.WA_DeleteOnClose, True)
         new_window.destroyed.connect(cleanup)
 
         # Store reference in the active dictionary using the ID as the key

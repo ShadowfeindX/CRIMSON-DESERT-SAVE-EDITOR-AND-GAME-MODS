@@ -15,7 +15,7 @@ from PySide6.QtCore import (
 )
 
 from collections.abc import Sequence
-from typing import Any, Self
+from typing import Any, Self, TypedDict
 
 from PySide6.QtWidgets import QPushButton, QVBoxLayout, QWidget
 
@@ -33,7 +33,7 @@ from ...theme import COLORS
 
 
 if TYPE_CHECKING:
-    from .helpers import HistoryEntry, ItemEditorInfoDetails
+    #     from .helpers import HistoryEntry, ItemEditorInfoDetails
 
     "STUB"
 
@@ -41,6 +41,8 @@ log = logging.getLogger(__name__)
 
 __all__ = [
     "CONFIG",
+    "COLORS",
+    "STATE",
     "HistoryEntry",
     "ItemEditorInfo",
     "ItemEditorInfoDetails",
@@ -49,7 +51,15 @@ __all__ = [
     "is_game_running",
     "find_game_path",
     "safe_iv",
+    "log",
 ]
+
+
+class _State(TypedDict):
+    "stub"
+
+
+STATE: _State = benedict(keyattr_dynamic=True)
 
 
 class HistoryEntry:
@@ -195,7 +205,9 @@ class ItemEditorInfoDetails:
     def get_registry(self) -> HistoryRegistry:
         return self.HISTORY_REGISTRY
 
-    def passives(self, new_list: list[PassiveSkillLevel] = None) -> list[PassiveSkillLevel] | None:
+    def passives(
+        self, new_list: list[PassiveSkillLevel] = None
+    ) -> list[PassiveSkillLevel] | None:
         if new_list is not None:
             self._data |= {"equip_passive_skill_list": new_list}
         return self._data.get("equip_passive_skill_list", None)
@@ -344,9 +356,11 @@ def make_collapsible(
     start_open: bool = True,
     config_key: str = None,
 ) -> QWidget:
+    cfg = CONFIG
     accent = COLORS.get("accent", "#daa850")
-    # if config_key and self._config.get(config_key) is not None:
-    #     start_open = self._config[config_key]
+
+    if config_key and cfg[config_key] is not None:
+        start_open = cfg[config_key]
     wrapper = QWidget()
     vbox = QVBoxLayout(wrapper)
     vbox.setContentsMargins(0, 0, 0, 0)
@@ -363,7 +377,6 @@ def make_collapsible(
     toggle.setFixedHeight(22)
 
     content.setVisible(start_open)
-    cfg = CONFIG
 
     def _on_toggle():
         vis = not content.isVisible()

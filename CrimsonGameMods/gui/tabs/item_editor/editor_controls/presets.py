@@ -377,7 +377,7 @@ class Presets:
     _current_item: ItemEditorInfoDetails = None
 
     def __init__(self):
-        self._set_current_item(ItemEditorInfoDetails._last_created_item)
+        # self._set_current_item(ItemEditorInfoDetails._last_created_item)
         SIGNALS.s_item_selected.connect(self._set_current_item)
 
         custom_path = Path("custom_presets.json")

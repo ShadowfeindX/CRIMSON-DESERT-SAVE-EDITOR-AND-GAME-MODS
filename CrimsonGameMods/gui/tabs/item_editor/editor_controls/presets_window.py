@@ -26,7 +26,7 @@ class PresetsWindow(QWidget):
         self.setWindowTitle("Presets")
 
         self.Presets = Presets.get_presets()
-        # self.Presets._set_current_item(parent.get_current_item())
+        self.Presets._set_current_item(parent.get_current_item())
 
         self._config = {}
 
@@ -683,6 +683,10 @@ class PresetsWindow(QWidget):
     def apply_std_preset(
         self, preset_key: str, skip: bool = False, warn: str = ""
     ):
+        if self.Presets._current_item is None:
+            self._warn("Please select an item first!")
+            return
+
         if skip:
             self.Presets.apply_std_preset(preset_key, skip=skip, warn=warn)
             return
@@ -756,3 +760,6 @@ class PresetsWindow(QWidget):
         self, preset: str, skip: bool = False, warn: str = ""
     ):
         log.info("Applying Custom Preset: %s", preset)
+
+    def _warn(self, warning):
+        QMessageBox.warning(self, "Warning!", warning)

@@ -98,14 +98,15 @@ class ItemEditorTableView(QTableView):
 
     def refresh_view(self: QTableView) -> None:
         self.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
-        self.horizontalHeader().setStretchLastSection(False)
-        self.horizontalHeader().setSectionResizeMode(
+        header = self.horizontalHeader()
+        header.setStretchLastSection(False)
+        header.setSectionResizeMode(
             0, QHeaderView.ResizeMode.ResizeToContents
         )
-        self.horizontalHeader().setSectionResizeMode(
+        header.setSectionResizeMode(
             1, QHeaderView.ResizeMode.Stretch
         )
-        self.horizontalHeader().setSectionResizeMode(
+        header.setSectionResizeMode(
             2, QHeaderView.ResizeMode.ResizeToContents
         )
     
