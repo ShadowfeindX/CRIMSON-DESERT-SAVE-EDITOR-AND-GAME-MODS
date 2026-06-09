@@ -738,8 +738,8 @@ class MainWindow(QMainWindow):
         #         pass
         # self._mods_tabs.addTab(self._field_edit_tab_obj, tr("FieldEdit"))
 
-        # self._iteminfo_cache = ItemInfoCache()
-        # self._iteminfo_cache.set_game_path(self._config.get("game_install_path", ""))
+        self._iteminfo_cache = ItemInfoCache()
+        self._iteminfo_cache.set_game_path(self._config.get("game_install_path", ""))
 
         # self._buffs_tab = ItemBuffsTab(
         #     name_db=self._name_db,

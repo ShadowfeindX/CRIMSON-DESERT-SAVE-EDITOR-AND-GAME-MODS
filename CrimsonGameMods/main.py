@@ -1,3 +1,17 @@
+#!/bin/sh
+''':'
+# This section is executed by sh/bash, but treated as a string by Python.
+# It checks for python3 first, then falls back to python.
+if command -v python3 >/dev/null 2>&1; then
+  exec python3 "$0" "$@"
+elif command -v python >/dev/null 2>&1; then
+  exec python "$0" "$@"
+else
+  echo "Error: Python interpreter not found." >&2
+  exit 1
+fi
+'''
+
 import sys
 import os
 

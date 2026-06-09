@@ -144,14 +144,6 @@ class ItemEditorTab(QWidget):
                         data = ItemEditorInfo(
                             [
                                 json.load(f)
-                                # {
-                                #     "item_name": "Test Item",
-                                #     "string_key": "test_item",
-                                #     "cooltime": {"a": 1, "b": 1, "c": 1},
-                                #     "gimmick_info": 0,
-                                #     "item_tier": 1,
-                                #     "key": 100,
-                                # }
                             ]
                         )
                         SIGNALS.s_iteminfo_extracted.emit(data)
@@ -165,22 +157,44 @@ class ItemEditorTab(QWidget):
             case "vanilla":
                 log.info("extracting vanilla...")
 
-                pabgb = dmm.extract_file(
-                    game_dir=self._game_path,
-                    group_name="0008",
-                    dir_path="gamedata/binary__/client/bin",
-                    file_name="iteminfo.pabgb",
-                )
-                data = dmm.parse_table("iteminfo", pabgb)
+                if not self._game_path or not os.path.isdir(self._game_path):
+                    log.critical(
+                        "Error: Game path is not set or invalid!\n"
+                        "Please set the game install path in settings."
+                    )
+                    return
 
-                iteminfo = ItemEditorInfo(data)
+                pamt_path = os.path.join(self._game_path, "0008", "0.pamt")
+                if not os.path.isfile(pamt_path):
+                    log.critical(
+                        f"Error: Required game file not found:\n{pamt_path}\n"
+                        "Make sure the game is installed and the path is correct."
+                    )
+                    return
 
-                with open("./data/sample.json", "w") as f:
-                    json.dump(data[0], f)
+                try:
+                    pabgb = dmm.extract_file(
+                        game_dir=self._game_path,
+                        group_name="0008",
+                        dir_path="gamedata/binary__/client/bin",
+                        file_name="iteminfo.pabgb",
+                    )
+                    data = dmm.parse_table("iteminfo", pabgb)
 
-                log.info(f"extracted {len(data)} items from vanilla pabgb...")
-                log.info("sample item data written to data/sample.json")
-                SIGNALS.s_iteminfo_extracted.emit(iteminfo)
+                    iteminfo = ItemEditorInfo(data)
+
+                    with open("./data/sample.json", "w") as f:
+                        json.dump(data[0], f)
+
+                    log.info(f"extracted {len(data)} items from vanilla pabgb...")
+                    log.info("sample item data written to data/sample.json")
+                    SIGNALS.s_iteminfo_extracted.emit(iteminfo)
+                except BaseException as e:
+                    print(e)
+                    log.critical(
+                        "Error: Failed to extract vanilla item data!\n"
+                        f"{e}"
+                    )
             case _:
                 log.critical("Invalid extract type: %s", type)
 
