@@ -82,41 +82,18 @@ class HistoryEntry:
             case self.EntryType.PRESET:
                 "stub"
 
-    # def data() ->
-
 
 type HistoryRegistry = Sequence[HistoryEntry]
 
 
 class ItemEditorInfo:
-    ITEM_REGISTRY: dict[int, ItemEditorInfoDetails] = {}
+    """Central data store for all items with cached proxy creation.
 
-    def __init__(self, data: list[ItemInfo] = []):
-        self._data = data
+    Stores raw item data and history. Creates lightweight proxy objects
+    (ItemEditorInfoDetails) on-demand and caches them to prevent duplicate
+    object creation.
+    """
 
-    def __len__(self):
-        return len(self._data)
-
-    def details(self, idx) -> ItemEditorInfoDetails:
-        if idx < 0 or idx > len(self._data):
-            raise IndexError("Index not in range!")
-
-        details = self.ITEM_REGISTRY.get(idx, None)
-        if details is None:
-            details = self.ITEM_REGISTRY.setdefault(
-                idx, ItemEditorInfoDetails(self._data[idx])
-            )
-        # key: int = data.get("key", None)
-
-        # if key is None:
-        #     raise AttributeError("Key missing from Item Entry!")
-
-        # log.info(f"Getting details for {key}")
-
-        return details
-
-
-class ItemEditorInfoDetails:
     EDITABLE_ENTRIES = [
         "cooltime",
         "docking_child_data",
@@ -134,28 +111,109 @@ class ItemEditorInfoDetails:
         "price_list",
     ]
 
+    # Global history across all items
     HISTORY_REGISTRY = []
 
-    def __init__(self, data: ItemInfo = {}):
-        # self._item_info = data
-        self._data: ItemInfo = benedict(data)
-        self._history = []
-        # key = self._data.get("key", None)
-        # if key:
-        #     ItemEditorInfoDetails.ITEM_REGISTRY[key] = self
-        # caller_frame = inspect.stack()[2]
+    def __init__(self, data: list[ItemInfo] = None):
+        self._data: list[ItemInfo] = data if data is not None else []
+        # Per-item history: { item_key: [HistoryEntry, ...] }
+        self._history: dict[int, list[HistoryEntry]] = {}
+        # Cache of proxy objects: { index: ItemEditorInfoDetails }
+        self._proxies: dict[int, ItemEditorInfoDetails] = {}
 
-        # self.created_in_file = caller_frame.filename
-        # self.created_at_line = caller_frame.lineno
-        # self.created_by_func = caller_frame.function
+    def __len__(self):
+        return len(self._data)
 
-        # print(
-        #     f"Object created in '{self.created_in_file}' at line {self.created_at_line} inside '{self.created_by_func}'"
-        # )
+    def get_item(self, idx: int) -> ItemInfo:
+        """Get raw item dict by index (no object creation)."""
+        if idx < 0 or idx >= len(self._data):
+            raise IndexError("Index not in range!")
+        return self._data[idx]
 
-        # log.info(f"Creating details object #{ItemEditorInfoDetails._times_called}!")
-        # ItemEditorInfoDetails._times_called += 1
-        # ItemEditorInfoDetails._last_created_item = self
+    def get_item_key(self, item: ItemInfo) -> int:
+        """Get the unique key for an item."""
+        return item.get("key", -1)
+
+    def get_history(self, item_key: int) -> list[HistoryEntry]:
+        """Get history for a specific item key."""
+        if item_key not in self._history:
+            self._history[item_key] = []
+        return self._history[item_key]
+
+    def add_history_entry(self, item_key: int, entry: HistoryEntry):
+        """Add a history entry for a specific item key."""
+        if item_key not in self._history:
+            self._history[item_key] = []
+        self._history[item_key].append(entry)
+        self.HISTORY_REGISTRY.append(entry)
+        SIGNALS.s_history_entry_added.emit(entry)
+
+    def update_item(self, item: ItemInfo, key: str, new_value):
+        """Update an item field."""
+        if key not in self.EDITABLE_ENTRIES:
+            raise KeyError("This data is not editable!")
+        item[key] = new_value
+
+    def update_item_with_history(self, item: ItemInfo, key: str, new_value, desc=None):
+        """Update an item field and record history."""
+        if key not in self.EDITABLE_ENTRIES:
+            raise KeyError("This data is not editable!")
+
+        old_value = copy(item.get(key))
+        self.update_item(item, key, new_value)
+
+        if desc is None:
+            desc = f"Value of {key} changed: {old_value} -> {new_value}"
+
+        entry = HistoryEntry(
+            HistoryEntry.EntryType.EDIT, (key, old_value), desc
+        )
+
+        item_key = self.get_item_key(item)
+        self.add_history_entry(item_key, entry)
+
+    def get_editable_fields(self, item: ItemInfo) -> list[tuple[str, Any]]:
+        """Get list of editable field names and their current values."""
+        return [(key, item.get(key, None)) for key in self.EDITABLE_ENTRIES] if item else []
+
+    def get_passives(self, item: ItemInfo, new_list: list[PassiveSkillLevel] = None) -> list[PassiveSkillLevel] | None:
+        """Get or set passive skills for an item."""
+        if new_list is not None:
+            item["equip_passive_skill_list"] = new_list
+        return item.get("equip_passive_skill_list", None)
+
+    def details(self, idx: int) -> ItemEditorInfoDetails:
+        """Get or create a cached proxy for the item at the given index.
+        
+        Proxies are cached, so requesting the same index multiple times
+        returns the same proxy object (no duplicate creation).
+        """
+        if idx < 0 or idx >= len(self._data):
+            raise IndexError("Index not in range!")
+        
+        if idx not in self._proxies:
+            self._proxies[idx] = ItemEditorInfoDetails(self, idx)
+        return self._proxies[idx]
+
+
+class ItemEditorInfoDetails:
+    """Lightweight proxy for a single item's data.
+
+    Holds only (parent_ref, index, item_key) - 3 attributes.
+    Delegates all operations to the parent ItemEditorInfo store.
+    Multiple proxies can exist simultaneously, each pointing to a different item.
+    Proxies are cached by ItemEditorInfo to prevent duplicate creation.
+    """
+
+    def __init__(self, parent: ItemEditorInfo, idx: int):
+        self._parent = parent
+        self._idx = idx
+        self._item_key = parent.get_item_key(parent.get_item(idx))
+
+    @property
+    def _data(self) -> ItemInfo:
+        """Get the underlying item data from parent (no copy, just reference)."""
+        return self._parent.get_item(self._idx)
 
     def __getitem__(self, key):
         return self._data.get(key, None)
@@ -164,13 +222,12 @@ class ItemEditorInfoDetails:
         return self._data.items()
 
     def update(self, key, new_value):
-        if key not in self.EDITABLE_ENTRIES:
+        if key not in self._parent.EDITABLE_ENTRIES:
             raise KeyError("This data is not editable!")
-
         self._data[key] = new_value
 
     def update_with_history(self, key, new_value, desc=None):
-        if key not in self.EDITABLE_ENTRIES:
+        if key not in self._parent.EDITABLE_ENTRIES:
             raise KeyError("This data is not editable!")
 
         old_value = copy(self._data.get(key))
@@ -183,33 +240,30 @@ class ItemEditorInfoDetails:
             HistoryEntry.EntryType.EDIT, (key, old_value), desc
         )
 
-        self._history.append(entry)
-        self.HISTORY_REGISTRY.append(entry)
-        SIGNALS.s_history_entry_added.emit(entry)
+        self._parent.add_history_entry(self._item_key, entry)
 
     def add_history_entry(self, entry: HistoryEntry):
-        self._history.append(entry)
-        self.HISTORY_REGISTRY.append(entry)
-        SIGNALS.s_history_entry_added.emit(entry)
+        self._parent.add_history_entry(self._item_key, entry)
 
     def editable(self):
+        data = self._data
         return (
-            [(key, self._data.get(key, None)) for key in self.EDITABLE_ENTRIES]
-            if self._data
+            [(key, data.get(key, None)) for key in self._parent.EDITABLE_ENTRIES]
+            if data
             else []
         )
 
     def get_history(self) -> HistoryRegistry:
-        return self._history
+        return self._parent.get_history(self._item_key)
 
     def get_registry(self) -> HistoryRegistry:
-        return self.HISTORY_REGISTRY
+        return self._parent.HISTORY_REGISTRY
 
     def passives(
         self, new_list: list[PassiveSkillLevel] = None
     ) -> list[PassiveSkillLevel] | None:
         if new_list is not None:
-            self._data |= {"equip_passive_skill_list": new_list}
+            self._data["equip_passive_skill_list"] = new_list
         return self._data.get("equip_passive_skill_list", None)
 
 
@@ -414,306 +468,3 @@ def center_window_in_parent(window: QWidget, parent: QWidget, embedded=False):
 
     # Move the window to the calculated position
     window.move(new_x, new_y)
-
-
-# def make_collapsible(
-#     label: str,
-#     content: QWidget,
-#     start_open: bool = True,
-#     config_key: str = None,
-# ) -> QWidget:
-#     accent = COLORS.get("accent", "#daa850")
-#     if config_key and self._config.get(config_key) is not None:
-#         start_open = self._config[config_key]
-#     wrapper = QWidget()
-#     vbox = QVBoxLayout(wrapper)
-#     vbox.setContentsMargins(0, 0, 0, 0)
-#     vbox.setSpacing(0)
-
-#     toggle = QPushButton(("▾ " if start_open else "▸ ") + label)
-#     toggle.setStyleSheet(
-#         f"QPushButton {{ text-align: left; font-weight: bold; font-size: 11px;"
-#         f" padding: 3px 8px; background: transparent;"
-#         f" color: {accent}; border: none; border-bottom: 1px solid {accent}; }}"
-#         f"QPushButton:hover {{ background: rgba(218,168,80,0.10); }}"
-#     )
-#     toggle.setCursor(Qt.PointingHandCursor)
-#     toggle.setFixedHeight(22)
-
-#     content.setVisible(start_open)
-#     cfg = self._config
-
-#     def _on_toggle():
-#         vis = not content.isVisible()
-#         content.setVisible(vis)
-#         toggle.setText(("▾ " if vis else "▸ ") + label)
-#         if config_key:
-#             cfg[config_key] = vis
-#             self.config_save_requested.emit()
-
-#     toggle.clicked.connect(_on_toggle)
-
-#     vbox.addWidget(toggle)
-#     vbox.addWidget(content)
-#     return wrapper
-
-# class _Slots(QObject):
-#     def __init__(self):
-#         super().__init__()
-
-#     @Slot(HistoryEntry)
-#     def log_history(entry: HistoryEntry):
-#         log.info(f"History entry added: ({entry.description})")
-
-
-# _SLOTS_INSTANCE: _Slots = None
-
-
-# def _log_history(entry: HistoryEntry):
-#     log.info(f"History entry added: ({entry.description})")
-
-
-# def _init_helpers():
-#     global _SIGNALS_INSTANCE, _SLOTS_INSTANCE, _CONFIG_INSTANCE
-
-
-# def __getattr__(name: str):
-#     """Intercepts module attribute access."""
-#     global SIGNALS, _SLOTS_INSTANCE, CONFIG
-#     if _SLOTS_INSTANCE is None:
-#         log.info("Initializing Helper Objects")
-#         _SLOTS_INSTANCE = _Slots()
-#         # SIGNALS = _Signals()
-#         CONFIG = _Config()
-
-#     match name:
-#         # case "SIGNALS":
-#         #     return SIGNALS
-#         case "CONFIG":
-#             return CONFIG
-#         case "SLOTS":
-#             return _SLOTS_INSTANCE
-
-#     raise AttributeError(f"module '{__name__}' has no attribute '{name}'")
-
-
-# def __getattr__(name: str):
-#     """Intercepts module attribute access."""
-#     global _SIGNALS_INSTANCE, _CONFIG_INSTANCE
-#     if name == "SIGNALS":
-#         if _SIGNALS_INSTANCE is None:
-#             _SIGNALS_INSTANCE = _Signals()
-#         return _SIGNALS_INSTANCE
-#     elif name == "CONFIG":
-#         if _CONFIG_INSTANCE is None:
-#             _CONFIG_INSTANCE = _Config()
-#         return _CONFIG_INSTANCE
-#     raise AttributeError(f"module '{__name__}' has no attribute '{name}'")
-
-
-# def __getattr__(name: str):
-#     """Intercepts module attribute access."""
-#     global _SIGNALS_INSTANCE, _CONFIG_INSTANCE
-#     if name == "SIGNALS":
-#         if _SIGNALS_INSTANCE is None:
-#             _SIGNALS_INSTANCE = _Signals()
-#         return _SIGNALS_INSTANCE
-#     elif name == "CONFIG":
-#         if _CONFIG_INSTANCE is None:
-#             _CONFIG_INSTANCE = _Config()
-#         return _CONFIG_INSTANCE
-#     raise AttributeError(f"module '{__name__}' has no attribute '{name}'")
-
-
-# def _init_helpers():
-#     global SIGNALS
-#     if SIGNALS is None:
-#         SIGNALS = _Signals()
-
-#     global CONFIG
-#     if CONFIG is None:
-#         CONFIG = _Config()
-
-# # Wrap your dictionary
-# data = benedict({
-#     "sub_dict": {
-#         "sub_dict": {
-#             "a": "Found the value!"
-#         }
-#     }
-# })
-
-# # Access using the dot-separated string
-# print(data["sub_dict.sub_dict.a"])
-
-# NOT_FOUND = object()
-
-
-# class HistoryRegistry:
-#     """Manages transactional logging and maps proxy references across data trees."""
-
-#     def __init__(self):
-#         self.history = []
-#         self.track = True
-
-#     def log(self, container, action, key, old_value):
-#         if self.track:
-#             self.history.append((container, action, key, old_value))
-
-#     def undo(self, root):
-#         if not self.history:
-#             print("No history to undo.")
-#             return
-
-#         self.track = False
-#         try:
-#             container, action, key, old_value = self.history.pop()
-
-#             if isinstance(container, ReversibleDict):
-#                 if action == "SET":
-#                     if old_value is NOT_FOUND:
-#                         if key in container.data:
-#                             del container.data[key]
-#                     else:
-#                         container.data[key] = container._wrap(key, old_value)
-#                 elif action == "DEL":
-#                     container.data[key] = container._wrap(key, old_value)
-
-#             elif isinstance(container, ReversibleList):
-#                 if action == "SET":
-#                     container.data[key] = container._wrap(key, old_value)
-#                 elif action == "APPEND":
-#                     container.data.pop()
-#                 elif action == "POP":
-#                     container.data.insert(key, container._wrap(key, old_value))
-#         finally:
-#             self.track = True
-
-
-# class ReversibleList(UserList):
-#     def __init__(self, initlist=None, registry=None):
-#         super().__init__()
-#         self._registry = (
-#             registry if registry is not None else HistoryRegistry()
-#         )
-#         if initlist is not None:
-#             # Populating raw items silently first
-#             for item in initlist:
-#                 self.data.append(self._wrap(len(self.data), item))
-
-#     def _wrap(self, index, value):
-#         if isinstance(value, dict) and not isinstance(value, ReversibleDict):
-#             return ReversibleDict(value, registry=self._registry)
-#         if isinstance(value, list) and not isinstance(value, ReversibleList):
-#             return ReversibleList(value, registry=self._registry)
-#         return value
-
-#     def _unwrap(self, val):
-#         return (
-#             val.data
-#             if isinstance(val, (ReversibleDict, ReversibleList))
-#             else val
-#         )
-
-#     def __setitem__(self, index, value):
-#         old_val = self.data[index]
-#         value = self._wrap(index, value)
-#         self._registry.log(
-#             self, "SET", index, copy.deepcopy(self._unwrap(old_val))
-#         )
-#         super().__setitem__(index, value)
-
-#     def append(self, value):
-#         idx = len(self.data)
-#         value = self._wrap(idx, value)
-#         self._registry.log(self, "APPEND", idx, None)
-#         super().append(value)
-
-#     def pop(self, index=-1):
-#         idx = index if index >= 0 else len(self.data) + index
-#         old_val = self.data[idx]
-#         self._registry.log(
-#             self, "POP", idx, copy.deepcopy(self._unwrap(old_val))
-#         )
-#         return super().pop(idx)
-
-
-# class ReversibleDict(UserDict):
-#     def __init__(self, dict_data=None, registry=None):
-#         self.data = {}
-#         self._registry = (
-#             registry if registry is not None else HistoryRegistry()
-#         )
-#         if dict_data:
-#             for k, v in dict_data.items():
-#                 self.data[k] = self._wrap(k, v)
-
-#     def _wrap(self, key, value):
-#         if isinstance(value, dict) and not isinstance(value, ReversibleDict):
-#             return ReversibleDict(value, registry=self._registry)
-#         if isinstance(value, list) and not isinstance(value, ReversibleList):
-#             return ReversibleList(value, registry=self._registry)
-#         return value
-
-#     def _unwrap(self, val):
-#         return (
-#             val.data
-#             if isinstance(val, (ReversibleDict, ReversibleList))
-#             else val
-#         )
-
-#     def __setitem__(self, key, value):
-#         old_value = self.data.get(key, NOT_FOUND)
-#         value = self._wrap(key, value)
-#         self._registry.log(
-#             self, "SET", key, copy.deepcopy(self._unwrap(old_value))
-#         )
-#         super().__setitem__(key, value)
-
-#     def __delitem__(self, key):
-#         if key not in self.data:
-#             raise KeyError(key)
-#         old_value = self.data[key]
-#         self._registry.log(
-#             self, "DEL", key, copy.deepcopy(self._unwrap(old_value))
-#         )
-#         super().__delitem__(key)
-
-#     def undo(self):
-#         """Rolls back the global state using explicit container instance references."""
-#         self._registry.undo(self)
-
-
-# # Initialize data with nested structural variations
-# user_data = ReversibleDict({
-#     "username": "coder123",
-#     "tasks": [
-#         {"id": 1, "status": "pending"},
-#         {"id": 2, "status": "completed"}
-#     ]
-# })
-
-# print("Original Object:")
-# print(user_data)
-
-# # Mutation 1: Update an attribute inside a list item
-# user_data['tasks'][0]['status'] = 'in_progress'
-
-# # Mutation 2: Append a new element to the list
-# user_data['tasks'].append({"id": 3, "status": "backlog"})
-
-# print("\nMutated Object:")
-# print(user_data)
-# # {'username': 'coder123', 'tasks': [{'id': 1, 'status': 'in_progress'}, {'id': 2, 'status': 'completed'}, {'id': 3, 'status': 'backlog'}]}
-
-# # Undo Mutation 2 (The Append)
-# user_data.undo()
-# print("\nAfter Undo 1 (Removes appended item):")
-# print(user_data['tasks'])
-# # [{'id': 1, 'status': 'in_progress'}, {'id': 2, 'status': 'completed'}]
-
-# # Undo Mutation 1 (The Inner dict change)
-# user_data.undo()
-# print("\nAfter Undo 2 (Reverts status modification):")
-# print(user_data['tasks'])
-# # [{'id': 1, 'status': 'pending'}, {'id': 2, 'status': 'completed'}]

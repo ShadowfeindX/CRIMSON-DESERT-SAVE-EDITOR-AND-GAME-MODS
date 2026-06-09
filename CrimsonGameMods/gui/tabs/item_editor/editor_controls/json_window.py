@@ -96,7 +96,7 @@ class JSONWindow(QWidget):
             lambda details: editor.setPlainText(
                 json.dumps(
                     details._data, indent=2, ensure_ascii=False, default=str
-                )
+                ) if details else ""
             )
         )
 

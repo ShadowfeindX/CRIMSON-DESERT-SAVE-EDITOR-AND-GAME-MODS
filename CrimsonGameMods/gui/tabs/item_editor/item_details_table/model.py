@@ -13,11 +13,10 @@ from ..helpers import ItemEditorInfoDetails, log
 
 class DetailsTableModel(QAbstractTableModel):
     def __init__(
-        self, parent, data: ItemEditorInfoDetails = ItemEditorInfoDetails()
+        self, parent, details: ItemEditorInfoDetails = None
     ) -> None:
         super().__init__(parent)
-
-        self.load(data)
+        self.load(details)
 
     def load(self, details: ItemEditorInfoDetails) -> None:
         if details is None:
@@ -25,7 +24,7 @@ class DetailsTableModel(QAbstractTableModel):
         
         self.beginResetModel()
 
-        # data = [(key, detail) for key, detail in details._data.items()]
+        # Use proxy's editable() method to get fields
         display_data: list[tuple[str, str]] = [
             (
                 key,
@@ -61,7 +60,6 @@ class DetailsTableModel(QAbstractTableModel):
                             "Item Details Table: Invalid index column %s",
                             index.column(),
                         )
-                # return self._data[index.row()]
 
     def display(self, key: str) -> None:
         "stub"
@@ -79,8 +77,8 @@ class DetailsTableModel(QAbstractTableModel):
 
         return None
 
-    def rowCount(self, _) -> int:
-        return len(self._display)
+    def rowCount(self, parent: QModelIndex = QModelIndex()) -> int:
+        return len(self._display) if hasattr(self, '_display') else 0
 
-    def columnCount(self, _) -> int:
+    def columnCount(self, parent: QModelIndex = QModelIndex()) -> int:
         return 2

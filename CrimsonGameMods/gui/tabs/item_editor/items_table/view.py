@@ -87,14 +87,6 @@ class ItemEditorTableView(QTableView):
         self.setSelectionBehavior(
             QAbstractItemView.SelectionBehavior.SelectRows
         )
-        # self.setWordWrap(False)
-        
-        
-        # SIGNALS
-        # self.selectionModel().currentRowChanged.connect(lambda: )
-
-        # self.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
-        # self.customContextMenuRequested.connect(self._show_context_menu)
 
     def refresh_view(self: QTableView) -> None:
         self.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)

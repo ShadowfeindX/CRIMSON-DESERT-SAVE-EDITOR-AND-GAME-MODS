@@ -99,17 +99,13 @@ class PassiveWindow(QWidget):
 
     def _connect_signals(self):
         SIGNALS.s_items_selected.connect(self._set_selected_items)
-        self.s_load_passive_skill_index.connect(
-            self.load_skill_index
-        )
+        self.s_load_passive_skill_index.connect(self.load_skill_index)
         self.s_load_passive_skill_index.connect(
             self._indexed_passives_table.load_passives
         )
 
         self.action_bar.s_add.connect(self.add_selected_passives)
-        self.action_bar.s_remove.connect(
-            self.remove_selected_passives
-        )
+        self.action_bar.s_remove.connect(self.remove_selected_passives)
         self._selected_passives.items()
         "STUB"
 
@@ -120,8 +116,8 @@ class PassiveWindow(QWidget):
         return self.skill_index
 
     def add_selected_passives(self):
-        s_list = self._selected_passives_table.selectionModel().selectedRows()
-        i_list = self._indexed_passives_table.selectionModel().selectedRows()
+        s_list = self._selected_passives_table.selected_rows()
+        i_list = self._indexed_passives_table.selected_rows()
 
         for index in i_list:
             self._selected_passives.setdefault(index.data(), "1")
@@ -133,7 +129,9 @@ class PassiveWindow(QWidget):
             current_level = self._selected_passives.get(key, "1")
             self._selected_passives[key] = max(current_level, level)
 
-        self._target_passives_table.load_passives(self._selected_passives.items())
+        self._target_passives_table.load_passives(
+            self._selected_passives.items()
+        )
 
     def remove_selected_passives(self):
         "STUB"
@@ -154,10 +152,8 @@ class PassiveWindow(QWidget):
         table_layout = QHBoxLayout()
 
         self.action_bar = ActionBar(self)
-        # left_table, left_table_layout = self._build_selected_passives_table()
         self._selected_passives_table = SelectedPassivesTable(self)
         self._indexed_passives_table = IndexedPassivesTable(self)
-        # right_table, right_table_layout = self._build_indexed_passives_table()
         self._target_passives_table = TargetPassivesTable(self)
         bottom_bar = self._build_bottom_bar()
 
@@ -294,6 +290,9 @@ class IndexedPassivesTable(QWidget):
 
         self._build_ui()
 
+    def selected_rows(self):
+        return self.table.selectionModel().selectedRows()
+
     def _build_ui(self):
         table = QTableWidget()
 
@@ -391,36 +390,40 @@ class SelectedPassivesTable(QWidget):
         layout.addWidget(QLabel("Passives on Selected Items:"))
         layout.addWidget(table)
 
+    def selected_rows(self):
+        return self.table.selectionModel().selectedRows()
+
     def load_passives(self):
         skills = self.get_skill_index()
         self.table.setRowCount(0)
 
-        # passive_list: list[PassiveSkillLevel] = []
-        
-
-        row = 0
-        passives = []
+        # Collect highest level for each skill key
+        skill_levels: dict[int, int] = {}
         for item in self._selected_items:
             passives = item.passives() or []
-            # row = len(passive_list)
 
-            for j, passive in enumerate(passives):
-                self.table.setRowCount(row + 1)
-                self.table.setItem(
-                    row, 0, QTableWidgetItem(str(passive["skill"]))
-                )
-                self.table.setItem(
-                    row,
-                    1,
-                    QTableWidgetItem(
-                        skills.get(
-                            str(passive["skill"]), "(unknown)"
-                        )
-                    ),
-                )
-                self.table.setItem(
-                    row, 2, QTableWidgetItem(str(passive["level"]))
-                )
-                row += 1
+            for passive in passives:
+                skill_key = passive["skill"]
+                level = passive["level"]
+                # Keep only the highest level
+                if skill_key not in skill_levels or level > skill_levels[skill_key]:
+                    skill_levels[skill_key] = level
 
-            # passive_list.extend(passives)
+        # Display unique skills with their highest level
+        row = 0
+        for skill_key, level in skill_levels.items():
+            self.table.setRowCount(row + 1)
+            self.table.setItem(
+                row, 0, QTableWidgetItem(str(skill_key))
+            )
+            self.table.setItem(
+                row,
+                1,
+                QTableWidgetItem(
+                    skills.get(str(skill_key), "(unknown)")
+                ),
+            )
+            self.table.setItem(
+                row, 2, QTableWidgetItem(str(level))
+            )
+            row += 1

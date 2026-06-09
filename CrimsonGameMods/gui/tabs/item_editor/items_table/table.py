@@ -72,7 +72,6 @@ class ItemTable(QFrame):
         self.proxy = ItemTableModelProxy(self, self.model)
         self.table = ItemEditorTableView(parent, self.proxy)
         self.proxy.setFilterKeyColumn(-1)
-        # self.proxy.invalidateFilter()
 
         layout.addWidget(self.table)
         self.table.refresh_view()
@@ -88,17 +87,4 @@ class ItemTable(QFrame):
 
     @Slot(str)
     def search(self, term: str):
-        # self.table.setModel(None)
-        # self.table.selectionModel().clearSelection()
-        # self.table.setCurrentIndex(QModelIndex())
-        # if self.table.selectionModel():
-        #     self.table.selectionModel().clear()
-        # self.proxy.sort(-1)
         self.proxy.apply_filter_text(term)
-        # self.table.setModel(self.proxy)
-        # self.proxy.setFilterRegularExpression(
-        #     QRegularExpression(
-        #         term, QRegularExpression.PatternOption.CaseInsensitiveOption
-        #     )
-        # )
-        # self.table.refresh_view()

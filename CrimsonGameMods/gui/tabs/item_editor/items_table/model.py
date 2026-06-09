@@ -63,7 +63,7 @@ from PySide6.QtWidgets import (
 )
 
 from .view import ItemEditorTableView
-from ..helpers import ItemEditorInfo, ItemEditorInfoDetails
+from ..helpers import ItemEditorInfo
 from ..dmm_types import ItemInfo
 
 # from gui.theme import COLORS, CATEGORY_COLORS
@@ -131,6 +131,7 @@ class ItemTableModel(QAbstractTableModel):
         self.endResetModel()
 
     def details(self, index: QModelIndex, key=None):
+        """Get cached proxy or specific field (for UserRole data)."""
         if not index.isValid():
             return None
 
@@ -138,10 +139,11 @@ class ItemTableModel(QAbstractTableModel):
         return data[key] if key else data
 
     def display(self, index: QModelIndex, key=None):
+        """Get raw dict for display (no object creation)."""
         if not index.isValid():
             return None
 
-        data = self._items._data[index.row()]
+        data = self._items.get_item(index.row())
         return data[key] if key else data
 
     def data(self, index: QModelIndex, role):
@@ -153,17 +155,18 @@ class ItemTableModel(QAbstractTableModel):
 
         match role:
             case Qt.ItemDataRole.DisplayRole:
+                # Use raw dict for display to avoid object creation
                 match index.column():
                     case 0:
-                        return self.details(index, "key")
+                        return self.display(index, "key")
                     case 1:
-                        return self.details(index, "string_key")
+                        return self.display(index, "string_key")
                     case 2:
                         return self.ITEM_TIERS[
-                            self.details(index, "item_tier")
+                            self.display(index, "item_tier")
                         ]
                     case _:
-                        return self.details(index, "item_name")
+                        return self.display(index, "item_name")
 
     def headerData(self, idx, orientation, role):
         if role == Qt.ItemDataRole.DisplayRole:
