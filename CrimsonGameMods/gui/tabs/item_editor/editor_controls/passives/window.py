@@ -48,7 +48,7 @@ class PassiveWindow(QWidget):
         return super().closeEvent(event)
 
     def _ready_signals(self):
-        "STUB"
+        pass
 
     def _connect_signals(self):
         SIGNALS.s_items_selected.connect(self._set_selected_items)
@@ -59,8 +59,10 @@ class PassiveWindow(QWidget):
 
         self.action_bar.s_add.connect(self.add_selected_passives)
         self.action_bar.s_remove.connect(self.remove_selected_passives)
-        self._selected_passives.items()
-        "STUB"
+        
+        self.bottom_bar.s_apply.connect(self.apply_passives_to_items)
+        self.bottom_bar.s_remove.connect(self.remove_passives_from_items)
+        self.bottom_bar.s_clear.connect(self.clear_target_list)
 
     def get_skill_name(self, key: str) -> str:
         return self.skill_index.get(key, "(unknown)")
@@ -87,7 +89,44 @@ class PassiveWindow(QWidget):
         )
 
     def remove_selected_passives(self):
-        "STUB"
+        selected = self._target_passives_table.table.selectionModel().selectedRows()
+        keys_to_remove = [index.data() for index in selected]
+
+        for key in keys_to_remove:
+            self._selected_passives.pop(key, None)
+
+        self._target_passives_table.load_passives(
+            self._selected_passives.items()
+        )
+
+    def apply_passives_to_items(self):
+        new_passives = [
+            {"skill": int(key), "level": int(level)}
+            for key, level in self._selected_passives.items()
+        ]
+
+        for item in self._selected_items:
+            item.update_with_history(
+                "equip_passive_skill_list",
+                new_passives,
+                f"Applied {len(new_passives)} passive(s)",
+            )
+
+    def remove_passives_from_items(self):
+        keys_to_remove = {int(k) for k in self._selected_passives}
+
+        for item in self._selected_items:
+            current = item.passives() or []
+            filtered = [p for p in current if p["skill"] not in keys_to_remove]
+            item.update_with_history(
+                "equip_passive_skill_list",
+                filtered,
+                f"Removed {len(current) - len(filtered)} passive(s)",
+            )
+
+    def clear_target_list(self):
+        self._selected_passives.clear()
+        self._target_passives_table.table.setRowCount(0)
 
     def load_skill_index(self):
         try:
@@ -119,7 +158,9 @@ class PassiveWindow(QWidget):
         main_layout.addWidget(self.bottom_bar)
 
     def _refresh_view(self):
-        "stub"
+        self._target_passives_table.load_passives(
+            self._selected_passives.items()
+        )
 
     def _set_selected_items(self, items: list[ItemEditorInfoDetails]):
         PassiveWindow._selected_items[:] = items
