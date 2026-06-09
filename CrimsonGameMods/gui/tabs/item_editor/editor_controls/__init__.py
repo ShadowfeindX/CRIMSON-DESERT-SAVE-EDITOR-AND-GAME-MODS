@@ -56,7 +56,7 @@ from PySide6.QtWidgets import (
 
 from .json_window import JSONWindow
 
-from .passive_window import PassiveWindow
+from .passives.window import PassiveWindow
 from gui.tabs.item_editor.helpers import ItemEditorInfoDetails, log
 from gui.tabs.item_editor.signals import SIGNALS
 
