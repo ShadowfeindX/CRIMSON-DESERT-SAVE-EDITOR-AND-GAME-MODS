@@ -34,8 +34,8 @@ class _SearchBarSignals:
 class _Signals:
     s_status_message: SignalInstance[str, int | None]
     s_iteminfo_extracted: SignalInstance[ItemEditorInfo]
-    s_item_selected: SignalInstance[ItemEditorInfoDetails]
-    s_items_selected: SignalInstance[list[ItemEditorInfoDetails]]
+    s_item_selected: SignalInstance[int]
+    s_items_selected: SignalInstance[list[int]]
     s_history_entry_added: SignalInstance[HistoryEntry]
     ActionBar: _ActionBarSignals
     SearchBar: _SearchBarSignals
