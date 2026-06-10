@@ -12,3 +12,4 @@ CrimsonGameMods/_dmm_parser/
 CrimsonGameMods/dmm_parser/
 .venv/
 .venv_linux/
+.pi/
