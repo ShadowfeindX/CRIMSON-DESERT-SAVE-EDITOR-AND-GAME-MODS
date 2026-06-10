@@ -55,9 +55,10 @@ from PySide6.QtWidgets import (
 )
 
 from .json_window import JSONWindow
+from .history_window import HistoryWindow
 
 from .passives.window import PassiveWindow
-from gui.tabs.item_editor.helpers import ItemEditorInfoDetails, log
+from gui.tabs.item_editor.helpers import ItemEditorInfoDetails, HistoryEntry, log
 from gui.tabs.item_editor.signals import SIGNALS
 
 
@@ -107,6 +108,7 @@ class EditorControls(QFrame):
         "preset": PresetsWindow,
         "passive": PassiveWindow,
         "json": JSONWindow,
+        "history": HistoryWindow,
     }
 
     def __init__(self, parent: QWidget):
@@ -257,6 +259,8 @@ class EditorControls(QFrame):
 
         btns["json"] = QPushButton("Edit JSON")
         btns["json"].clicked.connect(self._open_window("json"))
+        btns["history"] = QPushButton("View History")
+        btns["history"].clicked.connect(self._open_window("history"))
         btns["dump"] = QPushButton("Dump ITEMINFO")
         btns["diff"] = QPushButton("Show Item Diff")
         # btns["inspect"] = QPushButton("Inspect Item")
