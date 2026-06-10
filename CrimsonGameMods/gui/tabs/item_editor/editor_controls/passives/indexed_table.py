@@ -13,6 +13,8 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
+from ...helpers import CONFIG
+
 if TYPE_CHECKING:
     from .window import PassiveWindow
 
@@ -62,15 +64,29 @@ class IndexedPassivesTable(QWidget):
         v_header.setDefaultSectionSize(24)
         v_header.setSectionResizeMode(QHeaderView.ResizeMode.Fixed)
 
+        table.setSortingEnabled(True)
+
         self.table = table
 
         layout.addWidget(QLabel("Passive Skill Index:"))
         layout.addWidget(table)
 
-    def load_passives(self):
+    def load_passives(self, show_favorites_only: bool = False):
         skills = self.get_skill_index().items()
+        if show_favorites_only:
+            favorites = CONFIG["favorite_passives"]
+            if not isinstance(favorites, list):
+                favorites = []
+            skills = [(key, name) for key, name in skills if key in favorites]
+        
+        self.table.setUpdatesEnabled(False)
+        self.table.setSortingEnabled(False)
+        
         self.table.setRowCount(len(skills))
 
         for row, (key, name) in enumerate(skills):
             self.table.setItem(row, 0, QTableWidgetItem(key))
             self.table.setItem(row, 1, QTableWidgetItem(name))
+        
+        self.table.setSortingEnabled(True)
+        self.table.setUpdatesEnabled(True)

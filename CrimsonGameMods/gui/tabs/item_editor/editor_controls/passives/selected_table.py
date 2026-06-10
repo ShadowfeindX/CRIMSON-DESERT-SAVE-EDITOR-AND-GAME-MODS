@@ -25,7 +25,7 @@ class SelectedPassivesTable(QWidget):
 
         self.get_skill_name = parent.get_skill_name
         self.get_skill_index = parent.get_skill_index
-        self._selected_items = parent._selected_items
+        self._selected_item_indexes = parent._selected_item_indexes
 
         self._build_ui()
 
@@ -64,6 +64,8 @@ class SelectedPassivesTable(QWidget):
         v_header.setDefaultSectionSize(24)
         v_header.setSectionResizeMode(QHeaderView.ResizeMode.Fixed)
 
+        table.setSortingEnabled(True)
+
         self.table = table
 
         layout.addWidget(QLabel("Passives on Selected Items:"))
@@ -74,10 +76,14 @@ class SelectedPassivesTable(QWidget):
 
     def load_passives(self):
         skills = self.get_skill_index()
+        
+        self.table.setUpdatesEnabled(False)
+        self.table.setSortingEnabled(False)
+        
         self.table.setRowCount(0)
 
         skill_levels: dict[int, int] = {}
-        for item in self._selected_items:
+        for item in map(ItemEditorInfoDetails, self._selected_item_indexes):
             passives = item.passives() or []
 
             for passive in passives:
@@ -86,9 +92,8 @@ class SelectedPassivesTable(QWidget):
                 if skill_key not in skill_levels or level > skill_levels[skill_key]:
                     skill_levels[skill_key] = level
 
-        row = 0
-        for skill_key, level in skill_levels.items():
-            self.table.setRowCount(row + 1)
+        self.table.setRowCount(len(skill_levels))
+        for row, (skill_key, level) in enumerate(skill_levels.items()):
             self.table.setItem(
                 row, 0, QTableWidgetItem(str(skill_key))
             )
@@ -102,4 +107,6 @@ class SelectedPassivesTable(QWidget):
             self.table.setItem(
                 row, 2, QTableWidgetItem(str(level))
             )
-            row += 1
+        
+        self.table.setSortingEnabled(True)
+        self.table.setUpdatesEnabled(True)
