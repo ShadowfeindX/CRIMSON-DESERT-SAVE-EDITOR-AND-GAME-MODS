@@ -52,16 +52,14 @@ class ItemTable(QFrame):
 
         if not selected.isEmpty():
             SIGNALS.s_item_selected.emit(
-                self.model.details(
-                    self.proxy.mapToSource(selected.indexes()[0])
-                )
+                self.proxy.mapToSource(selected.indexes()[0]).row()
             )
         else:
             SIGNALS.s_item_selected.emit(None)
 
         SIGNALS.s_items_selected.emit(
             [
-                self.model.details(self.proxy.mapToSource(index))
+                self.proxy.mapToSource(index).row()
                 for index in self.table.selectionModel().selectedRows()
             ]
         )

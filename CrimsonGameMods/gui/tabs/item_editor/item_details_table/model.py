@@ -12,29 +12,18 @@ from ..helpers import ItemEditorInfoDetails, log
 
 
 class DetailsTableModel(QAbstractTableModel):
-    def __init__(
-        self, parent, details: ItemEditorInfoDetails = None
-    ) -> None:
+    def __init__(self, parent, details: ItemEditorInfoDetails = None) -> None:
         super().__init__(parent)
         self.load(details)
 
     def load(self, details: ItemEditorInfoDetails) -> None:
         if details is None:
             return
-        
+
         self.beginResetModel()
 
-        # Use proxy's editable() method to get fields
-        display_data: list[tuple[str, str]] = [
-            (
-                key,
-                json.dumps(detail),
-            )
-            for key, detail in details.editable()
-        ]
-
         self._data: ItemEditorInfoDetails = details
-        self._display: list[tuple[str, str]] = display_data
+        self._display = [(k, json.dumps(v)) for k, v in details.editable()]
 
         self.endResetModel()
 
@@ -78,7 +67,7 @@ class DetailsTableModel(QAbstractTableModel):
         return None
 
     def rowCount(self, parent: QModelIndex = QModelIndex()) -> int:
-        return len(self._display) if hasattr(self, '_display') else 0
+        return len(self._display) if hasattr(self, "_display") else 0
 
     def columnCount(self, parent: QModelIndex = QModelIndex()) -> int:
         return 2

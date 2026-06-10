@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import logging
+from typing import Optional
 
 from PySide6.QtWidgets import (
     QFrame,
@@ -17,6 +18,7 @@ from .proxy import DetailsTableProxy
 from .model import DetailsTableModel
 
 from ..helpers import ItemEditorInfoDetails
+
 
 class ItemDetailsTable(QFrame):
     def __init__(self, parent):
@@ -35,6 +37,7 @@ class ItemDetailsTable(QFrame):
         layout.addWidget(self.table)
         self.table.refresh_view()
 
-    def load(self, details: ItemEditorInfoDetails):
-        self.model.load(details)
-        self.table.refresh_view()
+    def load(self, idx: Optional[int]):
+        if idx:
+            self.model.load(ItemEditorInfoDetails(idx))
+            self.table.refresh_view()

@@ -65,24 +65,6 @@ from PySide6.QtWidgets import (
 from ..helpers import ItemEditorInfo, ItemEditorInfoDetails
 from ..dmm_types import ItemInfo
 
-# if TYPE_CHECKING:
-    
-
-# from gui.theme import COLORS, CATEGORY_COLORS
-
-
-
-try:
-    from gui.utils import make_help_btn
-except Exception:
-
-    def make_help_btn(topic, fn=None):
-        btn = QPushButton("?")
-        btn.setFixedSize(22, 22)
-        if fn:
-            btn.clicked.connect(lambda: fn(topic))
-        return btn
-
 class DetailsTableContextMenu(QMenu):
     instance: Self | None = None
 
@@ -94,36 +76,8 @@ class DetailsTableContextMenu(QMenu):
         if cls.instance is None:
             cls.instance = cls(parent, toolTipsVisible=True)
 
-        def get_table(parent, entries):
-            table = QTableWidget(parent)
-
-            table.setColumnCount(2)
-            table.setHorizontalHeaderLabels([
-                "Key", "Change Description",
-            ])
-            table.setRowCount(len(entries))
-            for i, (key, old_value, desc) in enumerate(entries):
-                table.setItem(i, 0, QTableWidgetItem(key))
-                table.setItem(i, 1, QTableWidgetItem(desc))
-
-            hdr_stats = table.horizontalHeader()
-            # hdr_stats.setSectionResizeMode(0, QHeaderView.Interactive)
-            # table.setColumnWidth(0, 240)
-            # hdr_stats.setSectionResizeMode(1, QHeaderView.Interactive)
-            # table.setColumnWidth(1, 100)
-            hdr_stats.setStretchLastSection(True)
-            table.verticalHeader().setDefaultSectionSize(24)
-            # table.setMinimumHeight(100)
-            return table
-
         def test():
-            details: ItemEditorInfoDetails = index.data(Qt.ItemDataRole.UserRole)
-            popup = QDialog(parent)
-            layout = QHBoxLayout(popup)
-            layout.addWidget(get_table(popup, details.get_history()))
-            layout.addWidget(get_table(popup, details.get_registry()))
-
-            popup.exec()
+            pass
 
 
         menu = cls.instance

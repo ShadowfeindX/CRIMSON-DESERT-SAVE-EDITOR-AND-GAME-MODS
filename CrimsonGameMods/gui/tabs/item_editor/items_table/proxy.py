@@ -151,17 +151,17 @@ class ItemTableModelProxy(QSortFilterProxyModel):
 
         if self._search_term.isdigit():
             idx0 = model.index(source_row, 0, source_parent)
-            val0 = model.display(idx0, "key")
+            val0 = model.details(idx0, "key")
             if val0 is not None and self._search_term in str(val0):
                 return True
 
         idx1 = model.index(source_row, 1, source_parent)
-        val1 = model.display(idx1, "string_key")
+        val1 = model.details(idx1, "string_key")
         if val1 is not None and self._search_term in str(val1).lower():
             return True
 
         idx2 = model.index(source_row, 2, source_parent)
-        val2 = model.display(idx2, "item_tier")
+        val2 = model.details(idx2, "item_tier")
         tier = model.ITEM_TIERS_INDEX.get(self._search_term.capitalize(), None)
         if tier is not None and val2 == tier:
             return True
