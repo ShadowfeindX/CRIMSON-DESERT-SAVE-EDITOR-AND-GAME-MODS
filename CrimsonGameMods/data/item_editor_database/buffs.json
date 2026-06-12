@@ -1,0 +1,1700 @@
+[
+  {
+    "1000062": {
+      "key": 1000062,
+      "string_key": "BuffLevel_Comma_Symptom"
+    }
+  },
+  {
+    "1000276": {
+      "key": 1000276,
+      "string_key": "BuffLevel_Difficulty"
+    }
+  },
+  {
+    "1000277": {
+      "key": 1000277,
+      "string_key": "BuffLevel_Difficulty_Boss"
+    }
+  },
+  {
+    "1000278": {
+      "key": 1000278,
+      "string_key": "BuffLevel_Difficulty_PC"
+    }
+  },
+  {
+    "1000078": {
+      "key": 1000078,
+      "string_key": "BuffLevel_CombatHigh"
+    }
+  },
+  {
+    "1000042": {
+      "key": 1000042,
+      "string_key": "BuffLevel_Drunken"
+    }
+  },
+  {
+    "1000019": {
+      "key": 1000019,
+      "string_key": "BuffLevel_FireArrow"
+    }
+  },
+  {
+    "1000030": {
+      "key": 1000030,
+      "string_key": "BuffLevel_DOT"
+    }
+  },
+  {
+    "1000017": {
+      "key": 1000017,
+      "string_key": "BuffLevel_IceShield"
+    }
+  },
+  {
+    "1000085": {
+      "key": 1000085,
+      "string_key": "BuffLevel_FireFist"
+    }
+  },
+  {
+    "1000044": {
+      "key": 1000044,
+      "string_key": "BuffLevel_IceTerrain"
+    }
+  },
+  {
+    "1000060": {
+      "key": 1000060,
+      "string_key": "BuffLevel_Lava"
+    }
+  },
+  {
+    "1000063": {
+      "key": 1000063,
+      "string_key": "BuffLevel_SulphurGas"
+    }
+  },
+  {
+    "1000031": {
+      "key": 1000031,
+      "string_key": "BuffLevel_LavaGas"
+    }
+  },
+  {
+    "1000033": {
+      "key": 1000033,
+      "string_key": "BuffLevel_SwarmBee"
+    }
+  },
+  {
+    "1000034": {
+      "key": 1000034,
+      "string_key": "BuffLevel_SwarmSpider"
+    }
+  },
+  {
+    "1000035": {
+      "key": 1000035,
+      "string_key": "BuffLevel_SwarmRat"
+    }
+  },
+  {
+    "1000036": {
+      "key": 1000036,
+      "string_key": "BuffLevel_SwarmLocust"
+    }
+  },
+  {
+    "1000054": {
+      "key": 1000054,
+      "string_key": "BuffLevel_MachineOverload"
+    }
+  },
+  {
+    "1000121": {
+      "key": 1000121,
+      "string_key": "BuffLevel_GearhornRenwOverload"
+    }
+  },
+  {
+    "1000274": {
+      "key": 1000274,
+      "string_key": "BuffLevel_GoldenStarOverload"
+    }
+  },
+  {
+    "1000207": {
+      "key": 1000207,
+      "string_key": "BuffLevel_CircusMachine_Weak"
+    }
+  },
+  {
+    "1000168": {
+      "key": 1000168,
+      "string_key": "BuffLevel_Umbra_GroggyStop"
+    }
+  },
+  {
+    "1000070": {
+      "key": 1000070,
+      "string_key": "BuffLevel_Blizzard"
+    }
+  },
+  {
+    "1000075": {
+      "key": 1000075,
+      "string_key": "BuffLevel_Blizzard_NonepalayZone"
+    }
+  },
+  {
+    "1000043": {
+      "key": 1000043,
+      "string_key": "BuffLevel_Desert_NonepalayZone"
+    }
+  },
+  {
+    "1000077": {
+      "key": 1000077,
+      "string_key": "BuffLevel_Water_NonepalayZone"
+    }
+  },
+  {
+    "1000079": {
+      "key": 1000079,
+      "string_key": "BuffLevel_Normal_NonepalayZone"
+    }
+  },
+  {
+    "1000061": {
+      "key": 1000061,
+      "string_key": "BuffLevel_SpiderWeb"
+    }
+  },
+  {
+    "1000104": {
+      "key": 1000104,
+      "string_key": "BuffLevel_Trap_MoveSpeedRate"
+    }
+  },
+  {
+    "1000083": {
+      "key": 1000083,
+      "string_key": "BuffLevel_Waterfall"
+    }
+  },
+  {
+    "1000065": {
+      "key": 1000065,
+      "string_key": "BuffLevel_SpiderWeb_Player"
+    }
+  },
+  {
+    "1000037": {
+      "key": 1000037,
+      "string_key": "BuffLevel_DetectDistance"
+    }
+  },
+  {
+    "1000057": {
+      "key": 1000057,
+      "string_key": "BuffLevel_DetectBrightness"
+    }
+  },
+  {
+    "1000045": {
+      "key": 1000045,
+      "string_key": "BuffLevel_Guard"
+    }
+  },
+  {
+    "1000038": {
+      "key": 1000038,
+      "string_key": "BuffLevel_SuperArmor"
+    }
+  },
+  {
+    "1000039": {
+      "key": 1000039,
+      "string_key": "BuffLevel_Avoid"
+    }
+  },
+  {
+    "1000040": {
+      "key": 1000040,
+      "string_key": "BuffLevel_FireWeapon"
+    }
+  },
+  {
+    "1000058": {
+      "key": 1000058,
+      "string_key": "BuffLevel_NatureMpRegen"
+    }
+  },
+  {
+    "1000059": {
+      "key": 1000059,
+      "string_key": "BuffLevel_NatureHpRegen"
+    }
+  },
+  {
+    "1000084": {
+      "key": 1000084,
+      "string_key": "BuffLevel_BlockDamage_Situation"
+    }
+  },
+  {
+    "1000041": {
+      "key": 1000041,
+      "string_key": "BuffLevel_NatureProtect"
+    }
+  },
+  {
+    "1000095": {
+      "key": 1000095,
+      "string_key": "BuffLevel_ChangeElementalStatSpeed"
+    }
+  },
+  {
+    "1000094": {
+      "key": 1000094,
+      "string_key": "BuffLevel_SmithStone_DDD"
+    }
+  },
+  {
+    "1000056": {
+      "key": 1000056,
+      "string_key": "BuffLevel_AIDifficulty"
+    }
+  },
+  {
+    "1000171": {
+      "key": 1000171,
+      "string_key": "BuffLevel_BlockLearn"
+    }
+  },
+  {
+    "1000167": {
+      "key": 1000167,
+      "string_key": "BuffLevel_DecreaseHP_IncreaseMP_Dot"
+    }
+  },
+  {
+    "1000050": {
+      "key": 1000050,
+      "string_key": "BuffLevel_Food_MaxHP"
+    }
+  },
+  {
+    "1000177": {
+      "key": 1000177,
+      "string_key": "BuffLevel_Food_MpUseDecreaseRate"
+    }
+  },
+  {
+    "1000055": {
+      "key": 1000055,
+      "string_key": "BuffLevel_Food_StaminaUseDecreaseRate"
+    }
+  },
+  {
+    "1000178": {
+      "key": 1000178,
+      "string_key": "BuffLevel_Food_HP_Dot"
+    }
+  },
+  {
+    "1000179": {
+      "key": 1000179,
+      "string_key": "BuffLevel_Food_MP_Dot"
+    }
+  },
+  {
+    "1000180": {
+      "key": 1000180,
+      "string_key": "BuffLevel_Food_DDD"
+    }
+  },
+  {
+    "1000181": {
+      "key": 1000181,
+      "string_key": "BuffLevel_Food_DPV"
+    }
+  },
+  {
+    "1000182": {
+      "key": 1000182,
+      "string_key": "BuffLevel_Food_FireResistance"
+    }
+  },
+  {
+    "1000183": {
+      "key": 1000183,
+      "string_key": "BuffLevel_Food_IceResistance"
+    }
+  },
+  {
+    "1000184": {
+      "key": 1000184,
+      "string_key": "BuffLevel_Food_ElectricityResistance"
+    }
+  },
+  {
+    "1000185": {
+      "key": 1000185,
+      "string_key": "BuffLevel_Food_FallDamageReduce"
+    }
+  },
+  {
+    "1000186": {
+      "key": 1000186,
+      "string_key": "BuffLevel_Food_AttackSpeedRate"
+    }
+  },
+  {
+    "1000101": {
+      "key": 1000101,
+      "string_key": "BuffLevel_Food_Poison"
+    }
+  },
+  {
+    "1000219": {
+      "key": 1000219,
+      "string_key": "BuffLevel_Alchemy_DDD"
+    }
+  },
+  {
+    "1000220": {
+      "key": 1000220,
+      "string_key": "BuffLevel_Alchemy_DPV"
+    }
+  },
+  {
+    "1000221": {
+      "key": 1000221,
+      "string_key": "BuffLevel_Alchemy_HP"
+    }
+  },
+  {
+    "1000076": {
+      "key": 1000076,
+      "string_key": "BuffLevel_Potion_DDD"
+    }
+  },
+  {
+    "1000204": {
+      "key": 1000204,
+      "string_key": "BuffLevel_Potion_DPV"
+    }
+  },
+  {
+    "1000205": {
+      "key": 1000205,
+      "string_key": "BuffLevel_Potion_HP"
+    }
+  },
+  {
+    "1000018": {
+      "key": 1000018,
+      "string_key": "BuffLevel_MinHP"
+    }
+  },
+  {
+    "1000001": {
+      "key": 1000001,
+      "string_key": "BuffLevel_HP"
+    }
+  },
+  {
+    "1000016": {
+      "key": 1000016,
+      "string_key": "BuffLevel_MaxHPPercent"
+    }
+  },
+  {
+    "1000051": {
+      "key": 1000051,
+      "string_key": "BuffLevel_HP_Dot_Damage"
+    }
+  },
+  {
+    "1000008": {
+      "key": 1000008,
+      "string_key": "BuffLevel_HPRegen"
+    }
+  },
+  {
+    "1000052": {
+      "key": 1000052,
+      "string_key": "BuffLevel_Mp_Dot_Damage"
+    }
+  },
+  {
+    "1000009": {
+      "key": 1000009,
+      "string_key": "BuffLevel_MpRegen"
+    }
+  },
+  {
+    "1000053": {
+      "key": 1000053,
+      "string_key": "BuffLevel_Sp_Dot_Damage"
+    }
+  },
+  {
+    "1000046": {
+      "key": 1000046,
+      "string_key": "BuffLevel_StaminaRegen"
+    }
+  },
+  {
+    "1000002": {
+      "key": 1000002,
+      "string_key": "BuffLevel_MP"
+    }
+  },
+  {
+    "1000003": {
+      "key": 1000003,
+      "string_key": "BuffLevel_SP"
+    }
+  },
+  {
+    "1000004": {
+      "key": 1000004,
+      "string_key": "BuffLevel_DDD"
+    }
+  },
+  {
+    "1000005": {
+      "key": 1000005,
+      "string_key": "BuffLevel_DPV"
+    }
+  },
+  {
+    "1000006": {
+      "key": 1000006,
+      "string_key": "BuffLevel_AttackSpeedRate"
+    }
+  },
+  {
+    "1000007": {
+      "key": 1000007,
+      "string_key": "BuffLevel_MoveSpeedRate"
+    }
+  },
+  {
+    "1000074": {
+      "key": 1000074,
+      "string_key": "BuffLevel_CriticalRate"
+    }
+  },
+  {
+    "1000082": {
+      "key": 1000082,
+      "string_key": "BuffLevel_DHIT"
+    }
+  },
+  {
+    "1000010": {
+      "key": 1000010,
+      "string_key": "BuffLevel_Pressure"
+    }
+  },
+  {
+    "1000011": {
+      "key": 1000011,
+      "string_key": "BuffLevel_AttackedDamageReduction"
+    }
+  },
+  {
+    "1000012": {
+      "key": 1000012,
+      "string_key": "BuffLevel_FireResistance"
+    }
+  },
+  {
+    "1000013": {
+      "key": 1000013,
+      "string_key": "BuffLevel_IceResistance"
+    }
+  },
+  {
+    "1000014": {
+      "key": 1000014,
+      "string_key": "BuffLevel_ElectricityResistance"
+    }
+  },
+  {
+    "1000141": {
+      "key": 1000141,
+      "string_key": "BuffLevel_StaminaUseIncreaseRate"
+    }
+  },
+  {
+    "1000015": {
+      "key": 1000015,
+      "string_key": "BuffLevel_StaminaUseDecreaseRate"
+    }
+  },
+  {
+    "1000189": {
+      "key": 1000189,
+      "string_key": "BuffLevel_MpUseDecreaseRate"
+    }
+  },
+  {
+    "1000026": {
+      "key": 1000026,
+      "string_key": "BuffLevel_Bleeding"
+    }
+  },
+  {
+    "1000029": {
+      "key": 1000029,
+      "string_key": "BuffLevel_BossWeaken"
+    }
+  },
+  {
+    "1000092": {
+      "key": 1000092,
+      "string_key": "BuffLevel_JijeongtaWeaken"
+    }
+  },
+  {
+    "1000098": {
+      "key": 1000098,
+      "string_key": "BuffLevel_JijeongtaWeakenBreakable"
+    }
+  },
+  {
+    "1000280": {
+      "key": 1000280,
+      "string_key": "BuffLevel_Equipment_FireResistance"
+    }
+  },
+  {
+    "1000281": {
+      "key": 1000281,
+      "string_key": "BuffLevel_Equipment_IceResistance"
+    }
+  },
+  {
+    "1000282": {
+      "key": 1000282,
+      "string_key": "BuffLevel_Equipment_ElectricityResistance"
+    }
+  },
+  {
+    "1000025": {
+      "key": 1000025,
+      "string_key": "BuffLevel_NonSlip"
+    }
+  },
+  {
+    "1000047": {
+      "key": 1000047,
+      "string_key": "BuffLevel_Abyss_HP"
+    }
+  },
+  {
+    "1000048": {
+      "key": 1000048,
+      "string_key": "BuffLevel_Abyss_MP"
+    }
+  },
+  {
+    "1000049": {
+      "key": 1000049,
+      "string_key": "BuffLevel_Abyss_SP"
+    }
+  },
+  {
+    "1000106": {
+      "key": 1000106,
+      "string_key": "BuffLevel_ReduceFishingTime"
+    }
+  },
+  {
+    "1000190": {
+      "key": 1000190,
+      "string_key": "BuffLevel_FallDamageReduce"
+    }
+  },
+  {
+    "1000068": {
+      "key": 1000068,
+      "string_key": "BuffLevel_DetectReaction"
+    }
+  },
+  {
+    "1000086": {
+      "key": 1000086,
+      "string_key": "BuffLevel_BattleOrder"
+    }
+  },
+  {
+    "1000166": {
+      "key": 1000166,
+      "string_key": "BuffLevel_PlayerSensible"
+    }
+  },
+  {
+    "1000024": {
+      "key": 1000024,
+      "string_key": "BuffLevel_AIType_Tier1"
+    }
+  },
+  {
+    "1000064": {
+      "key": 1000064,
+      "string_key": "BuffLevel_AIType_Tier2"
+    }
+  },
+  {
+    "1000200": {
+      "key": 1000200,
+      "string_key": "BuffLevel_Equip_Set_Stealth_Animal_Wild_Battle_Wolf"
+    }
+  },
+  {
+    "1000201": {
+      "key": 1000201,
+      "string_key": "BuffLevel_Equip_Set_Stealth_Animal_Wild_Battle_Bear"
+    }
+  },
+  {
+    "1000202": {
+      "key": 1000202,
+      "string_key": "BuffLevel_Equip_Set_Stealth_Animal_Wild_NonBattle_Deer"
+    }
+  },
+  {
+    "1000203": {
+      "key": 1000203,
+      "string_key": "BuffLevel_Equip_Set_Stealth_Animal_Ent"
+    }
+  },
+  {
+    "1000087": {
+      "key": 1000087,
+      "string_key": "BuffLevel_Equip_Set_Stealth_Human"
+    }
+  },
+  {
+    "1000128": {
+      "key": 1000128,
+      "string_key": "BuffLevel_Equip_Set_Stealth_Faction_DemenissMP"
+    }
+  },
+  {
+    "1000227": {
+      "key": 1000227,
+      "string_key": "BuffLevel_Equip_Set_Stealth_Faction_Thorel_Demeniss"
+    }
+  },
+  {
+    "1000126": {
+      "key": 1000126,
+      "string_key": "BuffLevel_Equip_Set_Stealth_Faction_LonelyJackal"
+    }
+  },
+  {
+    "1000127": {
+      "key": 1000127,
+      "string_key": "BuffLevel_Equip_Set_Stealth_Faction_DrunkenBlackBears"
+    }
+  },
+  {
+    "1000165": {
+      "key": 1000165,
+      "string_key": "BuffLevel_Equip_Set_Stealth_Faction_Desert_Harrier"
+    }
+  },
+  {
+    "1000196": {
+      "key": 1000196,
+      "string_key": "BuffLevel_Equip_Set_Stealth_Faction_DawnMoon"
+    }
+  },
+  {
+    "1000197": {
+      "key": 1000197,
+      "string_key": "BuffLevel_Equip_Set_Stealth_Faction_Faceless"
+    }
+  },
+  {
+    "1000198": {
+      "key": 1000198,
+      "string_key": "BuffLevel_Equip_Set_Stealth_Faction_ThiefDusksong"
+    }
+  },
+  {
+    "1000215": {
+      "key": 1000215,
+      "string_key": "BuffLevel_Equip_Set_Stealth_Faction_WyvernTamers"
+    }
+  },
+  {
+    "1000216": {
+      "key": 1000216,
+      "string_key": "BuffLevel_Equip_Set_Stealth_Faction_MistOwls"
+    }
+  },
+  {
+    "1000199": {
+      "key": 1000199,
+      "string_key": "BuffLevel_Equip_Set_Stealth_Faction_PirateI"
+    }
+  },
+  {
+    "1000228": {
+      "key": 1000228,
+      "string_key": "BuffLevel_Equip_Set_Stealth_Faction_BleedBlade"
+    }
+  },
+  {
+    "1000229": {
+      "key": 1000229,
+      "string_key": "BuffLevel_Equip_Set_Stealth_Faction_Bandit"
+    }
+  },
+  {
+    "1000230": {
+      "key": 1000230,
+      "string_key": "BuffLevel_Equip_Set_Stealth_Faction_Antumbra"
+    }
+  },
+  {
+    "1000275": {
+      "key": 1000275,
+      "string_key": "BuffLevel_Equip_Set_Stealth_Faction_Flame_Knights"
+    }
+  },
+  {
+    "1000231": {
+      "key": 1000231,
+      "string_key": "BuffLevel_Equip_Set_Stealth_Faction_DeerKingSaigord"
+    }
+  },
+  {
+    "1000232": {
+      "key": 1000232,
+      "string_key": "BuffLevel_Equip_Set_Stealth_Faction_Dewhaven"
+    }
+  },
+  {
+    "1000233": {
+      "key": 1000233,
+      "string_key": "BuffLevel_Equip_Set_Stealth_Faction_SteelArrows"
+    }
+  },
+  {
+    "1000234": {
+      "key": 1000234,
+      "string_key": "BuffLevel_Equip_Set_Stealth_Faction_WolfPursuer"
+    }
+  },
+  {
+    "1000245": {
+      "key": 1000245,
+      "string_key": "BuffLevel_Equip_Set_Stealth_Faction_Halsius"
+    }
+  },
+  {
+    "1000069": {
+      "key": 1000069,
+      "string_key": "BuffLevel_Useless_Faction_Hide"
+    }
+  },
+  {
+    "1000249": {
+      "key": 1000249,
+      "string_key": "BuffLevel_Check_NonSlip"
+    }
+  },
+  {
+    "1000081": {
+      "key": 1000081,
+      "string_key": "BuffLevel_Boss_Immune"
+    }
+  },
+  {
+    "1000191": {
+      "key": 1000191,
+      "string_key": "BuffLevel_Item_Active_Food_ComaImmune"
+    }
+  },
+  {
+    "1000192": {
+      "key": 1000192,
+      "string_key": "BuffLevel_Item_Active_Food_SOUNDATTACK"
+    }
+  },
+  {
+    "1000096": {
+      "key": 1000096,
+      "string_key": "BuffLevel_Socket_AttackDamageReduction"
+    }
+  },
+  {
+    "1000097": {
+      "key": 1000097,
+      "string_key": "BuffLevel_Socket_GuardPVRate"
+    }
+  },
+  {
+    "1000100": {
+      "key": 1000100,
+      "string_key": "BuffLevel_Socket_ClimbSpeedRate"
+    }
+  },
+  {
+    "1000122": {
+      "key": 1000122,
+      "string_key": "BuffLevel_Socket_StaminaRegen"
+    }
+  },
+  {
+    "1000107": {
+      "key": 1000107,
+      "string_key": "BuffLevel_Socket_SwimSpeedRate"
+    }
+  },
+  {
+    "1000090": {
+      "key": 1000090,
+      "string_key": "BuffLevel_Machine_AddDamageRate"
+    }
+  },
+  {
+    "1000108": {
+      "key": 1000108,
+      "string_key": "BuffLevel_CommonHexe_AddDamageRate"
+    }
+  },
+  {
+    "1000109": {
+      "key": 1000109,
+      "string_key": "BuffLevel_CommonHumanoid_AddDamageRate"
+    }
+  },
+  {
+    "1000110": {
+      "key": 1000110,
+      "string_key": "BuffLevel_CommonGolem_AddDamageRate"
+    }
+  },
+  {
+    "1000111": {
+      "key": 1000111,
+      "string_key": "BuffLevel_Boss_AddDamageRate"
+    }
+  },
+  {
+    "1000112": {
+      "key": 1000112,
+      "string_key": "BuffLevel_CommonAnimal_AddDamageRate"
+    }
+  },
+  {
+    "1000113": {
+      "key": 1000113,
+      "string_key": "BuffLevel_Creature_AddDamageRate"
+    }
+  },
+  {
+    "1000114": {
+      "key": 1000114,
+      "string_key": "BuffLevel_Socket_ContributionExp"
+    }
+  },
+  {
+    "1000115": {
+      "key": 1000115,
+      "string_key": "BuffLevel_Socket_SkillPointExp"
+    }
+  },
+  {
+    "1000089": {
+      "key": 1000089,
+      "string_key": "BuffLevel_FoodSkillLevelUp"
+    }
+  },
+  {
+    "1000091": {
+      "key": 1000091,
+      "string_key": "BuffLevel_ReduceCraftMaterial"
+    }
+  },
+  {
+    "1000116": {
+      "key": 1000116,
+      "string_key": "BuffLevel_Socket_BlockAmmoConsume"
+    }
+  },
+  {
+    "1000117": {
+      "key": 1000117,
+      "string_key": "BuffLevel_Socket_AddMoneyDropRate"
+    }
+  },
+  {
+    "1000119": {
+      "key": 1000119,
+      "string_key": "BuffLevel_Socket_AdditionalThief"
+    }
+  },
+  {
+    "1000099": {
+      "key": 1000099,
+      "string_key": "BuffLevel_AdditionalFriendly"
+    }
+  },
+  {
+    "1000123": {
+      "key": 1000123,
+      "string_key": "BuffLevel_AdditionalVehicleExp"
+    }
+  },
+  {
+    "1000124": {
+      "key": 1000124,
+      "string_key": "BuffLevel_AdditionalPetFriendly"
+    }
+  },
+  {
+    "1000071": {
+      "key": 1000071,
+      "string_key": "BuffLevel_CollectDrop_Ore"
+    }
+  },
+  {
+    "1000072": {
+      "key": 1000072,
+      "string_key": "BuffLevel_CollectDrop_Plant"
+    }
+  },
+  {
+    "1000073": {
+      "key": 1000073,
+      "string_key": "BuffLevel_CollectDrop_Animal"
+    }
+  },
+  {
+    "1000105": {
+      "key": 1000105,
+      "string_key": "BuffLevel_Drop_Log"
+    }
+  },
+  {
+    "1000176": {
+      "key": 1000176,
+      "string_key": "BuffLevel_Drop_Mining"
+    }
+  },
+  {
+    "1000093": {
+      "key": 1000093,
+      "string_key": "BuffLevel_CollectDrop_Log"
+    }
+  },
+  {
+    "1000226": {
+      "key": 1000226,
+      "string_key": "BuffLevel_CollectDrop_Machine"
+    }
+  },
+  {
+    "1000066": {
+      "key": 1000066,
+      "string_key": "BuffLevel_EquipDropRate"
+    }
+  },
+  {
+    "1000149": {
+      "key": 1000149,
+      "string_key": "BuffLevel_AbyssGrass_Immune"
+    }
+  },
+  {
+    "1000150": {
+      "key": 1000150,
+      "string_key": "BuffLevel_Passive_Hyena_PoisonImmune"
+    }
+  },
+  {
+    "1000225": {
+      "key": 1000225,
+      "string_key": "BuffLevel_Passive_CCImumune"
+    }
+  },
+  {
+    "1000151": {
+      "key": 1000151,
+      "string_key": "BuffLevel_Passive_Immune_Bismuth"
+    }
+  },
+  {
+    "1000152": {
+      "key": 1000152,
+      "string_key": "BuffLevel_Passive_DeerKingHelm"
+    }
+  },
+  {
+    "1000153": {
+      "key": 1000153,
+      "string_key": "BuffLevel_Socket_AddKillSkillLevel"
+    }
+  },
+  {
+    "1000270": {
+      "key": 1000270,
+      "string_key": "BuffLevel_Socket_DecreaseHP_IncreaseMP_Dot_Desc"
+    }
+  },
+  {
+    "1000130": {
+      "key": 1000130,
+      "string_key": "BuffLevel_Passive_Myurdin_Sword"
+    }
+  },
+  {
+    "1000131": {
+      "key": 1000131,
+      "string_key": "BuffLevel_Passive_SplitHornSword"
+    }
+  },
+  {
+    "1000132": {
+      "key": 1000132,
+      "string_key": "BuffLevel_Passive_SizlekSword"
+    }
+  },
+  {
+    "1000253": {
+      "key": 1000253,
+      "string_key": "BuffLevel_Passive_HexeMarie"
+    }
+  },
+  {
+    "1000134": {
+      "key": 1000134,
+      "string_key": "BuffLevel_Passive_CrowmanSword"
+    }
+  },
+  {
+    "1000135": {
+      "key": 1000135,
+      "string_key": "BuffLevel_Passive_CaliburnRapier"
+    }
+  },
+  {
+    "1000136": {
+      "key": 1000136,
+      "string_key": "BuffLevel_Passive_ReedDevilSword"
+    }
+  },
+  {
+    "1000133": {
+      "key": 1000133,
+      "string_key": "BuffLevel_Passive_MasterDoo"
+    }
+  },
+  {
+    "1000138": {
+      "key": 1000138,
+      "string_key": "BuffLevel_Passive_HamondBindel_LongSword"
+    }
+  },
+  {
+    "1000139": {
+      "key": 1000139,
+      "string_key": "BuffLevel_Passive_RedsentinelBow"
+    }
+  },
+  {
+    "1000256": {
+      "key": 1000256,
+      "string_key": "BuffLevel_Passive_Trukan"
+    }
+  },
+  {
+    "1000259": {
+      "key": 1000259,
+      "string_key": "BuffLevel_Passive_Catfish"
+    }
+  },
+  {
+    "1000142": {
+      "key": 1000142,
+      "string_key": "BuffLevel_Passive_Antumbra_TwoHandSword"
+    }
+  },
+  {
+    "1000159": {
+      "key": 1000159,
+      "string_key": "BuffLevel_Passive_Moonhead_GiantSpear_Fire"
+    }
+  },
+  {
+    "1000163": {
+      "key": 1000163,
+      "string_key": "BuffLevel_Passive_Moonhead_GiantSpear_Ice"
+    }
+  },
+  {
+    "1000164": {
+      "key": 1000164,
+      "string_key": "BuffLevel_Passive_Moonhead_GiantSpear_Lightning"
+    }
+  },
+  {
+    "1000144": {
+      "key": 1000144,
+      "string_key": "BuffLevel_Passive_Ator_Sword"
+    }
+  },
+  {
+    "1000251": {
+      "key": 1000251,
+      "string_key": "BuffLevel_Passive_SilverArmor"
+    }
+  },
+  {
+    "1000137": {
+      "key": 1000137,
+      "string_key": "BuffLevel_Passive_Merrick"
+    }
+  },
+  {
+    "1000263": {
+      "key": 1000263,
+      "string_key": "BuffLevel_Passive_Muscan"
+    }
+  },
+  {
+    "1000148": {
+      "key": 1000148,
+      "string_key": "BuffLevel_Passive_SoulKnight_OneHandSword"
+    }
+  },
+  {
+    "1000161": {
+      "key": 1000161,
+      "string_key": "BuffLevel_Passive_WhiteHorn"
+    }
+  },
+  {
+    "1000156": {
+      "key": 1000156,
+      "string_key": "BuffLevel_Passive_FlameKnightSword"
+    }
+  },
+  {
+    "1000140": {
+      "key": 1000140,
+      "string_key": "BuffLevel_Passive_Ludvig"
+    }
+  },
+  {
+    "1000254": {
+      "key": 1000254,
+      "string_key": "BuffLevel_Passive_TarandusWarrior"
+    }
+  },
+  {
+    "1000250": {
+      "key": 1000250,
+      "string_key": "BuffLevel_Passive_Ogre"
+    }
+  },
+  {
+    "1000175": {
+      "key": 1000175,
+      "string_key": "BuffLevel_Passive_Karanda"
+    }
+  },
+  {
+    "1000266": {
+      "key": 1000266,
+      "string_key": "BuffLevel_Passive_Primus"
+    }
+  },
+  {
+    "1000129": {
+      "key": 1000129,
+      "string_key": "BuffLevel_Passive_Titan"
+    }
+  },
+  {
+    "1000258": {
+      "key": 1000258,
+      "string_key": "BuffLevel_Passive_Priscus"
+    }
+  },
+  {
+    "1000261": {
+      "key": 1000261,
+      "string_key": "BuffLevel_Passive_Praevus"
+    }
+  },
+  {
+    "1000257": {
+      "key": 1000257,
+      "string_key": "BuffLevel_Passive_Leebur"
+    }
+  },
+  {
+    "1000160": {
+      "key": 1000160,
+      "string_key": "BuffLevel_Passive_LanFord"
+    }
+  },
+  {
+    "1000125": {
+      "key": 1000125,
+      "string_key": "BuffLevel_Passive_Forgotten_General"
+    }
+  },
+  {
+    "1000155": {
+      "key": 1000155,
+      "string_key": "BuffLevel_Passive_QueenSpider"
+    }
+  },
+  {
+    "1000260": {
+      "key": 1000260,
+      "string_key": "BuffLevel_Passive_ImpBoss"
+    }
+  },
+  {
+    "1000255": {
+      "key": 1000255,
+      "string_key": "BuffLevel_Passive_Skevald"
+    }
+  },
+  {
+    "1000265": {
+      "key": 1000265,
+      "string_key": "BuffLevel_Passive_Antumbra_Spear"
+    }
+  },
+  {
+    "1000162": {
+      "key": 1000162,
+      "string_key": "BuffLevel_Passive_GottiSword"
+    }
+  },
+  {
+    "1000088": {
+      "key": 1000088,
+      "string_key": "BuffLevel_Passive_DarknessKingHalberd"
+    }
+  },
+  {
+    "1000169": {
+      "key": 1000169,
+      "string_key": "BuffLevel_Passive_Antumbra_TwoHandRod"
+    }
+  },
+  {
+    "1000170": {
+      "key": 1000170,
+      "string_key": "BuffLevel_Passive_SolidBringer_WarHammer"
+    }
+  },
+  {
+    "1000264": {
+      "key": 1000264,
+      "string_key": "BuffLevel_Passive_Gwen"
+    }
+  },
+  {
+    "1000120": {
+      "key": 1000120,
+      "string_key": "BuffLevel_Passive_Bastier_Gear"
+    }
+  },
+  {
+    "1000195": {
+      "key": 1000195,
+      "string_key": "BuffLevel_Fishing_Autoreel"
+    }
+  },
+  {
+    "1000223": {
+      "key": 1000223,
+      "string_key": "BuffLevel_Hit_HPRecover"
+    }
+  },
+  {
+    "1000224": {
+      "key": 1000224,
+      "string_key": "BuffLevel_Hit_MPRecover"
+    }
+  },
+  {
+    "1000248": {
+      "key": 1000248,
+      "string_key": "BuffLevel_Hit_SPRecover"
+    }
+  },
+  {
+    "1000208": {
+      "key": 1000208,
+      "string_key": "BuffLevel_Passive_Attack_HPRecover"
+    }
+  },
+  {
+    "1000209": {
+      "key": 1000209,
+      "string_key": "BuffLevel_Passive_Attack_MPRecover"
+    }
+  },
+  {
+    "1000210": {
+      "key": 1000210,
+      "string_key": "BuffLevel_Passive_Attack_SPRecover"
+    }
+  },
+  {
+    "1000252": {
+      "key": 1000252,
+      "string_key": "BuffLevel_Attack_HPRecover"
+    }
+  },
+  {
+    "1000262": {
+      "key": 1000262,
+      "string_key": "BuffLevel_Attack_MPRecover"
+    }
+  },
+  {
+    "1000273": {
+      "key": 1000273,
+      "string_key": "BuffLevel_Attack_SPRecover"
+    }
+  },
+  {
+    "1000279": {
+      "key": 1000279,
+      "string_key": "BuffLevel_WildSpirit_Boar_Angry"
+    }
+  },
+  {
+    "1000211": {
+      "key": 1000211,
+      "string_key": "BuffLevel_TradeShopSellPricePercent"
+    }
+  },
+  {
+    "1000212": {
+      "key": 1000212,
+      "string_key": "BuffLevel_Passive_Combo"
+    }
+  },
+  {
+    "1000213": {
+      "key": 1000213,
+      "string_key": "BuffLevel_HorseArmor_Shoe_StaminaRegen"
+    }
+  },
+  {
+    "1000147": {
+      "key": 1000147,
+      "string_key": "BuffLevel_Socket_AddCriticalRateByMaterialKey_PlateArmor"
+    }
+  },
+  {
+    "1000154": {
+      "key": 1000154,
+      "string_key": "BuffLevel_Socket_AddCriticalRateByMaterialKey_LeatherArmor"
+    }
+  },
+  {
+    "1000157": {
+      "key": 1000157,
+      "string_key": "BuffLevel_Socket_AddCriticalRateByMaterialKey_FabricArmor"
+    }
+  },
+  {
+    "1000214": {
+      "key": 1000214,
+      "string_key": "BuffLevel_HorseArmor_Stirrup_HPRegen"
+    }
+  },
+  {
+    "1000267": {
+      "key": 1000267,
+      "string_key": "BuffLevel_Boss_PauseCount"
+    }
+  },
+  {
+    "1000268": {
+      "key": 1000268,
+      "string_key": "BuffLevel_Boss_ThreatCount"
+    }
+  },
+  {
+    "1000269": {
+      "key": 1000269,
+      "string_key": "BuffLevel_BumpCountStart"
+    }
+  },
+  {
+    "1000102": {
+      "key": 1000102,
+      "string_key": "BuffLevel_MountedHit"
+    }
+  },
+  {
+    "1000103": {
+      "key": 1000103,
+      "string_key": "BuffLevel_Legendary_Wolf_Effect"
+    }
+  },
+  {
+    "1000118": {
+      "key": 1000118,
+      "string_key": "BuffLevel_Ludvig_Effect"
+    }
+  },
+  {
+    "1000193": {
+      "key": 1000193,
+      "string_key": "BuffLevel_Ludvig_Awakened_Effect"
+    }
+  },
+  {
+    "1000194": {
+      "key": 1000194,
+      "string_key": "BuffLevel_DeadBlood_Effect"
+    }
+  },
+  {
+    "1000217": {
+      "key": 1000217,
+      "string_key": "BuffLevel_ReedDevil_EyeLights_Effect"
+    }
+  },
+  {
+    "1000218": {
+      "key": 1000218,
+      "string_key": "BuffLevel_DarkMyordin_EyeLights_Effect"
+    }
+  },
+  {
+    "1000246": {
+      "key": 1000246,
+      "string_key": "BuffLevel_FlameMyurdin_Effect"
+    }
+  },
+  {
+    "1000235": {
+      "key": 1000235,
+      "string_key": "BuffLevel_Boss_EyeLights_Effect"
+    }
+  },
+  {
+    "1000236": {
+      "key": 1000236,
+      "string_key": "BuffLevel_WhiteHorn_EyeLights_Effect"
+    }
+  },
+  {
+    "1000237": {
+      "key": 1000237,
+      "string_key": "BuffLevel_Nuclear_Fusion_Effect"
+    }
+  },
+  {
+    "1000238": {
+      "key": 1000238,
+      "string_key": "BuffLevel_ReedDevil_Shadow_Effect"
+    }
+  },
+  {
+    "1000239": {
+      "key": 1000239,
+      "string_key": "BuffLevel_ReedDevil_Clone_Shadow_Effect"
+    }
+  },
+  {
+    "1000240": {
+      "key": 1000240,
+      "string_key": "BuffLevel_Hexe_Marie_Effect"
+    }
+  },
+  {
+    "1000241": {
+      "key": 1000241,
+      "string_key": "BuffLevel_WizardBracelet_Effect"
+    }
+  },
+  {
+    "1000242": {
+      "key": 1000242,
+      "string_key": "BuffLevel_Wizard_Halo_Effect"
+    }
+  },
+  {
+    "1000243": {
+      "key": 1000243,
+      "string_key": "BuffLevel_Giant_Titan_Effect"
+    }
+  },
+  {
+    "1000222": {
+      "key": 1000222,
+      "string_key": "BuffLevel_Abyss_Kutum_Effect"
+    }
+  },
+  {
+    "1000247": {
+      "key": 1000247,
+      "string_key": "BuffLevel_Oongka_SuperArmorEffect"
+    }
+  },
+  {
+    "1000172": {
+      "key": 1000172,
+      "string_key": "BuffLevel_Armor_Plate_Mastery"
+    }
+  },
+  {
+    "1000173": {
+      "key": 1000173,
+      "string_key": "BuffLevel_Armor_Leather_Mastery"
+    }
+  },
+  {
+    "1000174": {
+      "key": 1000174,
+      "string_key": "BuffLevel_Armor_Fabric_Mastery"
+    }
+  },
+  {
+    "1000187": {
+      "key": 1000187,
+      "string_key": "BuffLevel_Armor_Plate_Mastery_Stat"
+    }
+  },
+  {
+    "1000188": {
+      "key": 1000188,
+      "string_key": "BuffLevel_Armor_Leather_Mastery_Stat"
+    }
+  },
+  {
+    "1000206": {
+      "key": 1000206,
+      "string_key": "BuffLevel_Armor_Fabric_Mastery_Stat"
+    }
+  },
+  {
+    "1000000": {
+      "key": 1000000,
+      "string_key": "BuffLevel_Temperature"
+    }
+  },
+  {
+    "1000145": {
+      "key": 1000145,
+      "string_key": "BuffLevel_Temperature_Debuff_Cold"
+    }
+  },
+  {
+    "1000146": {
+      "key": 1000146,
+      "string_key": "BuffLevel_Temperature_Debuff_Hot"
+    }
+  },
+  {
+    "1000067": {
+      "key": 1000067,
+      "string_key": "BuffLevel_Electricity"
+    }
+  },
+  {
+    "1000143": {
+      "key": 1000143,
+      "string_key": "BuffLevel_Temperature_Wagon"
+    }
+  },
+  {
+    "1000080": {
+      "key": 1000080,
+      "string_key": "BuffLevel_Temperature_Boss"
+    }
+  },
+  {
+    "1000158": {
+      "key": 1000158,
+      "string_key": "BuffLevel_Temperature_Insect"
+    }
+  },
+  {
+    "1000244": {
+      "key": 1000244,
+      "string_key": "BuffLevel_Electricity_Boss"
+    }
+  },
+  {
+    "1000271": {
+      "key": 1000271,
+      "string_key": "BuffLevel_Electricity_Machine"
+    }
+  },
+  {
+    "1000027": {
+      "key": 1000027,
+      "string_key": "BuffLevel_RedLightning"
+    }
+  },
+  {
+    "1000028": {
+      "key": 1000028,
+      "string_key": "BuffLevel_Bismuth"
+    }
+  },
+  {
+    "1000021": {
+      "key": 1000021,
+      "string_key": "BuffLevel_Confusion"
+    }
+  },
+  {
+    "1000020": {
+      "key": 1000020,
+      "string_key": "BuffLevel_Poison"
+    }
+  },
+  {
+    "1000032": {
+      "key": 1000032,
+      "string_key": "BuffLevel_AbyssPoison"
+    }
+  },
+  {
+    "1000023": {
+      "key": 1000023,
+      "string_key": "BuffLevel_WhitePoison"
+    }
+  },
+  {
+    "1000022": {
+      "key": 1000022,
+      "string_key": "BuffLevel_PuplePoison"
+    }
+  },
+  {
+    "1000272": {
+      "key": 1000272,
+      "string_key": "BuffLevel_WetNess"
+    }
+  }
+]
