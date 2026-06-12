@@ -7,6 +7,7 @@ import os
 import contextlib
 import logging
 from pathlib import Path
+import string
 from i18n import tr
 import dmm_parser as dmm
 from dmm_parser.pack_mod import pack_mod
@@ -42,6 +43,28 @@ except Exception:
 
 log = logging.getLogger(__name__)
 
+def find_game_path() -> str:
+    candidates = []
+
+    for letter in string.ascii_uppercase:
+        candidates.append(
+            f"{letter}:\\SteamLibrary\\steamapps\\common\\Crimson Desert"
+        )
+
+    candidates.extend(
+        [
+            r"C:\Program Files (x86)\Steam\steamapps\common\Crimson Desert",
+            r"C:\Program Files\Steam\steamapps\common\Crimson Desert",
+            r"C:\Program Files\Epic Games\CrimsonDesert",
+        ]
+    )
+
+    for path in candidates:
+        papgt = os.path.join(path, "meta", "0.papgt")
+        if os.path.isfile(papgt):
+            return path
+
+    return ""
 
 def extract_file_data(
     game_dir: str = "",
@@ -143,7 +166,9 @@ class GameBrowserTab(QWidget):
 
         self._config = config
         self._show_guide = show_guide_fn
-        self._game_path = path or self._config.get("game_install_path", "")
+        self._game_path = find_game_path()
+        # self._game_path = path or self._config.get("game_install_path", "")
+        # self.set_game_path(path or self._config.get("game_install_path", path))
         self._build_ui()
 
     def _build_ui(self):
@@ -162,30 +187,11 @@ class GameBrowserTab(QWidget):
 
         self._tree_view = tree_view
 
-        # _dmp_fns = [
-        #     x
-        #     for x in dir(dmm)
-        #     if "parse" in x.lower() or "extract" in x.lower()
-        # ]
-        # log.info(
-        #     "[DIAG] dmm_parser spec: %s", getattr(dmm, "__spec__", "None")
-        # )
-        # log.info("[DIAG] dmm_parser funcs: %s", _dmp_fns)
-        # _dmp_fns = [
-        #     x
-        #     for x in dir(dmm.dmm_parser)
-        #     if "parse" in x.lower() or "extract" in x.lower()
-        # ]
-        # log.info(
-        #     "[DIAG] dmm_parser.dmm_parser spec: %s",
-        #     getattr(dmm.dmm_parser, "__spec__", "None"),
-        # )
-        # log.info("[DIAG] dmm_parser.dmm_parser funcs: %s", _dmp_fns)
-
     def set_game_path(self, path: str):
-        self._game_path = path
+        self._game_path = Path(path)
 
     def reload_model(self):
+        log.info(self._game_path)
         if not self._game_path:
             QMessageBox.warning(
                 self,
