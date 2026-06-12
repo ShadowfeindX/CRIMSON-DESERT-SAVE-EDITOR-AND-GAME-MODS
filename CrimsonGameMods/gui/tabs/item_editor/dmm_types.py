@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 # from dataclasses import dataclass
-from typing import TypedDict
+from typing import List, TypedDict, Union
 
 class LocalizableString(TypedDict):
     category: int
@@ -522,6 +522,102 @@ class ItemInfo(TypedDict):
     max_endurance: int
     """u16"""
     repair_data_list: list[RepairData]
+
+class UpgradeGraph(TypedDict):
+    a: int
+    b: int
+    c: int
+    d: int
+
+class ResourceItem(TypedDict):
+    lookup: int
+    value: int
+
+class BuffBase(TypedDict):
+    asset_path: str
+    by132: int
+    by58: int
+    by68: int
+    by69: int
+    carray_u16: List[int]
+    carray_u32: List[int]
+    category: int
+    flags_a: int
+    flags_b: int
+    id: int
+    lookup_88: int
+    lookup_90: int
+    lookup_a_60: int
+    lookup_b_62: int
+    lookup_c_64: int
+    lookup_d_66: int
+    name_id: int
+    qword_a: int
+    qword_b: int
+    qword_c: int
+    tag: int
+    u32_at128: int
+    u32_at136: int
+    u32_at72: int
+    u32_at76: int
+    u32_at80: int
+    u32_at84: int
+
+class BuffVariantBody(TypedDict, total=False):
+    f00: Union[int, List[int]]
+    f01: int
+    f02: int
+    f03: int
+    f04: int
+
+class BuffVariant(TypedDict):
+    body: BuffVariantBody
+    type: str
+
+class BuffEntry(TypedDict):
+    absent_flag: int
+    base: BuffBase
+    variant: BuffVariant
+
+class SkillInfo(TypedDict):
+    """A single item parsed from the skillinfo binary file."""
+
+    allow_skill_with_low_resource: int
+    apply_type: int
+    buff_level_list: List[List[BuffEntry]]
+    buff_sustain_flag: int
+    cooltime: int
+    damage_type: int
+    dev_extra_a: str
+    dev_extra_b: str
+    dev_skill_desc: str
+    dev_skill_name: str
+    faction_info: int
+    icon_path: int
+    is_blocked: int
+    is_learn_use_artifact: int
+    is_ui_use_allowed: int
+    is_use_child_pattern_description_buff_data: int
+    key: int
+    learn_knowledge_info: int
+    learn_level: int
+    max_level: int
+    need_upgrade_experience_graph: UpgradeGraph
+    need_upgrade_item_count_graph: UpgradeGraph
+    need_upgrade_item_info: int
+    parent_skill: int
+    reserve_slot_info_list: List
+    skill_group_key: int
+    skill_group_key_list: List[int]
+    string_key: str
+    ui_type: int
+    usable_character_info_list: List
+    usable_condition: List[int]
+    use_battery_stat: int
+    use_driver_resource_stat_list: List
+    use_resource_item_list: List[ResourceItem]
+    use_resource_stat_list: List
+    video_path: int
 
 def _safe_iv(v, default=0):
     """Safely extract int from plain int, float, or dmm_parser nested dict.
