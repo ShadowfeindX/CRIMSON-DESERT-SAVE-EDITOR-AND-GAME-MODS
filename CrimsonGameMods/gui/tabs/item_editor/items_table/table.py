@@ -14,7 +14,7 @@ from PySide6.QtWidgets import (
 )
 
 from ..helpers import ItemEditorInfo, ItemEditorInfoDetails
-from ..signals import SIGNALS
+from ..signals import SIGNALS, SLOTS
 from .model import ItemTableModel
 from .proxy import ItemTableModelProxy
 from .view import ItemEditorTableView
@@ -37,12 +37,15 @@ class ItemTable(QFrame):
         SIGNALS.s_item_selected = self.s_item_selected
         SIGNALS.s_items_selected = self.s_items_selected
 
+        # SLOTS.current_selection = self.current_selection
+
     def _connect_signals(self):
         SIGNALS.s_iteminfo_extracted.connect(self.load)
         self.table.selectionModel().selectionChanged.connect(
             self._selection_changed
         )
-        "STUB"
+
+        SIGNALS.s_item_selected.connect(SLOTS.current_selection)
 
     @Slot(QItemSelection, QItemSelection)
     def _selection_changed(

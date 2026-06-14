@@ -50,7 +50,7 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
-from gui.tabs.item_editor.signals import SIGNALS
+from gui.tabs.item_editor.signals import SIGNALS, SLOTS
 
 from .helpers import HistoryEntry, ItemEditorInfo, CONFIG
 
@@ -118,16 +118,9 @@ class ItemEditorTab(QWidget):
         SIGNALS.s_history_entry_added = self.s_history_entry_added
 
     def _connect_signals(self):
-        SIGNALS.s_history_entry_added.connect(self.log_history)
         SIGNALS.ActionBar.s_extract.connect(self._extract)
 
-    @Slot(HistoryEntry, bool)
-    def log_history(self, entry: HistoryEntry, is_remove: bool = False):
-        log.info(
-            f"History entry removed: ({entry.description})"
-            if is_remove
-            else f"History entry added: ({entry.description})"
-        )
+        SIGNALS.s_history_entry_added.connect(SLOTS._log_history)
 
     @Slot(str)
     def set_game_path(self, path: str):
@@ -141,11 +134,7 @@ class ItemEditorTab(QWidget):
 
                 try:
                     with open("data/sample.json", "r+", encoding="utf-8") as f:
-                        data = ItemEditorInfo(
-                            [
-                                json.load(f)
-                            ]
-                        )
+                        data = ItemEditorInfo([json.load(f)])
                         SIGNALS.s_iteminfo_extracted.emit(data)
                 except BaseException as e:
                     print(e)
@@ -186,14 +175,15 @@ class ItemEditorTab(QWidget):
                     with open("./data/sample.json", "w") as f:
                         json.dump(data[0], f)
 
-                    log.info(f"extracted {len(data)} items from vanilla pabgb...")
+                    log.info(
+                        f"extracted {len(data)} items from vanilla pabgb..."
+                    )
                     log.info("sample item data written to data/sample.json")
                     SIGNALS.s_iteminfo_extracted.emit(iteminfo)
                 except BaseException as e:
                     print(e)
                     log.critical(
-                        "Error: Failed to extract vanilla item data!\n"
-                        f"{e}"
+                        f"Error: Failed to extract vanilla item data!\n{e}"
                     )
             case _:
                 log.critical("Invalid extract type: %s", type)

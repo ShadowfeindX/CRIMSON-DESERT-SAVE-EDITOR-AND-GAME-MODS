@@ -30,7 +30,7 @@ ItemEditorTab  (tab.py — top-level QWidget, owns signals & extraction logic)
 item_editor/
 ├── tab.py                       # ItemEditorTab — root widget, owns signals + extraction
 ├── layout.py                    # ItemEditorLayout — wires together action bar, search, 3 panels
-├── signals.py                   # SIGNALS / SLOTS global registries (benedict-based)
+├── signals.py                   # SIGNALS (benedict) + SLOTS (stateful class) global registries
 ├── helpers.py                   # Shared data classes, config, utilities
 ├── dmm_types.py                 # TypedDict definitions for every iteminfo sub-struct
 ├── action_bar.py                # ActionBar widget (Extract, Import, Export, Apply, Reset, Undo)
@@ -55,7 +55,7 @@ item_editor/
 └── editor_controls/             # RIGHT PANEL — tool buttons + sub-windows  ← PRIMARY WORK AREA
     ├── __init__.py              #   EditorControls (QFrame) — main widget with 3 collapsible grids
     ├── window_template.py       #   Window (QWidget) — base template for sub-windows
-    ├── json_window.py           #   JSONWindow — raw JSON viewer/editor (QTextEdit, currently stub)
+    ├── json_window.py           #   JSONWindow — raw JSON viewer (QTextEdit, read-only)
     ├── history_window.py        #   HistoryWindow — read-only viewer for the global history registry
     ├── presets.py               #   Presets — data class with Standard/Dev/Special/Custom preset dicts
     ├── presets_window.py        #   PresetsWindow — grid UI for one-click preset application
@@ -69,7 +69,6 @@ item_editor/
     │   └── target_table.py      #     TargetPassivesTable — staging area for passives to apply
     │
     └── buffs/                   #   BUFF EDITOR sub-window
-        ├── __init__.py          #     empty
         ├── window.py            #     BuffWindow — main buff editor window
         ├── action_bar.py        #     ActionBar — search, add, remove, favorites toggle
         ├── bottom_bar.py        #     BottomBar — apply to items, remove from items, clear
@@ -95,9 +94,9 @@ SIGNALS: _Signals = benedict(keyattr_dynamic=True)
 |--------------------------------------|-----------------------------------|----------------------|--------------------------------------|
 | `SIGNALS.s_status_message`           | `Signal(str, int\|None)`          | Various              | Main window status bar               |
 | `SIGNALS.s_iteminfo_extracted`       | `Signal(ItemEditorInfo)`          | `ItemEditorTab`      | `ItemTable.load()`                   |
-| `SIGNALS.s_item_selected`            | `Signal(int)`                     | `ItemTable`          | `ItemDetailsTable`, `EditorControls`, `PassiveWindow` |
+| `SIGNALS.s_item_selected`            | `Signal(int)`                     | `ItemTable`          | `ItemDetailsTable`, `EditorControls`, `PassiveWindow`, `SLOTS.current_selection` |
 | `SIGNALS.s_items_selected`           | `Signal(list[int])`               | `ItemTable`          | `PassiveWindow` (multi-select)       |
-| `SIGNALS.s_history_entry_added`      | `Signal(HistoryEntry)`            | Various              | `ItemEditorTab.log_history()`        |
+| `SIGNALS.s_history_entry_added`      | `Signal(HistoryEntry)`            | Various              | `SLOTS._log_history()`               |
 | `SIGNALS.ActionBar.s_extract`        | `Signal(str)`                     | `ActionBar`          | `ItemEditorTab._extract()`           |
 | `SIGNALS.SearchBar.s_search`         | `Signal(str)`                     | `SearchBar`          | `ItemTable.search()`                 |
 | `SIGNALS.SearchBar.s_filter`         | `Signal(str)`                     | `SearchBar`          | (wired but consumer logic pending)   |
@@ -116,6 +115,39 @@ def _ready_signals(self):
 
 The root `ItemEditorTab` calls `_ready_signals()` first in `__init__()` before
 `_build_ui()` so children can connect during construction.
+
+### Slots System (`SLOTS`)
+
+Alongside `SIGNALS` (event-based, fire-and-forget), the module defines a **`SLOTS`**
+singleton that holds **shared mutable state** and **callable handlers**:
+
+```python
+class _Slots:
+    idx: int = -1  # currently selected item index (-1 = none)
+
+    def current_selection(self, idx: Optional[int] = None) -> int:
+        """Getter/setter: pass idx to update, omit to read."""
+        if idx is not None:
+            self.idx = idx
+        return self.idx
+
+    def _log_history(self, entry: HistoryEntry, is_remove: bool = False) -> None:
+        """Log history entry (moved here from ItemEditorTab.log_history)."""
+
+SLOTS: _Slots = _Slots()
+```
+
+Key points:
+- **`SLOTS` is a plain class instance**, not a `benedict`. It replaces the earlier
+  `TypedDict` stub and the `benedict(keyattr_dynamic=True)` instantiation.
+- **`current_selection()`** uses a dual getter/setter idiom — pass an `int` to write,
+  omit (or pass `None`) to read. ItemTable wires `SIGNALS.s_item_selected` to
+  `SLOTS.current_selection` in `_connect_signals()`, so every row selection
+  automatically updates the shared index. Consumers (e.g. `JSONWindow`) read the
+  current selection at any time via `SLOTS.current_selection()`.
+- **`_log_history()`** is the handler for `SIGNALS.s_history_entry_added`. This logic
+  was previously a method on `ItemEditorTab` (`log_history`); it is now centralized
+  in `SLOTS` so the tab no longer owns history logging.
 
 ---
 
@@ -172,7 +204,7 @@ all items. Its sole purpose is to support **rollback and replay** of changes. En
 are not timestamped; insertion order alone is the meaningful data.
 
 History entries are emitted via `SIGNALS.s_history_entry_added` and logged
-in `ItemEditorTab.log_history()`.
+in `SLOTS._log_history()`.
 
 ### 4.4 Config (helpers.py)
 
@@ -309,8 +341,16 @@ Application flow:
 
 #### JSONWindow (`json_window.py`)
 
-Simple raw JSON viewer. On `s_item_selected`, dumps `details._data` as indented JSON
-into a `QTextEdit`. Currently read-only (no save/apply button).
+Raw JSON viewer. Reads the currently selected item's data via `SLOTS.current_selection()`.
+
+- **`_render_details(idx)`** — constructs `ItemEditorInfoDetails(idx)` and dumps
+  `details.data` (public property) as indented JSON into a `QTextEdit`. Gracefully
+  handles invalid indices by clearing the editor.
+- **On build** — seeds the editor immediately by calling `_render_details(SLOTS.current_selection())`,
+  so the window shows data even if opened after an item is already selected.
+- **On selection change** — `SIGNALS.s_item_selected` is connected to `_render_details`,
+  updating the view as the user navigates the item table.
+- Currently read-only (no save/apply button).
 
 #### HistoryWindow (`editor_controls/history_window.py`)
 
@@ -365,6 +405,8 @@ Two extraction modes in `ActionBar`:
 - **View**: `ItemEditorTableView` — `QTableView` with row selection, stretch on column 1
 - **Selection**: On selection change, emits `SIGNALS.s_item_selected(row_index)` with
   the proxy-mapped-to-source row, and `SIGNALS.s_items_selected(list[row_indices])`
+- **SLOTS wiring**: `_connect_signals()` connects `SIGNALS.s_item_selected` to
+  `SLOTS.current_selection`, ensuring the shared slot tracks the active row index.
 
 ---
 
@@ -415,6 +457,19 @@ embedded (within parent geometry) and standalone (absolute coordinates) modes.
 Uses JSON round-trip (`json.loads(json.dumps(obj))`) for deep copies.
 Returns `None` on TypeError rather than raising.
 
+### 9.6 SIGNALS / SLOTS Duality
+
+The system uses two complementary communication mechanisms:
+
+| Mechanism  | Type                | Purpose                                            |
+|------------|---------------------|----------------------------------------------------|
+| `SIGNALS`  | `benedict` (event)  | Fire-and-forget Qt signals; one-to-many broadcast  |
+| `SLOTS`    | `_Slots` (state)    | Shared mutable state + callable handlers; any component can read or write |
+
+The getter/setter idiom on `SLOTS.current_selection()` lets producers (ItemTable)
+push updates and consumers (JSONWindow, future windows) pull the current value
+at any time — decoupling them from needing a direct signal connection.
+
 ---
 
 ## 10. Known Gaps & Stubs
@@ -435,7 +490,7 @@ These are areas that exist in the UI but lack implementation:
 | **Edit VFX**                     | Advanced grid button              | No click handler                    |
 | **Dump ITEMINFO**                | Dev grid button                   | No click handler                    |
 | **Show Item Diff**               | Dev grid button                   | No click handler                    |
-| **JSON Editor save/apply**       | `json_window.py`                  | View-only QTextEdit, no save button |
+| **JSON Editor save/apply**       | `json_window.py`                  | Rendering fully functional; save/apply still absent |
 | **Preset actual data mutation**  | `presets.py` → `apply_std_preset` | Records history but doesn't mutate  |
 | **Dev preset apply**             | `presets.py` → `apply_dev_preset` | Stub (just logs)                    |
 | **Custom preset apply**          | `presets.py` → `apply_custom_preset` | Stub (just logs)                 |
@@ -502,6 +557,7 @@ To add a new tool button + window to the `editor_controls` panel:
 
 - **tab.py** — Large file (~200 lines), but most is imports. The actual `ItemEditorTab`
   class is compact: init, build UI, ready/connect signals, extraction, close event.
+  History logging (`log_history`) has been removed and delegated to `SLOTS._log_history()`.
 - **helpers.py** — Largest file (~400+ lines). Contains `ItemEditorInfoDetails`,
   `ItemEditorInfo`, `_Config`, `HistoryEntry`, utility functions, and a commented-out
   alternative proxy-based architecture (the "ItemEditorInfo as central store" pattern).

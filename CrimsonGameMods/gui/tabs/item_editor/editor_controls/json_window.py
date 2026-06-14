@@ -72,7 +72,7 @@ class JSONWindow(QWidget):
     def __init__(self, parent: QWidget):
         super().__init__()
 
-        self.setWindowTitle("Json Editor")
+        self.setWindowTitle("JSON Editor")
 
         self._ready_signals()
         self._build_ui(parent)
@@ -87,17 +87,22 @@ class JSONWindow(QWidget):
     def _connect_signals(self):
         "STUB"
 
-    def _build_ui(self, parent: QWidget):
-        layout = QHBoxLayout(self)
-        editor = QTextEdit()
-        layout.addWidget(editor)
+    def _render_details(self, idx: int):
+        try:
+            details = ItemEditorInfoDetails(idx)
+        except Exception:
+            details = None
 
-        SIGNALS.s_item_selected.connect(
-            lambda details: editor.setPlainText(
-                json.dumps(
-                    details._data, indent=2, ensure_ascii=False, default=str
-                ) if details else ""
-            )
+        self.editor.setPlainText(
+            json.dumps(details.data, indent=2, ensure_ascii=False, default=str)
+            if details
+            else ""
         )
 
-        "STUB"
+    def _build_ui(self, parent: QWidget):
+        layout = QHBoxLayout(self)
+        self.editor = QTextEdit()
+        layout.addWidget(self.editor)
+        self._render_details(SLOTS.current_selection())
+
+        SIGNALS.s_item_selected.connect(self._render_details)
