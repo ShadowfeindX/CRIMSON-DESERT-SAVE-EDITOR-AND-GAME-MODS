@@ -1,6 +1,6 @@
 # Item Editor — Technical Memo
 
-> Last updated: 2026-06-10
+> Last updated: 2026-06-13
 > Scope: `CrimsonGameMods/gui/tabs/item_editor/` and all subdirectories
 
 ---
@@ -60,13 +60,22 @@ item_editor/
     ├── presets.py               #   Presets — data class with Standard/Dev/Special/Custom preset dicts
     ├── presets_window.py        #   PresetsWindow — grid UI for one-click preset application
     │
-    └── passives/                #   PASSIVE SKILL EDITOR sub-window
-        ├── window.py            #     PassiveWindow — main passives editor window
+    ├── passives/                #   PASSIVE SKILL EDITOR sub-window
+    │   ├── window.py            #     PassiveWindow — main passives editor window
+    │   ├── action_bar.py        #     ActionBar — search, add, remove, favorites toggle
+    │   ├── bottom_bar.py        #     BottomBar — apply to items, remove from items, clear
+    │   ├── indexed_table.py     #     IndexedPassivesTable — all known skills from catalog
+    │   ├── selected_table.py    #     SelectedPassivesTable — passives on currently selected items
+    │   └── target_table.py      #     TargetPassivesTable — staging area for passives to apply
+    │
+    └── buffs/                   #   BUFF EDITOR sub-window
+        ├── __init__.py          #     empty
+        ├── window.py            #     BuffWindow — main buff editor window
         ├── action_bar.py        #     ActionBar — search, add, remove, favorites toggle
         ├── bottom_bar.py        #     BottomBar — apply to items, remove from items, clear
-        ├── indexed_table.py     #     IndexedPassivesTable — all known skills from catalog
-        ├── selected_table.py    #     SelectedPassivesTable — passives on currently selected items
-        └── target_table.py      #     TargetPassivesTable — staging area for passives to apply
+        ├── indexed_table.py     #     IndexedBuffsTable — all buffs from catalog
+        ├── selected_table.py    #     SelectedBuffsTable — buffs on currently selected items
+        └── target_table.py      #     TargetBuffsTable — staging area with editable levels
 ```
 
 ---
@@ -142,6 +151,7 @@ Helper types: `PassiveSkillLevel`, `EnchantStatData`, `EquipmentBuff`,
 - `.data` — the raw `ItemInfo` dict
 - `.editable()` — generator of `(key, value)` for fields in `EDITABLE_ENTRIES`
 - `.passives(new, log)` — get/set `equip_passive_skill_list` with optional history logging
+- `.buffs(new, log)` — get/set `equip_buffs` across all enchant levels, bootstraps `enchant_data_list` if absent
 - `.EDITABLE_ENTRIES` — set of 15 field names that can be edited:
   `cooltime`, `docking_child_data`, `drop_default_data`, `enchant_data_list`,
   `equip_passive_skill_list`, `gimmick_info`, `gimmick_visual_prefab_data_list`,
@@ -170,7 +180,7 @@ in `ItemEditorTab.log_history()`.
 - Supports dict-like access (`CONFIG["key"]`)
 - `.save()` commits to disk
 - Used for collapsible section states (`itemeditor_standard`, etc.)
-- Also stores `favorite_passives`, `game_install_path`, `custom_preset_ask`
+- Also stores `favorite_passives`, `favorite_buffs`, `game_install_path`, `custom_preset_ask`
 
 ### 4.5 safe_iv() Utility
 
@@ -191,7 +201,7 @@ This is the **primary extensibility point** — where new editor tools are added
 | Section           | Buttons                                     | Status          |
 |-------------------|---------------------------------------------|-----------------|
 | **Standard**      | Presets, Show Preview, Transmog, Custom Item, Bulk Options, Global Options | Presets ✅, others stub |
-| **Advanced**      | Edit Passives, Edit Buffs, Edit Stats, Edit Drop Data, Edit Gimmick, Edit VFX | Passives ✅, others stub |
+| **Advanced**      | Edit Passives, Edit Buffs, Edit Stats, Edit Drop Data, Edit Gimmick, Edit VFX | Passives ✅, Buffs ✅, others stub |
 | **Dev**           | Edit JSON, View History, Dump ITEMINFO, Show Item Diff | JSON ✅ (viewer only), History ✅, others stub |
 
 ### 5.2 Window Registry Pattern
@@ -204,6 +214,7 @@ WINDOW_REGISTRY = {
     "passive": PassiveWindow,
     "json":    JSONWindow,
     "history": HistoryWindow,
+    "buff":    BuffWindow,
 }
 ```
 
@@ -265,6 +276,36 @@ Application flow:
 3. User browses indexed table, adds skills → they appear in target table
 4. User clicks "Apply Passives" → `apply_passives_to_items()` iterates selected items,
    calls `item.passives(new=..., log=True)` which mutates the data and logs history
+
+#### BuffWindow (`buffs/window.py` + sub-files)
+
+A full-featured buff editor following the same three-table pattern as PassiveWindow:
+
+- **IndexedBuffsTable** — all buffs from `data/item_editor_database/buffs.json` (283 entries)
+- **SelectedBuffsTable** — buffs currently on selected items (merged, highest level wins)
+- **TargetBuffsTable** — staging area ("buffs to apply") with editable Level column
+  (QSpinBox delegate, range 1–99), context menu (add to favorites, remove)
+- **ActionBar** — favorites toggle, search, add/remove buttons
+- **BottomBar** — apply to selected items, remove from selected items, clear target list
+
+Key differences from PassiveWindow:
+- All enchant levels share the same underlying `equip_buffs` data, so the user does
+  not select an enchant level. Writes propagate to every entry in `enchant_data_list`.
+- Target table Level column is editable via `_LevelSpinBoxDelegate`.
+- `_sync_from_table()` reads live table values back into `_selected_buffs` before any
+  operation that depends on it, ensuring spinbox edits are captured.
+- Bootstrap logic: if an item has no `enchant_data_list`, `ItemEditorInfoDetails.buffs()`
+  creates a baseline entry so the buff list has a place to live.
+- Display names are derived from `string_key` by stripping `BuffLevel_` prefix, replacing
+  `_` with spaces, and splitting CamelCase boundaries (e.g. `BuffLevel_CombatHigh` → `Combat High`).
+- Favorites are stored in `CONFIG["favorite_buffs"]`.
+
+Application flow:
+1. User selects items in ItemTable (multi-select supported)
+2. `SIGNALS.s_items_selected` → `BuffWindow._set_selected_items()`
+3. User browses indexed table, adds buffs → they appear in target table
+4. User adjusts levels via spinbox delegate in the Level column
+5. User clicks "Apply Buffs" → reads live values from target table, calls `item.buffs(new=..., log=True)`
 
 #### JSONWindow (`json_window.py`)
 
@@ -387,7 +428,7 @@ These are areas that exist in the UI but lack implementation:
 | **Custom Item**                  | Standard grid button              | No click handler                    |
 | **Bulk Options**                 | Standard grid button              | No click handler                    |
 | **Global Options**               | Standard grid button              | No click handler                    |
-| **Edit Buffs**                   | Advanced grid button              | No window in registry               |
+| ~~Edit Buffs~~                   | ~~Advanced grid button~~          | ✅ Implemented (BuffWindow)          |
 | **Edit Stats**                   | Advanced grid button              | No window in registry               |
 | **Edit Drop Data**               | Advanced grid button              | No window in registry               |
 | **Edit Gimmick**                 | Advanced grid button              | No window in registry               |
@@ -432,7 +473,7 @@ To add a new tool button + window to the `editor_controls` panel:
 4. **Wire signals** — if your tool produces changes:
    - Create `HistoryEntry` objects and emit `SIGNALS.s_history_entry_added`
    - Use `SIGNALS.s_status_message` for status bar feedback
-   - Use `ItemEditorInfoDetails.passives()` or direct dict mutation for data changes
+   - Use `ItemEditorInfoDetails.passives()` / `buffs()` or direct dict mutation for data changes
 
 5. **Persist state** (optional) — use `CONFIG["your_key"]` for settings
    and `CONFIG.save()` to persist to `editor_config.json`.
@@ -479,5 +520,6 @@ To add a new tool button + window to the `editor_controls` panel:
 - **Game install**: Auto-detected via `find_game_path()` (checks Steam/Epic directories)
 - **iteminfo.pabgb**: `{game_dir}/0008/0.pamt` → extracted via `dmm_parser`
 - **Passive skill catalog**: `data/passive_skill_catalog.json`
+- **Buff catalog**: `data/item_editor_database/buffs.json`
 - **Sample data**: `data/sample.json` (overlay extraction test data)
 - **Custom presets**: `custom_presets.json` (root-level)

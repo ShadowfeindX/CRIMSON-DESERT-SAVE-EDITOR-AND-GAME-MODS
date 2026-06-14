@@ -22,7 +22,7 @@ from PySide6.QtWidgets import QPushButton, QVBoxLayout, QWidget
 from .signals import SIGNALS
 
 
-from .dmm_types import ItemInfo, PassiveSkillLevel
+from .dmm_types import EquipmentBuff, ItemInfo, PassiveSkillLevel
 from collections import UserDict, UserList
 from enum import StrEnum, auto
 from benedict import benedict
@@ -185,6 +185,67 @@ class ItemEditorInfoDetails:
 
                 self._history.append(entry)
                 SIGNALS.s_history_entry_added.emit(entry)
+
+        return old
+
+    def buffs(
+        self, new: Optional[list[EquipmentBuff]] = None, log: bool = True
+    ) -> list[EquipmentBuff]:
+        """Get or set equip_buffs across all enchant levels.
+
+        All levels in ``enchant_data_list`` share the same buff data object,
+        so we read from the first entry and write to every entry.
+
+        If *new* is ``None`` and the item has no ``enchant_data_list`` the
+        method simply returns an empty list.  If *new* is provided but
+        ``enchant_data_list`` does not yet exist a single baseline entry is
+        bootstrapped so the buff list has somewhere to live.
+        """
+        enchant_data_list = self.data.get("enchant_data_list", []) or []
+
+        # --- read-only path: nothing to do if the structure is absent ---
+        if new is None:
+            if not enchant_data_list:
+                return []
+            return enchant_data_list[0].get("equip_buffs", [])
+
+        # --- write path ---
+        if not enchant_data_list:
+            # Bootstrap a single EnchantData entry so equip_buffs has a home.
+            baseline = {
+                "level": 0,
+                "enchant_stat_data": {
+                    "max_stat_list": [],
+                    "regen_stat_list": [],
+                    "stat_list_static": [],
+                    "stat_list_static_level": [],
+                },
+                "buy_price_list": [],
+                "equip_buffs": [],
+            }
+            enchant_data_list = [baseline]
+            self.data["enchant_data_list"] = enchant_data_list
+
+        old = enchant_data_list[0].get("equip_buffs", [])
+        snapshot = copy(old) if log else None
+
+        # Write to every enchant level entry
+        for entry in enchant_data_list:
+            entry["equip_buffs"] = new
+
+        if log:
+            hist_entry = POJO()
+            hist_entry.idx = self.idx
+            hist_entry.key = self.data["key"]
+            hist_entry.old = snapshot
+            hist_entry.new = copy(new)
+            hist = HistoryEntry(
+                HistoryEntry.EntryType.REPLACE,
+                hist_entry,
+                "Update Buff List",
+            )
+            self._history.append(hist)
+            SIGNALS.s_history_entry_added.emit(hist)
 
         return old
 

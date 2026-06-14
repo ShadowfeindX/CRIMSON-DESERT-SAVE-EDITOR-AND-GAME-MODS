@@ -58,6 +58,7 @@ from .json_window import JSONWindow
 from .history_window import HistoryWindow
 
 from .passives.window import PassiveWindow
+from .buffs.window import BuffWindow
 from gui.tabs.item_editor.helpers import ItemEditorInfoDetails, HistoryEntry, log
 from gui.tabs.item_editor.signals import SIGNALS
 
@@ -109,6 +110,7 @@ class EditorControls(QFrame):
         "passive": PassiveWindow,
         "json": JSONWindow,
         "history": HistoryWindow,
+        "buff": BuffWindow,
     }
 
     def __init__(self, parent: QWidget):
@@ -235,6 +237,7 @@ class EditorControls(QFrame):
         btns["passive"].clicked.connect(self._open_window("passive"))
 
         btns["buff"] = QPushButton("Edit Buffs")
+        btns["buff"].clicked.connect(self._open_window("buff"))
         btns["stat"] = QPushButton("Edit Stats")
         btns["drop"] = QPushButton("Edit Drop Data")
         btns["effect"] = QPushButton("Edit Gimmick")
