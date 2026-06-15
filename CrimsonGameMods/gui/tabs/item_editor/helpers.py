@@ -1,29 +1,27 @@
 from __future__ import annotations
 
-import inspect
 import os
 import json
 import string
 import subprocess
 import logging
-import json
 
 from PySide6.QtCore import (
-    QObject,
     QPoint,
     Qt,
 )
 
 from collections.abc import Sequence
-from typing import Any, Optional, Self, TypedDict
+from typing import Optional
 
 from PySide6.QtWidgets import QPushButton, QVBoxLayout, QWidget
 
-from .signals import SIGNALS
+from data.item_editor_database.database_entry import Buff, Skill
+
+from .signals import SIGNALS, SLOTS
 
 
 from .dmm_types import EquipmentBuff, ItemInfo, PassiveSkillLevel
-from collections import UserDict, UserList
 from enum import StrEnum, auto
 from benedict import benedict
 
@@ -52,6 +50,11 @@ __all__ = [
     "is_game_running",
     "find_game_path",
     "safe_iv",
+    "load_passive_skill_index",
+    "load_skill_index",
+    "load_skill_list",
+    "load_buff_index",
+    "load_buff_list",
     "log",
 ]
 
@@ -66,11 +69,136 @@ class POJO:
         )
 
 
-class _State(TypedDict):
-    "stub"
+class _State(benedict):
+    skill_index: dict[str, Skill]
+    skill_list: list[Skill]
+    buff_index: dict[str, Buff]
+    buff_list: list[Buff]
 
 
 STATE: _State = benedict(keyattr_dynamic=True)
+
+
+def load_buff_list(force=False) -> list[Buff]:
+    """Load the buff list from the buffs database file.
+
+    Returns:
+        list[Buff]: A list of Buff objects.
+            Returns empty list if loading fails.
+    """
+    if force and STATE.buff_list:
+        old = STATE.pop("buff_list")
+        del old
+
+    if not STATE.buff_list:
+        print("recreating buff list")
+        try:
+            with open(
+                "data/item_editor_database/buffs_list.json",
+                "r",
+                encoding="utf-8",
+            ) as f:
+                # print(catalog)
+                STATE.buff_list = json.load(f) or [0]
+                # buff_list = copy(catalog) or {}
+                STATE.buff_list.pop(0)
+        except BaseException as e:
+            log.error(f"An error occurred while loading the buff index!\n{e}")
+            return []
+
+    return STATE.buff_list
+
+
+def load_skill_list(force=False) -> list[Skill]:
+    """Load the passive skill list from the skills database file.
+
+    Returns:
+        list[Skill]: A list of Skill objects.
+            Returns empty list if loading fails.
+    """
+    if force and STATE.skill_list:
+        old = STATE.pop("skill_list")
+        del old
+
+    if not STATE.skill_list:
+        print("recreating skill list")
+        try:
+            with open(
+                "data/item_editor_database/skills_list.json",
+                "r",
+                encoding="utf-8",
+            ) as f:
+                # print(catalog)
+                STATE.skill_list = json.load(f) or [0]
+                # skill_list = copy(catalog) or {}
+                STATE.skill_list.pop(0)
+        except BaseException as e:
+            log.error(f"An error occurred while loading the skill index!\n{e}")
+            return []
+
+    return STATE.skill_list
+
+
+def load_buff_index(force=False) -> dict[str, Skill]:
+    """Load the buff index from the buffs database file.
+
+    Returns:
+        dict[str, Buff]: A dictionary mapping buff IDs to Buff objects.
+            Returns empty dict if loading fails.
+    """
+    if force and STATE.buff_index:
+        old = STATE.pop("buff_index")
+        del old
+
+    if not STATE.buff_index:
+        print("recreating buff index")
+        try:
+            with open(
+                "data/item_editor_database/buffs.json", "r", encoding="utf-8"
+            ) as f:
+                STATE.buff_index = json.load(f) or {}
+                STATE.buff_index.pop("999999", None)
+        except BaseException as e:
+            log.error(f"An error occurred while loading the buff index!\n{e}")
+            return {}
+
+    return STATE.buff_index
+
+
+def load_skill_index(force=False) -> dict[str, Skill]:
+    """Load the passive skill index from the skills database file.
+
+    Returns:
+        dict[str, Skill]: A dictionary mapping skill IDs to Skill objects.
+            Returns empty dict if loading fails.
+    """
+    if force and STATE.skill_index:
+        old = STATE.pop("skill_index")
+        del old
+
+    if not STATE.skill_index:
+        print("recreating skill index")
+        try:
+            with open(
+                "data/item_editor_database/skills.json", "r", encoding="utf-8"
+            ) as f:
+                # catalog = json.load(f)
+                # print(catalog)
+                STATE.skill_index = json.load(f) or {}
+                # skill_index = copy(catalog) or {}
+                STATE.skill_index.pop("999999", None)
+        except BaseException as e:
+            log.error(f"An error occurred while loading the skill index!\n{e}")
+            return {}
+
+    return STATE.skill_index
+
+
+def load_state(force=True):
+    load_buff_index(force)
+    load_buff_list(force)
+    load_skill_index(force)
+    load_skill_list(force)
 
 
 class HistoryEntry:
@@ -93,22 +221,13 @@ class HistoryEntry:
                 "stub"
 
 
-# type HistoryRegistry = Sequence[HistoryEntry]
-
-
-# class ItemEditorInfoDetails:
-#     pass
-# class ItemEditorInfo:
-#     pass
-
-
 class ItemEditorInfoDetails:
     EDITABLE_ENTRIES = {
+        "equip_passive_skill_list",
         "cooltime",
         "docking_child_data",
         "drop_default_data",
         "enchant_data_list",
-        "equip_passive_skill_list",
         "gimmick_info",
         "gimmick_visual_prefab_data_list",
         "is_dyeable",
@@ -123,7 +242,7 @@ class ItemEditorInfoDetails:
     data: ItemInfo = {}
 
     _instance = None
-    _reference: list[ItemInfo] = []
+    _reference: ItemEditorInfo = None
     _history: list[HistoryEntry] = []
 
     def __new__(cls, idx: int):
@@ -139,7 +258,9 @@ class ItemEditorInfoDetails:
     def __init__(self, idx: int):
         if idx != self.idx:
             self.idx = idx
-            ItemEditorInfoDetails.data = ItemEditorInfoDetails._reference[idx]
+            ItemEditorInfoDetails.data = (
+                ItemEditorInfoDetails._reference._data[idx]
+            )
 
     def __len__(self):
         return self.data.__len__()
@@ -151,45 +272,70 @@ class ItemEditorInfoDetails:
         return self.data.get(key, default)
 
     def items(self):
+        return (
+            (key, value)
+            for key, value in (
+                ("passives", self.passives()),
+                ("buffs", self.buffs()),
+                ("stack_size", self.stack_size()),
+            )
+            if value is not None
+        )
         return self.data.items()
 
     def history(self) -> Sequence[HistoryEntry]:
         return self._history
 
     def editable(self):
+        return self.items()
         return (
             (key, value)
-            for key, value in self.data.items()
+            for key, value in self.items()
             if key in self.EDITABLE_ENTRIES
         )
 
     def passives(
-        self, new: Optional[list[PassiveSkillLevel]] = None, log=True
+        self,
+        new: Optional[list[PassiveSkillLevel]] = None,
+        log=True,
+        refresh=True,
     ) -> list[PassiveSkillLevel]:
         old = self.data["equip_passive_skill_list"]
 
-        if new:
-            old[:] = new
+        if new is None:
+            return old
 
-            if log:
-                entry = POJO()
-                entry.idx = self.idx
-                entry.key = self.data["key"]
-                entry.old = copy(old)
-                entry.new = copy(new)
-                entry = HistoryEntry(
-                    HistoryEntry.EntryType.REPLACE,
-                    entry,
-                    "Update Passive List",
-                )
+        self._reference.dirty(self)
+        snapshot = copy(old) if log else None
 
-                self._history.append(entry)
-                SIGNALS.s_history_entry_added.emit(entry)
+        old[:] = new
+
+        if log:
+            entry = POJO()
+            entry.idx = self.idx
+            entry.key = self.data["key"]
+            entry.old = snapshot
+            entry.new = copy(new)
+            entry = HistoryEntry(
+                HistoryEntry.EntryType.REPLACE,
+                entry,
+                "Update Passive List",
+            )
+
+            self._history.append(entry)
+            SIGNALS.s_history_entry_added.emit(entry)
+
+        # Reset view if changing currently selected item
+        if refresh and self.idx == SLOTS.last_selected():
+            SIGNALS.s_item_selected.emit(self.idx)
 
         return old
 
     def buffs(
-        self, new: Optional[list[EquipmentBuff]] = None, log: bool = True
+        self,
+        new: Optional[list[EquipmentBuff]] = None,
+        log: bool = True,
+        refresh: bool = True,
     ) -> list[EquipmentBuff]:
         """Get or set equip_buffs across all enchant levels.
 
@@ -201,13 +347,15 @@ class ItemEditorInfoDetails:
         ``enchant_data_list`` does not yet exist a single baseline entry is
         bootstrapped so the buff list has somewhere to live.
         """
-        enchant_data_list = self.data.get("enchant_data_list", []) or []
+        enchant_data_list = self.data.get("enchant_data_list", [])
 
         # --- read-only path: nothing to do if the structure is absent ---
         if new is None:
-            if not enchant_data_list:
-                return []
-            return enchant_data_list[0].get("equip_buffs", [])
+            return (
+                []
+                if not enchant_data_list
+                else enchant_data_list[0].get("equip_buffs", [])
+            )
 
         # --- write path ---
         if not enchant_data_list:
@@ -247,13 +395,85 @@ class ItemEditorInfoDetails:
             self._history.append(hist)
             SIGNALS.s_history_entry_added.emit(hist)
 
+        # Reset view if changing currently selected item
+        if refresh and self.idx == SLOTS.last_selected():
+            SIGNALS.s_item_selected.emit(self.idx)
+
         return old
+
+    def stats(
+        self,
+        new: Optional[list[EquipmentBuff]] = None,
+        log: bool = True,
+        refresh: bool = True,
+    ) -> list[EquipmentBuff]:
+        enchant_data_list = self.data.get("enchant_data_list", [])
+
+        # --- read-only path: nothing to do if the structure is absent ---
+        if new is None:
+            return enchant_data_list
+
+        # --- write path ---
+        if not enchant_data_list:
+            # Bootstrap a single EnchantData entry so equip_buffs has a home.
+            baseline = {
+                "level": 0,
+                "enchant_stat_data": {
+                    "max_stat_list": [],
+                    "regen_stat_list": [],
+                    "stat_list_static": [],
+                    "stat_list_static_level": [],
+                },
+                "buy_price_list": [],
+                "equip_buffs": [],
+            }
+            enchant_data_list = [baseline]
+            self.data["enchant_data_list"] = enchant_data_list
+
+        old = enchant_data_list[0].get("equip_buffs", [])
+        snapshot = copy(old) if log else None
+
+        # Write to every enchant level entry
+        for entry in enchant_data_list:
+            entry["equip_buffs"] = new
+
+        if log:
+            hist_entry = POJO()
+            hist_entry.idx = self.idx
+            hist_entry.key = self.data["key"]
+            hist_entry.old = snapshot
+            hist_entry.new = copy(new)
+            hist = HistoryEntry(
+                HistoryEntry.EntryType.REPLACE,
+                hist_entry,
+                "Update Buff List",
+            )
+            self._history.append(hist)
+            SIGNALS.s_history_entry_added.emit(hist)
+
+        # Reset view if changing currently selected item
+        if refresh and self.idx == SLOTS.last_selected():
+            SIGNALS.s_item_selected.emit(self.idx)
+
+        return old
+
+    def stack_size(
+        self,
+        new: int = None,
+        log: bool = True,
+        refresh: bool = True,
+    ) -> int:
+        if new is None:
+            return self.data["max_stack_count"]
+
+        self.data["max_stack_count"] = new
 
 
 class ItemEditorInfo:
     def __init__(self, data: list[ItemInfo] = []):
         self._data = data
-        ItemEditorInfoDetails._reference = data
+        self._backup = {}
+        ItemEditorInfoDetails._reference = self
 
     def __len__(self):
         return len(self._data)
@@ -261,236 +481,14 @@ class ItemEditorInfo:
     def details(self, idx: int) -> ItemEditorInfoDetails:
         return ItemEditorInfoDetails(idx)
 
+    def dirty(self, item: ItemEditorInfoDetails, mark=False) -> bool:
+        idx = item.idx
 
-# class ItemEditorInfo:
-#     """Central data store for all items with cached proxy creation.
+        if mark:
+            self._backup[idx] = copy(item.data)
+            return True
 
-#     Stores raw item data and history. Creates lightweight proxy objects
-#     (ItemEditorInfoDetails) on-demand and caches them to prevent duplicate
-#     object creation.
-#     """
-
-#     EDITABLE_ENTRIES = [
-#         "cooltime",
-#         "docking_child_data",
-#         "drop_default_data",
-#         "enchant_data_list",
-#         "equip_passive_skill_list",
-#         "gimmick_info",
-#         "gimmick_visual_prefab_data_list",
-#         "is_dyeable",
-#         "item_charge_type",
-#         "item_tier",
-#         "max_charged_useable_count",
-#         "max_endurance",
-#         "max_stack_count",
-#         "price_list",
-#     ]
-
-#     # Global history across all items
-#     HISTORY_REGISTRY = []
-
-#     def __init__(self, data: list[ItemInfo] = None):
-#         self._data: list[ItemInfo] = data if data is not None else []
-#         # Per-item history: { item_key: [HistoryEntry, ...] }
-#         self._history: dict[int, list[HistoryEntry]] = {}
-#         # Cache of proxy objects: { index: ItemEditorInfoDetails }
-#         self._proxies: dict[int, ItemEditorInfoDetails] = {}
-
-#     def __len__(self):
-#         return len(self._data)
-
-#     def get_item(self, idx: int) -> ItemInfo:
-#         """Get raw item dict by index (no object creation)."""
-#         if idx < 0 or idx >= len(self._data):
-#             raise IndexError("Index not in range!")
-#         return self._data[idx]
-
-#     def get_item_key(self, item: ItemInfo) -> int:
-#         """Get the unique key for an item."""
-#         return item.get("key", -1)
-
-#     def get_history(self, item_key: int) -> list[HistoryEntry]:
-#         """Get history for a specific item key."""
-#         if item_key not in self._history:
-#             self._history[item_key] = []
-#         return self._history[item_key]
-
-#     def add_history_entry(self, item_key: int, entry: HistoryEntry):
-#         """Add a history entry for a specific item key."""
-#         if item_key not in self._history:
-#             self._history[item_key] = []
-#         self._history[item_key].append(entry)
-#         self.HISTORY_REGISTRY.append(entry)
-#         SIGNALS.s_history_entry_added.emit(entry)
-
-#     def update_item(self, item: ItemInfo, key: str, new_value):
-#         """Update an item field."""
-#         if key not in self.EDITABLE_ENTRIES:
-#             raise KeyError("This data is not editable!")
-#         item[key] = new_value
-
-#     def update_item_with_history(self, item: ItemInfo, key: str, new_value, desc=None):
-#         """Update an item field and record history."""
-#         if key not in self.EDITABLE_ENTRIES:
-#             raise KeyError("This data is not editable!")
-
-#         old_value = copy(item.get(key))
-#         self.update_item(item, key, new_value)
-
-#         if desc is None:
-#             desc = f"Value of {key} changed: {old_value} -> {new_value}"
-
-#         entry = HistoryEntry(
-#             HistoryEntry.EntryType.EDIT, (key, old_value), desc
-#         )
-
-#         item_key = self.get_item_key(item)
-#         self.add_history_entry(item_key, entry)
-
-#     @classmethod
-#     def bulk_update_with_history(
-#         cls,
-#         items: list[ItemEditorInfoDetails],
-#         key: str,
-#         new_value,
-#         desc: str = None,
-#     ):
-#         """Update a field across multiple items as a single bulk history entry.
-
-#         Args:
-#             items: List of item proxies to update.
-#             key: The field name to update (must be in EDITABLE_ENTRIES).
-#             new_value: Either a single value applied to all items,
-#                        or a callable (item_proxy) -> value for per-item values.
-#             desc: Optional description for the history entry.
-#         """
-#         if key not in cls.EDITABLE_ENTRIES:
-#             raise KeyError("This data is not editable!")
-
-#         if not items:
-#             return
-
-#         parent = items[0]._parent
-#         snapshots: list[tuple[int, str, Any]] = []
-
-#         for proxy in items:
-#             item = proxy._data
-#             item_key = parent.get_item_key(item)
-#             old_value = copy(item.get(key))
-#             snapshots.append((item_key, key, old_value))
-
-#             resolved = new_value(proxy) if callable(new_value) else new_value
-#             parent.update_item(item, key, resolved)
-
-#         if desc is None:
-#             desc = f"Bulk update of {key} on {len(items)} item(s)"
-
-#         entry = HistoryEntry(
-#             HistoryEntry.EntryType.BULK, snapshots, desc
-#         )
-
-#         for item_key, _, _ in snapshots:
-#             if item_key not in parent._history:
-#                 parent._history[item_key] = []
-#             parent._history[item_key].append(entry)
-
-#         cls.HISTORY_REGISTRY.append(entry)
-#         SIGNALS.s_history_entry_added.emit(entry)
-
-#     def get_editable_fields(self, item: ItemInfo) -> list[tuple[str, Any]]:
-#         """Get list of editable field names and their current values."""
-#         return [(key, item.get(key, None)) for key in self.EDITABLE_ENTRIES] if item else []
-
-#     def get_passives(self, item: ItemInfo, new_list: list[PassiveSkillLevel] = None) -> list[PassiveSkillLevel] | None:
-#         """Get or set passive skills for an item."""
-#         if new_list is not None:
-#             item["equip_passive_skill_list"] = new_list
-#         return item.get("equip_passive_skill_list", None)
-
-#     def details(self, idx: int) -> ItemEditorInfoDetails:
-#         """Get or create a cached proxy for the item at the given index.
-
-#         Proxies are cached, so requesting the same index multiple times
-#         returns the same proxy object (no duplicate creation).
-#         """
-#         if idx < 0 or idx >= len(self._data):
-#             raise IndexError("Index not in range!")
-
-#         if idx not in self._proxies:
-#             self._proxies[idx] = ItemEditorInfoDetails(self, idx)
-#         return self._proxies[idx]
-
-
-# class ItemEditorInfoDetails:
-#     """Lightweight proxy for a single item's data.
-
-#     Holds only (parent_ref, index, item_key) - 3 attributes.
-#     Delegates all operations to the parent ItemEditorInfo store.
-#     Multiple proxies can exist simultaneously, each pointing to a different item.
-#     Proxies are cached by ItemEditorInfo to prevent duplicate creation.
-#     """
-
-#     def __init__(self, parent: ItemEditorInfo, idx: int):
-#         self._parent = parent
-#         self._idx = idx
-#         self._item_key = parent.get_item_key(parent.get_item(idx))
-
-#     @property
-#     def _data(self) -> ItemInfo:
-#         """Get the underlying item data from parent (no copy, just reference)."""
-#         return self._parent.get_item(self._idx)
-
-#     def __getitem__(self, key):
-#         return self._data.get(key, None)
-
-#     def items(self):
-#         return self._data.items()
-
-#     def update(self, key, new_value):
-#         if key not in self._parent.EDITABLE_ENTRIES:
-#             raise KeyError("This data is not editable!")
-#         self._data[key] = new_value
-
-#     def update_with_history(self, key, new_value, desc=None):
-#         if key not in self._parent.EDITABLE_ENTRIES:
-#             raise KeyError("This data is not editable!")
-
-#         old_value = copy(self._data.get(key))
-#         self.update(key, new_value)
-
-#         if desc is None:
-#             desc = f"Value of {key} changed: {old_value} -> {new_value}"
-
-#         entry = HistoryEntry(
-#             HistoryEntry.EntryType.EDIT, (key, old_value), desc
-#         )
-
-#         self._parent.add_history_entry(self._item_key, entry)
-
-#     def add_history_entry(self, entry: HistoryEntry):
-#         self._parent.add_history_entry(self._item_key, entry)
-
-#     def editable(self):
-#         data = self._data
-#         return (
-#             [(key, data.get(key, None)) for key in self._parent.EDITABLE_ENTRIES]
-#             if data
-#             else []
-#         )
-
-#     def get_history(self) -> HistoryRegistry:
-#         return self._parent.get_history(self._item_key)
-
-#     def get_registry(self) -> HistoryRegistry:
-#         return self._parent.HISTORY_REGISTRY
-
-#     def passives(
-#         self, new_list: list[PassiveSkillLevel] = None
-#     ) -> list[PassiveSkillLevel] | None:
-#         if new_list is not None:
-#             self._data["equip_passive_skill_list"] = new_list
-#         return self._data.get("equip_passive_skill_list", None)
+        return True if self._backup.get(idx) else False
 
 
 class _Config:
@@ -628,6 +626,26 @@ def safe_iv(v, default=0):
         return int(v)
     except Exception:
         return default
+
+
+def load_passive_skill_index() -> dict[str, str]:
+    """Load the passive skill index from the catalog file.
+
+    Returns:
+        dict[str, str]: A dictionary mapping skill IDs to skill names.
+                       Returns empty dict if loading fails.
+    """
+    try:
+        with open(
+            "data/passive_skill_catalog.json", "r", encoding="utf-8"
+        ) as f:
+            catalog = json.load(f)
+            skill_index = copy(catalog["full_skill_index"]) or {}
+            skill_index.pop("999999", None)
+            return skill_index
+    except BaseException as e:
+        log.error(f"An error occurred while loading the skill index!\n{e}")
+        return {}
 
 
 def make_collapsible(

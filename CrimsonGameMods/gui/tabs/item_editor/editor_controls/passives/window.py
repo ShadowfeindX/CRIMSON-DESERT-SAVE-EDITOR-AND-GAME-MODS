@@ -12,7 +12,13 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
-from ...helpers import CONFIG, ItemEditorInfo, ItemEditorInfoDetails, copy
+from ...helpers import (
+    CONFIG,
+    ItemEditorInfo,
+    ItemEditorInfoDetails,
+    copy,
+    load_passive_skill_index,
+)
 from ...signals import SIGNALS
 
 from .action_bar import ActionBar
@@ -133,26 +139,21 @@ class PassiveWindow(QWidget):
             current = item.passives() or []
             return [p for p in current if p["skill"] not in keys_to_remove]
 
-        ItemEditorInfo.bulk_update_with_history(
-            self._selected_item_indexes,
-            "equip_passive_skill_list",
-            make_filtered,
-            f"Removed passives from {len(self._selected_item_indexes)} item(s)",
-        )
+        for item in map(ItemEditorInfoDetails, self._selected_item_indexes):
+            item.passives(new=make_filtered(item), log=True)
+            
+        # ItemEditorInfo.bulk_update_with_history(
+        #     self._selected_item_indexes,
+        #     "equip_passive_skill_list",
+        #     make_filtered,
+        #     f"Removed passives from {len(self._selected_item_indexes)} item(s)",
+        # )
 
     def clear_target_list(self):
         self.target_passives_table.clear()
 
     def load_skill_index(self):
-        try:
-            with open(
-                "data/passive_skill_catalog.json", "r", encoding="utf-8"
-            ) as f:
-                catalog = json.load(f)
-                self.skill_index = copy(catalog["full_skill_index"]) or {}
-                self.skill_index.pop("999999")
-        except BaseException as e:
-            log.error(f"An error occurred while loading the skill index!\n{e}")
+        self.skill_index = load_passive_skill_index()
 
     def _ready_signals(self):
         pass

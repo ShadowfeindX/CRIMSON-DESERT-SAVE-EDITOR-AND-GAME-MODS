@@ -1,17 +1,13 @@
 from __future__ import annotations
 
 
-from PySide6.QtCore import Qt, Signal
 from PySide6.QtWidgets import (
     QHBoxLayout,
-    QPushButton,
     QVBoxLayout,
     QWidget,
 )
 
-from .signals import SIGNALS
 
-from .helpers import ItemEditorInfoDetails, log
 
 from .item_details_table.table import ItemDetailsTable
 
@@ -29,10 +25,6 @@ class ItemEditorLayout(QVBoxLayout):
         super().__init__(parent)
 
         self._build_ui(parent)
-
-        # self.items_table.table.selectionModel().currentRowChanged.connect(
-        #     self._load_details
-        # )
 
         self.search_bar.s_search.connect(self.items_table.search)
 
@@ -54,15 +46,6 @@ class ItemEditorLayout(QVBoxLayout):
         self.addWidget(self.action_bar)
         self.addWidget(self.search_bar)
         self.addLayout(layout, 1)
-
-    # def _load_details(self, curr, _):
-    #     i_model = self.items_table.model
-    #     d_table = self.item_details_table
-
-    #     details = i_model.data(curr, Qt.ItemDataRole.UserRole)
-    #     d_table.load(details)
-    #     log.info("Changing Selection...")
-        # SIGNALS.s_item_selected.emit(details)
 
     def closeEvent(self, event):
         self.editor_controls.closeEvent(event)

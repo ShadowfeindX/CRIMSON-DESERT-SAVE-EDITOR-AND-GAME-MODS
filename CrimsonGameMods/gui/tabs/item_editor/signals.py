@@ -44,7 +44,8 @@ class _Signals:
 
 
 class _Slots:
-    idx: int = -1
+    _last_idx: int = -1
+    _idx: list[int] = []
 
     def _log_history(
         self, entry: HistoryEntry, is_remove: bool = False
@@ -62,17 +63,31 @@ class _Slots:
             else f"History entry added: ({entry.description})"
         )
 
-    def current_selection(self, idx: Optional[int] = None) -> int:
-        """Set or Retrieve currently selected item index
+    def last_selected(self, idx: int = None) -> int:
+        """Set or Retrieve last selected item index
 
         Args:
-            idx: Index of currently selected item (Optional)
+            idx: Index of last selected item (Optional)
+        Returns:
+            int: Index of last selected item
         """
 
         if idx is not None:
-            self.idx = idx
+            self._last_idx = idx
+        return self._last_idx
 
-        return self.idx
+    def current_selection(self, idx: list[int] = None) -> list[int]:
+        """Set or Retrieve currently selected item indexes
+
+        Args:
+            idx: Indexes of currently selected items (Optional)
+        Returns:
+            list[int]: Indexs of currently selected items
+        """
+
+        if idx is not None:
+            self._idx[:] = idx
+        return self._idx
 
 
 SIGNALS: _Signals = benedict(keyattr_dynamic=True)

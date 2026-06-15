@@ -52,7 +52,7 @@ from PySide6.QtWidgets import (
 
 from gui.tabs.item_editor.signals import SIGNALS, SLOTS
 
-from .helpers import HistoryEntry, ItemEditorInfo, CONFIG
+from .helpers import HistoryEntry, ItemEditorInfo, CONFIG, load_state
 
 from .dmm_types import ItemInfo
 from gui.theme import COLORS, CATEGORY_COLORS
@@ -128,6 +128,7 @@ class ItemEditorTab(QWidget):
 
     @Slot(str)
     def _extract(self, type: str = "overlay"):
+        load_state()
         match type:
             case "overlay":
                 log.info("extracting...")

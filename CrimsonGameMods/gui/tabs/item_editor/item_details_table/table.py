@@ -38,6 +38,6 @@ class ItemDetailsTable(QFrame):
         self.table.refresh_view()
 
     def load(self, idx: Optional[int]):
-        if idx:
-            self.model.load(ItemEditorInfoDetails(idx))
+        if idx is not None:
+            self.model.load(idx)
             self.table.refresh_view()

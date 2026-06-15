@@ -54,6 +54,8 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
+from .quick_window import QuickWindow
+
 from .json_window import JSONWindow
 from .history_window import HistoryWindow
 
@@ -107,6 +109,7 @@ from gui.iteminfo_index import IteminfoIndex
 class EditorControls(QFrame):
     WINDOW_REGISTRY = {
         "preset": PresetsWindow,
+        "quick": QuickWindow,
         "passive": PassiveWindow,
         "json": JSONWindow,
         "history": HistoryWindow,
@@ -205,11 +208,12 @@ class EditorControls(QFrame):
 
         btns["preset"] = QPushButton("Presets")
         btns["preset"].clicked.connect(self._open_window("preset"))
-        # btns["preset"].clicked.connect(lambda: self._open_window("preset"))
-        btns["preview"] = QPushButton("Show Preview")
+        btns["quick"] = QPushButton("Quick Edit")
+        btns["quick"].clicked.connect(self._open_window("quick"))
 
-        btns["transmog"] = QPushButton("Transmog")
-        btns["custom"] = QPushButton("Custom Item")
+        # btns["preview"] = QPushButton("Show Preview")
+        # btns["transmog"] = QPushButton("Transmog")
+        # btns["custom"] = QPushButton("Custom Item")
 
         btns["bulk"] = QPushButton("Bulk Options")
         btns["global"] = QPushButton("Global Options")
@@ -266,7 +270,7 @@ class EditorControls(QFrame):
         btns["history"].clicked.connect(self._open_window("history"))
         btns["dump"] = QPushButton("Dump ITEMINFO")
         btns["diff"] = QPushButton("Show Item Diff")
-        # btns["inspect"] = QPushButton("Inspect Item")
+        btns["inspect"] = QPushButton("Inspect Item")
 
         self._dev_controls = btns
 

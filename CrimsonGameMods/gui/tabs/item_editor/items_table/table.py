@@ -45,27 +45,27 @@ class ItemTable(QFrame):
             self._selection_changed
         )
 
-        SIGNALS.s_item_selected.connect(SLOTS.current_selection)
+        # SIGNALS.s_item_selected.connect(SLOTS.current_selection)
 
     @Slot(QItemSelection, QItemSelection)
     def _selection_changed(
         self, selected: QItemSelection, deselected: QItemSelection
     ):
-        print("Selection changed...")
-
         if not selected.isEmpty():
-            SIGNALS.s_item_selected.emit(
-                self.proxy.mapToSource(selected.indexes()[0]).row()
-            )
+            selection = self.proxy.mapToSource(selected.indexes()[0]).row()
+            SIGNALS.s_item_selected.emit(selection)
+            SLOTS.last_selected(selection)
         else:
             SIGNALS.s_item_selected.emit(None)
+            SLOTS.last_selected(-1)
 
-        SIGNALS.s_items_selected.emit(
-            [
-                self.proxy.mapToSource(index).row()
-                for index in self.table.selectionModel().selectedRows()
-            ]
-        )
+        selection = [
+            self.proxy.mapToSource(index).row()
+            for index in self.table.selectionModel().selectedRows()
+        ]
+
+        SIGNALS.s_items_selected.emit(selection)
+        SLOTS.current_selection(selection)
 
     def _build_ui(self, parent):
         layout = QVBoxLayout(self)
