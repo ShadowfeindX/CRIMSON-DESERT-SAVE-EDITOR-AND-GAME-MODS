@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import enum
 import json
-from typing import Any
+from typing import Any, cast
 
 from PySide6.QtCore import (
     QAbstractTableModel,
@@ -11,6 +11,8 @@ from PySide6.QtCore import (
 )
 from PySide6.QtWidgets import QWidget
 from benedict import benedict
+
+from ..dmm_types import EnchantStatChange, EnchantStatData
 
 from ..signals import SIGNALS
 
@@ -32,11 +34,7 @@ class DetailsTableModel(QAbstractTableModel):
         self.idx = index
         self.load(index)
         SIGNALS.s_data_changed.connect(
-            lambda idx: (
-                self.load(idx)
-                if idx == self.idx
-                else None
-            )
+            lambda idx: self.load(idx) if idx == self.idx else None
         )
 
     def load(self, index: int) -> None:
@@ -109,26 +107,40 @@ class DetailsTableModel(QAbstractTableModel):
 
         match role:
             case TypeRole.Passive:
-                if (new := min(max(value, 1), 10)) == (
-                    passives := details.passives()
-                )[data]["level"]:
+                if (new := min(max(value, 1), 10)) == self.data(
+                    index, Role.EditRole
+                ):
                     return False
 
-                passives = copy(passives)
+                passives = copy(details.passives())
                 passives[data]["level"] = new
                 details.passives(passives, refresh=False)
                 self.display(details)
             case TypeRole.Buff:
-                if (new := min(max(value, 1), 50)) == (
-                    buffs := details.buffs()
-                )[data]["level"]:
+                if (new := min(max(value, 1), 50)) == self.data(
+                    index, Role.EditRole
+                ):
                     return False
 
-                buffs = copy(buffs)
+                buffs = copy(details.buffs())
                 buffs[data]["level"] = new
                 details.buffs(buffs, refresh=False)
                 self.display(details)
             case TypeRole.Stat:
+                if (new := min(max(value, 0), 9_999_999)) == self.data(
+                    index, Role.EditRole
+                ):
+                    return False
+
+                stats = copy(details.stats())
+                stat, level, type = data
+                stats[level][type][:] = [
+                    {**change, "change_mb": value}
+                    if change["stat"] == stat
+                    else change
+                    for change in stats[level][type]
+                ]
+                details.stats(stats, refresh=False)
                 self.display(details)
 
         return True

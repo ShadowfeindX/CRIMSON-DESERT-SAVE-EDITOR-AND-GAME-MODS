@@ -230,7 +230,15 @@ class LevelDelegate(QWidget):
 
         SIGNALS.s_data_changed.emit(self._idx)
 
-STAT_LISTS = ["max", "regen", "static", "level"]
+
+STAT_LISTS = [
+    "max_stat_list",
+    "regen_stat_list",
+    "stat_list_static",
+    "stat_list_static_level",
+]
+
+
 def stats_view(model: DetailsTableModel, start: int):
     view = []
     stat_data = _details.stats()
@@ -256,26 +264,26 @@ def stats_view(model: DetailsTableModel, start: int):
     view.extend(
         new_view(
             {
-                C_Role.TypeRole: (TypeRole.Stat, i),
+                C_Role.TypeRole: (
+                    TypeRole.Stat,
+                    (change["stat"], delegate._level, STAT_LISTS[type]),
+                ),
                 Role.DisplayRole: (
                     stat["key"],
                     stat["string_key"],
                     change["change_mb"],
                 ),
-                Role.EditRole: print(STAT_LISTS[type]),
                 Role.EditRole: new_row(change["change_mb"]),
             }
         )
-        for i, (type, change, stat) in enumerate(
+        for type, change, stat in (
             (
-                (
-                    list_type,
-                    stat_change,
-                    STATE.stat_index()[str(stat_change["stat"])],
-                )
-                for list_type, stat_list in enumerate(stat_data_list)
-                for stat_change in stat_list
+                list_type,
+                stat_change,
+                STATE.stat_index()[str(stat_change["stat"])],
             )
+            for list_type, stat_list in enumerate(stat_data_list)
+            for stat_change in stat_list
         )
     )
 
