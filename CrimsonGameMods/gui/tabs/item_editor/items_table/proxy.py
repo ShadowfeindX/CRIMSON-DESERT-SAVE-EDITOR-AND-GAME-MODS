@@ -65,48 +65,10 @@ from PySide6.QtWidgets import (
 from .model import ItemTableModel
 
 from .view import ItemEditorTableView
-from ..helpers import ItemEditorInfo, ItemEditorInfoDetails
+from ..helpers import log, ItemEditorInfo, ItemEditorInfoDetails
 from ..dmm_types import ItemInfo
 
 # from gui.theme import COLORS, CATEGORY_COLORS
-
-
-def _safe_iv(v, default=0):
-    """Safely extract int from plain int, float, or dmm_parser nested dict.
-    dmm_parser returns numeric structs as {'a': int, 'b': int, 'c': int}.
-    """
-    if v is None:
-        return default
-    if isinstance(v, (int, float, bool)):
-        return int(v)
-    if isinstance(v, dict):
-        for k in ("a", "value", "_v", "v", "val", "n", "data"):
-            if k in v:
-                sub = v[k]
-                if isinstance(sub, (int, float, bool)):
-                    return int(sub)
-                if sub is None:
-                    return default
-        return default
-    try:
-        return int(v)
-    except Exception:
-        return default
-
-
-try:
-    from gui.utils import make_help_btn
-except Exception:
-
-    def make_help_btn(topic, fn=None):
-        btn = QPushButton("?")
-        btn.setFixedSize(22, 22)
-        if fn:
-            btn.clicked.connect(lambda: fn(topic))
-        return btn
-
-
-log = logging.getLogger(__name__)
 
 
 class ItemTableModelProxy(QSortFilterProxyModel):
@@ -118,23 +80,24 @@ class ItemTableModelProxy(QSortFilterProxyModel):
         if model:
             self.setSourceModel(model)
 
-    def lessThan(self, left_index: QModelIndex, right_index: QModelIndex):
-        left: ItemInfo = self.sourceModel().display(left_index)
-        right: ItemInfo = self.sourceModel().display(right_index)
+    def lessThan(self, left: QModelIndex, right: QModelIndex):
+        i = self.sourceModel().details
+        # left: ItemInfo = self.sourceModel().display(left_index)
+        # right: ItemInfo = self.sourceModel().display(right_index)
 
-        match left_index.column():
+        match left.column():
             case 0:
-                return left["key"] < right["key"]
+                return i(left, "key") < i(right, "key")
             case 1:
-                return left["string_key"] < right["string_key"]
+                return i(left, "string_key") < i(right, "string_key")
             case 2:
-                return left["item_tier"] < right["item_tier"]
+                return i(left, "item_tier") < i(right, "item_tier")
             case _:
                 log.warning(
                     "Warning: Sorting unidentified column id: %s",
-                    left_index.column(),
+                    left.column(),
                 )
-                return super().lessThan(left_index, right_index)
+                return super().lessThan(left, right)
 
     def sort(self, column, order=Qt.SortOrder.AscendingOrder):
         return super().sort(column, order)

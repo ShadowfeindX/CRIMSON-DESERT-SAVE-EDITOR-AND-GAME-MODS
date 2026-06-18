@@ -13,8 +13,8 @@ class CustomItemDataRole(IntEnum):
 
     DisplayRole = auto()
     TypeRole = auto()
+    DelegateRole = auto()
     # BuffRole = auto()
-
 
 class TypeRole(IntEnum):
     Header = auto()

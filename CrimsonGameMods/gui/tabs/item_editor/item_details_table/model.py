@@ -9,9 +9,12 @@ from PySide6.QtCore import (
     Qt,
     QModelIndex,
 )
+from PySide6.QtWidgets import QWidget
 from benedict import benedict
 
-from .display import display
+from ..signals import SIGNALS
+
+from .display import display, is_implemented
 
 from .roles import CustomItemDataRole, TypeRole
 
@@ -28,6 +31,13 @@ class DetailsTableModel(QAbstractTableModel):
         super().__init__(parent)
         self.idx = index
         self.load(index)
+        SIGNALS.s_data_changed.connect(
+            lambda idx: (
+                self.load(idx)
+                if idx == self.idx
+                else None
+            )
+        )
 
     def load(self, index: int) -> None:
         if index == -1:
@@ -43,7 +53,7 @@ class DetailsTableModel(QAbstractTableModel):
 
     def data(
         self, index: QModelIndex, role: int
-    ) -> ItemEditorInfoDetails | str:
+    ) -> ItemEditorInfoDetails | str | QWidget | tuple:
         if not index.isValid():
             return None
 
@@ -53,7 +63,21 @@ class DetailsTableModel(QAbstractTableModel):
         if role == C_Role.DisplayRole:
             return self.display()[index.row()]
 
+        if role == C_Role.DelegateRole:
+            return (
+                delegate
+                if is_implemented(
+                    (
+                        delegate := self.display()[index.row()].get(
+                            C_Role.DelegateRole
+                        )
+                    )
+                )
+                else None
+            )
+
         try:
+            cell = None
             cell = self.display()[index.row()][role][index.column()]
         except Exception:
             log.info(
@@ -62,7 +86,7 @@ class DetailsTableModel(QAbstractTableModel):
                 role,
             )
         else:
-            if cell:
+            if cell is not None:
                 return cell
 
     def setData(self, index: QModelIndex, value, role: Role | C_Role):
@@ -123,9 +147,8 @@ class DetailsTableModel(QAbstractTableModel):
 
         if details is None:
             return self._display
-        
-        self._display = display(self, details)
 
+        self._display = display(self, details)
 
     #     return _build_views(self, details)
 

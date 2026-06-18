@@ -1,76 +1,30 @@
 from __future__ import annotations
 
-import datetime
-import json
-import logging
-import os
-import re
-import shutil
-import struct
-import subprocess
-import sys
-import tempfile
-import traceback
-import textwrap
-from typing import Any, Callable, List, Optional, Tuple
+from collections.abc import Sequence
+from typing import Any, List
 
 from PySide6.QtCore import (
-    QAbstractTableModel,
-    QRegularExpression,
-    QSortFilterProxyModel,
     Qt,
-    QSize,
-    QTimer,
-    Signal,
-    Slot,
-    QModelIndex,
 )
-from PySide6.QtGui import QAction, QBrush, QColor, QFont, QIcon
 from PySide6.QtWidgets import (
-    QAbstractItemView,
-    QApplication,
-    QCheckBox,
-    QComboBox,
-    QDialog,
-    QDialogButtonBox,
-    QDoubleSpinBox,
-    QFileDialog,
-    QFrame,
-    QGridLayout,
-    QGroupBox,
     QHBoxLayout,
-    QHeaderView,
-    QInputDialog,
     QLabel,
-    QLineEdit,
-    QListWidget,
-    QListWidgetItem,
-    QMenu,
-    QMessageBox,
     QPushButton,
-    QScrollArea,
-    QSizePolicy,
     QSpinBox,
-    QSplitter,
     QStyledItemDelegate,
-    QTableView,
-    QTableWidget,
-    QTableWidgetItem,
-    QTabWidget,
-    QTextEdit,
-    QToolButton,
-    QVBoxLayout,
     QWidget,
 )
+
+from ..signals import SIGNALS
 
 from .roles import CustomItemDataRole, TypeRole
 
 
 # from .view import ItemEditorTableView
-from ..signals import SIGNALS, SLOTS
+# from ..signals import SIGNALS, SLOTS
 
 from ..helpers import *
-from ..dmm_types import ItemInfo
+from ..dmm_types import EnchantLevelChange, EnchantStatChange, EnchantStatData
 
 from typing import TYPE_CHECKING
 
@@ -125,6 +79,10 @@ def new_row(value):
 NOT_IMPLEMENTED = new_row(None)
 
 
+def is_implemented(value):
+    return value is not NOT_IMPLEMENTED
+
+
 def new_view(data={}):
     return (
         {role.value: NOT_IMPLEMENTED for role in Role}
@@ -136,6 +94,7 @@ def new_view(data={}):
 def passives_view():
     view = []
 
+    # --- Passives Header ---
     view.append(
         new_view(
             {
@@ -146,13 +105,14 @@ def passives_view():
         )
     )
 
+    # --- Passives List ---
     view.extend(
         new_view(
             {
                 C_Role.TypeRole: (TypeRole.Passive, i),
                 Role.DisplayRole: (
                     passive["skill"],
-                    STATE.skill_index[str(passive["skill"])]["string_key"],
+                    STATE.skill_index()[str(passive["skill"])]["string_key"],
                     passive["level"],
                 ),
                 Role.EditRole: new_row(passive["level"]),
@@ -166,6 +126,7 @@ def passives_view():
 
 def buffs_view():
     view = []
+
     # --- Buffs Header ---
     view.append(
         new_view(
@@ -184,7 +145,7 @@ def buffs_view():
                 C_Role.TypeRole: (TypeRole.Buff, i),
                 Role.DisplayRole: (
                     buff["buff"],
-                    STATE.buff_index[str(buff["buff"])]["string_key"],
+                    STATE.buff_index()[str(buff["buff"])]["string_key"],
                     buff["level"],
                 ),
                 Role.EditRole: new_row(buff["level"]),
@@ -195,8 +156,148 @@ def buffs_view():
 
     return view
 
-def stats_view():
-    "STUB"
+
+_current_level = 0
+
+
+def render_stat_list():
+    "stub"
+
+
+class LevelDelegate(QWidget):
+    _registry: dict[int, int] = {}
+
+    def __init__(
+        self, start: int, model: DetailsTableModel, data: list[EnchantStatData]
+    ):
+        super().__init__()
+
+        self._idx = _details.idx
+        self._model = model
+        self._start = start
+        self._end = -1
+        self._level = self._registry.get(self._idx, 0)
+        self._max_level = max(len(data), 1) - 1
+
+        layout = QHBoxLayout(self)
+        layout.setContentsMargins(0, 0, 0, 0)
+        layout.setSpacing(0)
+
+        left = QPushButton("<")
+        left.clicked.connect(self.prev)
+
+        right = QPushButton(">")
+        right.clicked.connect(self.next)
+
+        label = QLabel(alignment=Qt.AlignmentFlag.AlignCenter)
+
+        self.left = left
+        self.right = right
+        self.label = label
+
+        layout.addWidget(left)
+        layout.addWidget(label, 1)
+        layout.addWidget(right)
+
+        self._refresh_label()  # Only update text, no model notification
+
+    def next(self):
+        if self._level >= self._max_level:
+            return
+        self._level += 1
+        self._refresh_label()
+        self._notify_model()
+
+    def prev(self):
+        if self._level <= 0:
+            return
+        self._level -= 1
+        self._refresh_label()
+        self._notify_model()
+
+    def _refresh_label(self):
+        """Update the label text and registry only (no model side-effects)."""
+        self._registry[self._idx] = self._level
+        self.label.setText(
+            f"--- Stats (Level {self._level}/{self._max_level}) ---"
+        )
+
+    def _notify_model(self):
+        """Tell the model to rebuild the stats rows for the new level."""
+        index = self._model.index(self._start + 1, 0)
+        if not index.isValid() or index.row() == self._end:
+            return
+
+        SIGNALS.s_data_changed.emit(self._idx)
+
+STAT_LISTS = ["max", "regen", "static", "level"]
+def stats_view(model: DetailsTableModel, start: int):
+    view = []
+    stat_data = _details.stats()
+
+    delegate = LevelDelegate(start, model, stat_data)
+    stat_data_list: Sequence[List[EnchantStatChange | EnchantLevelChange]] = (
+        stat_data[delegate._level].values() if stat_data else []
+    )
+
+    # --- Stats Header ---
+    view.append(
+        new_view(
+            {
+                C_Role.DelegateRole: delegate,
+                C_Role.TypeRole: new_row(TypeRole.Header),
+                Role.DisplayRole: new_row("--- Stats ---"),
+                Role.TextAlignmentRole: new_row(Qt.AlignmentFlag.AlignCenter),
+            }
+        )
+    )
+
+    # --- Stats List ---
+    view.extend(
+        new_view(
+            {
+                C_Role.TypeRole: (TypeRole.Stat, i),
+                Role.DisplayRole: (
+                    stat["key"],
+                    stat["string_key"],
+                    change["change_mb"],
+                ),
+                Role.EditRole: print(STAT_LISTS[type]),
+                Role.EditRole: new_row(change["change_mb"]),
+            }
+        )
+        for i, (type, change, stat) in enumerate(
+            (
+                (
+                    list_type,
+                    stat_change,
+                    STATE.stat_index()[str(stat_change["stat"])],
+                )
+                for list_type, stat_list in enumerate(stat_data_list)
+                for stat_change in stat_list
+            )
+        )
+    )
+
+    # view.extend(
+    #     new_view(
+    #         {
+    #             C_Role.TypeRole: (TypeRole.Buff, i),
+    #             Role.DisplayRole: (
+    #                 stats["buff"],
+    #                 STATE.buff_index[str(stats["buff"])]["string_key"],
+    #                 stats["level"],
+    #             ),
+    #             Role.EditRole: new_row(stats["level"]),
+    #         }
+    #     )
+    #     for i, stats in enumerate(_details.stats())
+    # )
+
+    delegate._end = start + len(view)
+
+    return view
+
 
 OTHER_HEADER = False
 
@@ -256,12 +357,14 @@ def other_view(key: str, value: Any):
 # )
 
 
-def build_view(key: str, value: Any):
+def build_view(self: DetailsTableModel, start: int, key: str, value: Any):
     match key:
         case "passives":
             return passives_view()
         case "buffs":
             return buffs_view()
+        case "stats":
+            return stats_view(self, start)
         case _:
             return other_view(key, value)
 
@@ -276,7 +379,7 @@ def display(self: DetailsTableModel, details: ItemEditorInfoDetails):
 
     views = []
     for key, value in details.editable():
-        views.extend(build_view(key, value))
+        views.extend(build_view(self, len(views), key, value))
 
     return views
 

@@ -67,11 +67,7 @@ from PySide6.QtWidgets import (
 
 from data.item_editor_database.database_entry import Skill
 
-from ..helpers import (
-    load_buff_list,
-    load_skill_index,
-    load_skill_list,
-)
+from ..helpers import STATE
 from ..signals import SIGNALS, SLOTS
 
 from ..helpers import *
@@ -126,12 +122,12 @@ class QuickWindow(QWidget):
 
         combo = QComboBox()
         combo.setUpdatesEnabled(False)
-        combo.addItems(
-            [
-                f"{skill['key']} - {skill['string_key']}"
-                for skill in STATE.skill_list
-            ]
-        )
+        # combo.addItems(
+        #     [
+        #         f"{skill['key']} - {skill['string_key']}"
+        #         for skill in STATE._skill_list
+        #     ]
+        # )
         combo.setUpdatesEnabled(True)
 
         combo.setEditable(True)
@@ -146,7 +142,7 @@ class QuickWindow(QWidget):
 
         def _add():
             indexes = SLOTS.current_selection()
-            selected = STATE.skill_list[combo.currentIndex()]
+            selected = STATE._skill_list[combo.currentIndex()]
             level = spin.value()
 
             for idx in indexes:
@@ -166,7 +162,7 @@ class QuickWindow(QWidget):
 
         def _remove():
             indexes = SLOTS.current_selection()
-            selected = STATE.skill_list[combo.currentIndex()]
+            selected = STATE._skill_list[combo.currentIndex()]
 
             for idx in indexes:
                 item = ItemEditorInfoDetails(idx)
@@ -180,14 +176,30 @@ class QuickWindow(QWidget):
                 if len(item.passives()) != len(passives):
                     item.passives(passives)
 
-        add = QPushButton("Add Passive")
+        def _new():
+            self = combo
+            c = self.count()
+            print(c)
+            if c != len(STATE.skill_list()):
+                combo.addItems(
+                    [
+                        f"{buff['key']} - {buff['string_key']}"
+                        for buff in STATE.skill_list()
+                    ]
+                )
+            self._old()
+
+        add = QPushButton("Add Buff")
         add.clicked.connect(_add)
 
-        remove = QPushButton("Remove Passive")
+        remove = QPushButton("Remove Buff")
         remove.clicked.connect(_remove)
 
+        combo._old = combo.showPopup
+        combo.showPopup = _new
+
         row.addWidget(spin)
-        row.addWidget(combo)
+        row.addWidget(combo, 1)
         row.addWidget(add)
         row.addWidget(remove)
 
@@ -199,12 +211,12 @@ class QuickWindow(QWidget):
 
         combo = QComboBox()
         combo.setUpdatesEnabled(False)
-        combo.addItems(
-            [
-                f"{skill['key']} - {skill['string_key']}"
-                for skill in STATE.buff_list
-            ]
-        )
+        # combo.addItems(
+        #     [
+        #         f"{skill['key']} - {skill['string_key']}"
+        #         for skill in STATE._buff_list
+        #     ]
+        # )
         combo.setUpdatesEnabled(True)
 
         combo.setEditable(True)
@@ -219,7 +231,7 @@ class QuickWindow(QWidget):
 
         def _add():
             indexes = SLOTS.current_selection()
-            selected = STATE.buff_list[combo.currentIndex()]
+            selected = STATE._buff_list[combo.currentIndex()]
             level = spin.value()
 
             for idx in indexes:
@@ -239,7 +251,7 @@ class QuickWindow(QWidget):
 
         def _remove():
             indexes = SLOTS.current_selection()
-            selected = STATE.buff_list[combo.currentIndex()]
+            selected = STATE._buff_list[combo.currentIndex()]
 
             for idx in indexes:
                 item = ItemEditorInfoDetails(idx)
@@ -253,14 +265,30 @@ class QuickWindow(QWidget):
                 if len(item.buffs()) != len(buffs):
                     item.buffs(buffs)
 
+        def _new():
+            self = combo
+            c = self.count()
+            print(c)
+            if c != len(STATE.buff_list()):
+                combo.addItems(
+                    [
+                        f"{buff['key']} - {buff['string_key']}"
+                        for buff in STATE.buff_list()
+                    ]
+                )
+            self._old()
+
         add = QPushButton("Add Buff")
         add.clicked.connect(_add)
 
         remove = QPushButton("Remove Buff")
         remove.clicked.connect(_remove)
 
+        combo._old = combo.showPopup
+        combo.showPopup = _new
+
         row.addWidget(spin)
-        row.addWidget(combo)
+        row.addWidget(combo, 1)
         row.addWidget(add)
         row.addWidget(remove)
 

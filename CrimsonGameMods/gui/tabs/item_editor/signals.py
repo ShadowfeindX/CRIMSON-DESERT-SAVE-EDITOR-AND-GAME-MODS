@@ -38,6 +38,7 @@ class _Signals:
     s_iteminfo_extracted: SignalInstance[ItemEditorInfo]
     s_item_selected: SignalInstance[int]
     s_items_selected: SignalInstance[list[int]]
+    s_data_changed: SignalInstance[int]
     s_history_entry_added: SignalInstance[HistoryEntry]
     ActionBar: _ActionBarSignals
     SearchBar: _SearchBarSignals

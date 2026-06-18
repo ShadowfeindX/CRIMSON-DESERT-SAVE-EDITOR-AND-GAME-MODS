@@ -1,7 +1,9 @@
 from __future__ import annotations
 
 # from dataclasses import dataclass
+from collections.abc import Iterable, Sequence
 from typing import List, TypedDict, Union
+
 
 class LocalizableString(TypedDict):
     category: int
@@ -322,8 +324,10 @@ class DockingChildData(TypedDict):
     """u8"""
     docking_slot_key: str
 
+
 class CoolTimeData(TypedDict):
     """Represents cool time values for different character slots."""
+
     a: int
     """Cool time value for slot 'a'."""
     b: int
@@ -331,8 +335,10 @@ class CoolTimeData(TypedDict):
     c: int
     """Cool time value for slot 'c'."""
 
+
 class MaxedChargedUseableData(TypedDict):
     """Represents max charge values for different character slots."""
+
     a: int
     """Max charge value for slot 'a'."""
     b: int
@@ -468,8 +474,8 @@ class ItemInfo(TypedDict):
     inspect_data_list: list[InspectData]
     inspect_action: InspectAction
     default_sub_item: SubItem
-    cooltime: CoolTimeData # ADDED PROPERTY
-    discard_attach_terrain: int # ADDED PROPERTY
+    cooltime: CoolTimeData  # ADDED PROPERTY
+    discard_attach_terrain: int  # ADDED PROPERTY
     item_charge_type: int
     """u8"""
     sharpness_data: ItemInfoSharpnessData
@@ -523,15 +529,18 @@ class ItemInfo(TypedDict):
     """u16"""
     repair_data_list: list[RepairData]
 
+
 class UpgradeGraph(TypedDict):
     a: int
     b: int
     c: int
     d: int
 
+
 class ResourceItem(TypedDict):
     lookup: int
     value: int
+
 
 class BuffBase(TypedDict):
     asset_path: str
@@ -563,6 +572,7 @@ class BuffBase(TypedDict):
     u32_at80: int
     u32_at84: int
 
+
 class BuffVariantBody(TypedDict, total=False):
     f00: Union[int, List[int]]
     f01: int
@@ -570,14 +580,17 @@ class BuffVariantBody(TypedDict, total=False):
     f03: int
     f04: int
 
+
 class BuffVariant(TypedDict):
     body: BuffVariantBody
     type: str
+
 
 class BuffEntry(TypedDict):
     absent_flag: int
     base: BuffBase
     variant: BuffVariant
+
 
 class SkillInfo(TypedDict):
     """A single item parsed from the skillinfo binary file."""
@@ -618,6 +631,7 @@ class SkillInfo(TypedDict):
     use_resource_item_list: List[ResourceItem]
     use_resource_stat_list: List
     video_path: int
+
 
 def _safe_iv(v, default=0):
     """Safely extract int from plain int, float, or dmm_parser nested dict.

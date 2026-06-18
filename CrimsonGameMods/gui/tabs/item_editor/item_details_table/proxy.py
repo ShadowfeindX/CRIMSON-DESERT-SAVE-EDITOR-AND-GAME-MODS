@@ -11,3 +11,4 @@ class DetailsTableProxy(QSortFilterProxyModel):
 
         if model:
             self.setSourceModel(model)
+            self.idx = model.idx

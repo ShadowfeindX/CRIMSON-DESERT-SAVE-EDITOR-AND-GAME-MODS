@@ -16,12 +16,17 @@ from typing import Optional
 
 from PySide6.QtWidgets import QPushButton, QVBoxLayout, QWidget
 
-from data.item_editor_database.database_entry import Buff, Skill
+from data.item_editor_database.database_entry import Buff, Skill, Stat
 
 from .signals import SIGNALS, SLOTS
 
 
-from .dmm_types import EquipmentBuff, ItemInfo, PassiveSkillLevel
+from .dmm_types import (
+    EnchantStatData,
+    EquipmentBuff,
+    ItemInfo,
+    PassiveSkillLevel,
+)
 from enum import StrEnum, auto
 from benedict import benedict
 
@@ -50,11 +55,7 @@ __all__ = [
     "is_game_running",
     "find_game_path",
     "safe_iv",
-    "load_passive_skill_index",
-    "load_skill_index",
-    "load_skill_list",
-    "load_buff_index",
-    "load_buff_list",
+    "load_state",
     "log",
 ]
 
@@ -69,136 +70,193 @@ class POJO:
         )
 
 
-class _State(benedict):
-    skill_index: dict[str, Skill]
-    skill_list: list[Skill]
-    buff_index: dict[str, Buff]
-    buff_list: list[Buff]
+class _State:
+    _skill_index: dict[str, Skill] = {}
+    _skill_list: list[Skill] = []
+    _buff_index: dict[str, Buff] = {}
+    _buff_list: list[Buff] = []
+    _stat_index: dict[str, Stat] = {}
+    _stat_list: list[Stat] = []
+
+    def buff_list(self, force=False) -> list[Buff]:
+        """Load the buff list from the buffs database file.
+
+        Returns:
+            list[Buff]: A list of Buff objects.
+                Returns empty list if loading fails.
+        """
+        if force and STATE._buff_list:
+            STATE._buff_list.clear()
+
+        if not STATE._buff_list:
+            log.info("loading buff list...")
+            try:
+                with open(
+                    "data/item_editor_database/buffs_list.json",
+                    "r",
+                    encoding="utf-8",
+                ) as f:
+                    STATE._buff_list[:] = json.load(f) or [0]
+                    STATE._buff_list.pop(0)
+            except BaseException as e:
+                log.error(
+                    f"An error occurred while loading the buff index!\n{e}"
+                )
+                return []
+
+        return STATE._buff_list
+
+    def buff_index(self, force=False) -> dict[str, Skill]:
+        """Load the buff index from the buffs database file.
+
+        Returns:
+            dict[str, Buff]: A dictionary mapping buff IDs to Buff objects.
+                Returns empty dict if loading fails.
+        """
+        if force and STATE._buff_index:
+            STATE._buff_index.clear()
+
+        if not STATE._buff_index:
+            log.info("loading buff index...")
+            try:
+                with open(
+                    "data/item_editor_database/buffs.json",
+                    "r",
+                    encoding="utf-8",
+                ) as f:
+                    STATE._buff_index.update(json.load(f) or {})
+                    STATE._buff_index.pop("999999", None)
+            except BaseException as e:
+                log.error(
+                    f"An error occurred while loading the buff index!\n{e}"
+                )
+                return {}
+
+        return STATE._buff_index
+
+    def skill_list(self, force=False) -> list[Skill]:
+        """Load the passive skill list from the skills database file.
+
+        Returns:
+            list[Skill]: A list of Skill objects.
+                Returns empty list if loading fails.
+        """
+        if force and STATE._skill_list:
+            STATE._skill_list.clear()
+
+        if not STATE._skill_list:
+            log.info("loading skill list...")
+            try:
+                with open(
+                    "data/item_editor_database/skills_list.json",
+                    "r",
+                    encoding="utf-8",
+                ) as f:
+                    STATE._skill_list[:] = json.load(f) or [0]
+                    STATE._skill_list.pop(0)
+            except BaseException as e:
+                log.error(
+                    f"An error occurred while loading the skill index!\n{e}"
+                )
+                return []
+
+        return STATE._skill_list
+
+    def skill_index(self, force=False) -> dict[str, Skill]:
+        """Load the passive skill index from the skills database file.
+
+        Returns:
+            dict[str, Skill]: A dictionary mapping skill IDs to Skill objects.
+                Returns empty dict if loading fails.
+        """
+        if force and STATE._skill_index:
+            STATE._skill_index.clear()
+
+        if not STATE._skill_index:
+            log.info("loading skill index...")
+            try:
+                with open(
+                    "data/item_editor_database/skills.json",
+                    "r",
+                    encoding="utf-8",
+                ) as f:
+                    # STATE._skill_index = json.load(f) or {}
+                    STATE._skill_index.update(json.load(f) or {})
+                    STATE._skill_index.pop("999999", None)
+            except BaseException as e:
+                log.error(
+                    f"An error occurred while loading the skill index!\n{e}"
+                )
+                return {}
+
+        return STATE._skill_index
+
+    def stat_list(self, force=False) -> list[Stat]:
+        """Load the stat list from the stats database file.
+
+        Returns:
+            list[Stat]: A list of Stat objects.
+                Returns empty list if loading fails.
+        """
+        if force and STATE._stat_list:
+            STATE._stat_list.clear()
+
+        if not STATE._stat_list:
+            log.info("loading stat list...")
+            try:
+                with open(
+                    "data/item_editor_database/stats_list.json",
+                    "r",
+                    encoding="utf-8",
+                ) as f:
+                    STATE._stat_list[:] = json.load(f) or [0]
+                    STATE._stat_list.pop(0)
+            except BaseException as e:
+                log.error(
+                    f"An error occurred while loading the stat index!\n{e}"
+                )
+                return []
+
+        return STATE._stat_list
+
+    def stat_index(self, force=False) -> dict[str, Stat]:
+        """Load the stat index from the stats database file.
+
+        Returns:
+            dict[str, Stat]: A dictionary mapping stat IDs to Stat objects.
+                Returns empty dict if loading fails.
+        """
+        if force and STATE._stat_index:
+            STATE._stat_index.clear()
+
+        if not STATE._stat_index:
+            log.info("loading stat index...")
+            try:
+                with open(
+                    "data/item_editor_database/stats.json",
+                    "r",
+                    encoding="utf-8",
+                ) as f:
+                    # STATE._stat_index = json.load(f) or {}
+                    STATE._stat_index.update(json.load(f) or {})
+                    # STATE._stat_index.pop("999999", None)
+            except BaseException as e:
+                log.error(
+                    f"An error occurred while loading the skill index!\n{e}"
+                )
+                return {}
+
+        return STATE._stat_index
 
 
-STATE: _State = benedict(keyattr_dynamic=True)
-
-
-def load_buff_list(force=False) -> list[Buff]:
-    """Load the buff list from the buffs database file.
-
-    Returns:
-        list[Buff]: A list of Buff objects.
-            Returns empty list if loading fails.
-    """
-    if force and STATE.buff_list:
-        old = STATE.pop("buff_list")
-        del old
-
-    if not STATE.buff_list:
-        print("recreating buff list")
-        try:
-            with open(
-                "data/item_editor_database/buffs_list.json",
-                "r",
-                encoding="utf-8",
-            ) as f:
-                # print(catalog)
-                STATE.buff_list = json.load(f) or [0]
-                # buff_list = copy(catalog) or {}
-                STATE.buff_list.pop(0)
-        except BaseException as e:
-            log.error(f"An error occurred while loading the buff index!\n{e}")
-            return []
-
-    return STATE.buff_list
-
-
-def load_skill_list(force=False) -> list[Skill]:
-    """Load the passive skill list from the skills database file.
-
-    Returns:
-        list[Skill]: A list of Skill objects.
-            Returns empty list if loading fails.
-    """
-    if force and STATE.skill_list:
-        old = STATE.pop("skill_list")
-        del old
-
-    if not STATE.skill_list:
-        print("recreating skill list")
-        try:
-            with open(
-                "data/item_editor_database/skills_list.json",
-                "r",
-                encoding="utf-8",
-            ) as f:
-                # print(catalog)
-                STATE.skill_list = json.load(f) or [0]
-                # skill_list = copy(catalog) or {}
-                STATE.skill_list.pop(0)
-        except BaseException as e:
-            log.error(f"An error occurred while loading the skill index!\n{e}")
-            return []
-
-    return STATE.skill_list
-
-
-def load_buff_index(force=False) -> dict[str, Skill]:
-    """Load the buff index from the buffs database file.
-
-    Returns:
-        dict[str, Buff]: A dictionary mapping buff IDs to Buff objects.
-            Returns empty dict if loading fails.
-    """
-    if force and STATE.buff_index:
-        old = STATE.pop("buff_index")
-        del old
-
-    if not STATE.buff_index:
-        print("recreating buff index")
-        try:
-            with open(
-                "data/item_editor_database/buffs.json", "r", encoding="utf-8"
-            ) as f:
-                STATE.buff_index = json.load(f) or {}
-                STATE.buff_index.pop("999999", None)
-        except BaseException as e:
-            log.error(f"An error occurred while loading the buff index!\n{e}")
-            return {}
-
-    return STATE.buff_index
-
-
-def load_skill_index(force=False) -> dict[str, Skill]:
-    """Load the passive skill index from the skills database file.
-
-    Returns:
-        dict[str, Skill]: A dictionary mapping skill IDs to Skill objects.
-            Returns empty dict if loading fails.
-    """
-    if force and STATE.skill_index:
-        old = STATE.pop("skill_index")
-        del old
-
-    if not STATE.skill_index:
-        print("recreating skill index")
-        try:
-            with open(
-                "data/item_editor_database/skills.json", "r", encoding="utf-8"
-            ) as f:
-                # catalog = json.load(f)
-                # print(catalog)
-                STATE.skill_index = json.load(f) or {}
-                # skill_index = copy(catalog) or {}
-                STATE.skill_index.pop("999999", None)
-        except BaseException as e:
-            log.error(f"An error occurred while loading the skill index!\n{e}")
-            return {}
-
-    return STATE.skill_index
+STATE: _State = _State()
 
 
 def load_state(force=True):
-    load_buff_index(force)
-    load_buff_list(force)
-    load_skill_index(force)
-    load_skill_list(force)
+    STATE.buff_index(force)
+    STATE.buff_list(force)
+    STATE.skill_index(force)
+    STATE.skill_list(force)
 
 
 class HistoryEntry:
@@ -277,6 +335,7 @@ class ItemEditorInfoDetails:
             for key, value in (
                 ("passives", self.passives()),
                 ("buffs", self.buffs()),
+                ("stats", self.stats()),
                 ("stack_size", self.stack_size()),
             )
             if value is not None
@@ -293,6 +352,27 @@ class ItemEditorInfoDetails:
             for key, value in self.items()
             if key in self.EDITABLE_ENTRIES
         )
+
+    def add_history_entry(
+        self,
+        old,
+        new,
+        type=HistoryEntry.EntryType.REPLACE,
+        desc="Update Item Data",
+    ):
+        entry = POJO()
+        entry.idx = self.idx
+        entry.key = self.data["key"]
+        entry.old = old
+        entry.new = new
+        entry = HistoryEntry(
+            type,
+            entry,
+            desc,
+        )
+
+        self._history.append(entry)
+        SIGNALS.s_history_entry_added.emit(entry)
 
     def passives(
         self,
@@ -311,23 +391,12 @@ class ItemEditorInfoDetails:
         old[:] = new
 
         if log:
-            entry = POJO()
-            entry.idx = self.idx
-            entry.key = self.data["key"]
-            entry.old = snapshot
-            entry.new = copy(new)
-            entry = HistoryEntry(
-                HistoryEntry.EntryType.REPLACE,
-                entry,
-                "Update Passive List",
+            self.add_history_entry(
+                snapshot, copy(new), desc="Update Passive List"
             )
 
-            self._history.append(entry)
-            SIGNALS.s_history_entry_added.emit(entry)
-
-        # Reset view if changing currently selected item
-        if refresh and self.idx == SLOTS.last_selected():
-            SIGNALS.s_item_selected.emit(self.idx)
+        if refresh:
+            SIGNALS.s_data_changed.emit(self.idx)
 
         return old
 
@@ -337,19 +406,8 @@ class ItemEditorInfoDetails:
         log: bool = True,
         refresh: bool = True,
     ) -> list[EquipmentBuff]:
-        """Get or set equip_buffs across all enchant levels.
-
-        All levels in ``enchant_data_list`` share the same buff data object,
-        so we read from the first entry and write to every entry.
-
-        If *new* is ``None`` and the item has no ``enchant_data_list`` the
-        method simply returns an empty list.  If *new* is provided but
-        ``enchant_data_list`` does not yet exist a single baseline entry is
-        bootstrapped so the buff list has somewhere to live.
-        """
         enchant_data_list = self.data.get("enchant_data_list", [])
 
-        # --- read-only path: nothing to do if the structure is absent ---
         if new is None:
             return (
                 []
@@ -357,9 +415,7 @@ class ItemEditorInfoDetails:
                 else enchant_data_list[0].get("equip_buffs", [])
             )
 
-        # --- write path ---
         if not enchant_data_list:
-            # Bootstrap a single EnchantData entry so equip_buffs has a home.
             baseline = {
                 "level": 0,
                 "enchant_stat_data": {
@@ -377,85 +433,47 @@ class ItemEditorInfoDetails:
         old = enchant_data_list[0].get("equip_buffs", [])
         snapshot = copy(old) if log else None
 
-        # Write to every enchant level entry
         for entry in enchant_data_list:
             entry["equip_buffs"] = new
 
         if log:
-            hist_entry = POJO()
-            hist_entry.idx = self.idx
-            hist_entry.key = self.data["key"]
-            hist_entry.old = snapshot
-            hist_entry.new = copy(new)
-            hist = HistoryEntry(
-                HistoryEntry.EntryType.REPLACE,
-                hist_entry,
-                "Update Buff List",
+            self.add_history_entry(
+                snapshot, copy(new), desc="Update Buff List"
             )
-            self._history.append(hist)
-            SIGNALS.s_history_entry_added.emit(hist)
 
-        # Reset view if changing currently selected item
-        if refresh and self.idx == SLOTS.last_selected():
-            SIGNALS.s_item_selected.emit(self.idx)
+        if refresh:
+            SIGNALS.s_data_changed.emit(self.idx)
 
         return old
 
     def stats(
         self,
-        new: Optional[list[EquipmentBuff]] = None,
+        new: Optional[list[EnchantStatData]] = None,
         log: bool = True,
         refresh: bool = True,
-    ) -> list[EquipmentBuff]:
-        enchant_data_list = self.data.get("enchant_data_list", [])
+    ) -> list[EnchantStatData]:
+        old = [
+            ed["enchant_stat_data"] for ed in self.data["enchant_data_list"]
+        ]
 
-        # --- read-only path: nothing to do if the structure is absent ---
         if new is None:
-            return enchant_data_list
+            return old
 
-        # --- write path ---
-        if not enchant_data_list:
-            # Bootstrap a single EnchantData entry so equip_buffs has a home.
-            baseline = {
-                "level": 0,
-                "enchant_stat_data": {
-                    "max_stat_list": [],
-                    "regen_stat_list": [],
-                    "stat_list_static": [],
-                    "stat_list_static_level": [],
-                },
-                "buy_price_list": [],
-                "equip_buffs": [],
-            }
-            enchant_data_list = [baseline]
-            self.data["enchant_data_list"] = enchant_data_list
-
-        old = enchant_data_list[0].get("equip_buffs", [])
         snapshot = copy(old) if log else None
 
-        # Write to every enchant level entry
-        for entry in enchant_data_list:
-            entry["equip_buffs"] = new
+        for i, entry in enumerate(new):
+            edl = self.data["enchant_data_list"]
+            edl[i]["enchant_stat_data"] = entry
 
         if log:
-            hist_entry = POJO()
-            hist_entry.idx = self.idx
-            hist_entry.key = self.data["key"]
-            hist_entry.old = snapshot
-            hist_entry.new = copy(new)
-            hist = HistoryEntry(
-                HistoryEntry.EntryType.REPLACE,
-                hist_entry,
-                "Update Buff List",
+            self.add_history_entry(
+                snapshot, copy(new), desc="Update Buff List"
             )
-            self._history.append(hist)
-            SIGNALS.s_history_entry_added.emit(hist)
 
-        # Reset view if changing currently selected item
-        if refresh and self.idx == SLOTS.last_selected():
-            SIGNALS.s_item_selected.emit(self.idx)
+        if refresh:
+            SIGNALS.s_data_changed.emit(self.idx)
 
-        return old
+        return edl
 
     def stack_size(
         self,
@@ -463,10 +481,20 @@ class ItemEditorInfoDetails:
         log: bool = True,
         refresh: bool = True,
     ) -> int:
+        old = self.data["max_stack_count"]
+
         if new is None:
-            return self.data["max_stack_count"]
+            return old
 
         self.data["max_stack_count"] = new
+
+        if log:
+            self.add_history_entry(
+                old, new, new, HistoryEntry.EntryType.EDIT, "Change Stack Size"
+            )
+
+        if refresh:
+            SIGNALS.s_data_changed.emit(self.idx)
 
 
 class ItemEditorInfo:
