@@ -43,6 +43,7 @@ except Exception:
 
 log = logging.getLogger(__name__)
 
+
 def find_game_path() -> str:
     candidates = []
 
@@ -65,6 +66,7 @@ def find_game_path() -> str:
             return path
 
     return ""
+
 
 def extract_file_data(
     game_dir: str = "",
@@ -247,9 +249,9 @@ class GameBrowserTab(QWidget):
         if first_dot_index != 0:
             found_match = node.name[first_dot_index:]
 
-        extract_custom = extract_unknown = extract_json = extract_csv = (
-            overlay
-        ) = "STUB"
+        extract_custom = extract_unknown = extract_json = extract_json = (
+            extract_csv
+        ) = overlay = "STUB"
         if found_match and found_match in VirtualNode.KNOWN_FORMATS:
             custom_type = VirtualNode.KNOWN_FORMATS[found_match]
             extract_custom = QAction(
@@ -259,13 +261,15 @@ class GameBrowserTab(QWidget):
 
             if found_match in ("pabgb", "pabgh"):
                 extract_json = QAction("Extract as JSON", self._tree_view)
-                menu.addAction(extract_json)
+                extract_jsonl = QAction("Extract as JSONL", self._tree_view)
                 extract_csv = QAction("Extract as CSV", self._tree_view)
-                menu.addAction(extract_csv)
-                menu.addSeparator()
                 overlay = QAction(
                     "Insert JSON Table as Overlay", self._tree_view
                 )
+                menu.addAction(extract_json)
+                menu.addAction(extract_jsonl)
+                menu.addAction(extract_csv)
+                menu.addSeparator()
                 menu.addAction(overlay)
         else:
             extract_unknown = QAction(
@@ -303,7 +307,7 @@ class GameBrowserTab(QWidget):
                         "File Extracted",
                         f"{node.name} was successfully extracted to the data folder.",
                     )
-                elif action in (extract_json, extract_csv):
+                elif action in (extract_json, extract_jsonl, extract_csv):
                     try:
                         if found_match == "pabgb":
                             pabgh = extract_file_data(
@@ -326,6 +330,11 @@ class GameBrowserTab(QWidget):
                         if action == extract_json:
                             with open(f"data/{no_ext}.json", "w") as f:
                                 json.dump(table, f)
+                        elif action == extract_jsonl:
+                            with open(f"data/{no_ext}.jsonl", "w") as f:
+                                for item in table:
+                                    json.dump(item, f)
+                                    f.write("\n")
                         else:
                             with open(
                                 f"data/{no_ext}.csv",
@@ -424,7 +433,7 @@ class GameBrowserTab(QWidget):
                         # Write overlay into game folder
                         output_dir = game_dir
                         # output_dir = mod_dir
-                        with open(os.devnull, 'w') as devnull:
+                        with open(os.devnull, "w") as devnull:
                             with contextlib.redirect_stdout(devnull):
                                 pack_mod(
                                     game_dir,
@@ -433,9 +442,10 @@ class GameBrowserTab(QWidget):
                                     new_group,
                                     compression=dmm.Compression.NONE,
                                 )
-                                
+
                         # Record overlay info into CGMT state file
                         from shared_state import record_overlay
+
                         record_overlay(
                             game_dir,
                             new_group,
