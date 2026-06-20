@@ -153,6 +153,8 @@ def dump_csv(table, file_handle):
 class GameBrowserTab(QWidget):
     """Tab for viewing and extracting files from game PAZ archives"""
 
+    TABLE_ALIAS = {"gameeventhandler": "game_event_handler_info"}
+
     status_message = Signal(str)
     game_path_changed = Signal(str)
     config_save_requested = Signal()
@@ -326,6 +328,8 @@ class GameBrowserTab(QWidget):
                             )
                             pabgh = file_data
 
+                        no_ext = self.TABLE_ALIAS.get(no_ext, no_ext)
+
                         table = dmm.parse_table(no_ext, pabgb, pabgh)
                         if action == extract_json:
                             with open(f"data/{no_ext}.json", "w") as f:
@@ -358,6 +362,7 @@ class GameBrowserTab(QWidget):
                 elif action == overlay:
                     try:
                         # Normalize node name
+                        no_ext = self.TABLE_ALIAS.get(no_ext, no_ext)
                         normalize = dmm.normalize_target_name(no_ext)
                         if normalize is None:
                             raise NameError(

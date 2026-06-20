@@ -54,7 +54,7 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
-from .quick_window import QuickWindow
+from .quick.window import QuickWindow
 
 from .json_window import JSONWindow
 from .history_window import HistoryWindow
@@ -143,15 +143,16 @@ class EditorControls(QFrame):
             self._windows[id].activateWindow()
             return
 
-        # Instantiate the class dynamically
-        new_window: QWidget = cls(self)
 
         def cleanup():
             self._windows.pop(id, None)
             gc.collect()
 
+        # Instantiate the class dynamically
+        new_window: QWidget = cls(self)
 
         # Hook into the close event to clean up memory when closed
+        new_window.setWindowFlags(Qt.WindowType.Tool | Qt.WindowType.Window)
         new_window.setAttribute(QtCore.Qt.WidgetAttribute.WA_DeleteOnClose, True)
         new_window.destroyed.connect(cleanup)
 

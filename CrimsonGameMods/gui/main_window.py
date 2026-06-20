@@ -873,16 +873,16 @@ class MainWindow(QMainWindow):
         # self._quest_mods_tab.config_save_requested.connect(self._save_config)
         # self._mods_tabs.addTab(self._quest_mods_tab, "Quest Mods")
 
-        try:
-            from gui.tabs.mercpets import MercPetsTab
-            self._mercpets_tab = MercPetsTab(
-                self._config,
-                lambda: self._config.get("game_install_path", ""),
-            )
-            self._mercpets_tab.config_save_requested.connect(self._save_config)
-            self._mods_tabs.addTab(self._mercpets_tab, "MercPets")
-        except Exception as e:
-            log.warning("MercPets tab load failed: %s", e)
+        # try:
+        #     from gui.tabs.mercpets import MercPetsTab
+        #     self._mercpets_tab = MercPetsTab(
+        #         self._config,
+        #         lambda: self._config.get("game_install_path", ""),
+        #     )
+        #     self._mercpets_tab.config_save_requested.connect(self._save_config)
+        #     self._mods_tabs.addTab(self._mercpets_tab, "MercPets")
+        # except Exception as e:
+        #     log.warning("MercPets tab load failed: %s", e)
 
         try:
             from gui.tabs.load_manager import LoadManagerTab

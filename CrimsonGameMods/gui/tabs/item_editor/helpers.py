@@ -12,7 +12,7 @@ from PySide6.QtCore import (
 )
 
 from collections.abc import Sequence
-from typing import Optional
+from typing import Optional, cast, overload
 
 from PySide6.QtWidgets import QPushButton, QVBoxLayout, QWidget
 
@@ -22,6 +22,7 @@ from .signals import SIGNALS, SLOTS
 
 
 from .dmm_types import (
+    EnchantData,
     EnchantStatData,
     EquipmentBuff,
     ItemInfo,
@@ -257,6 +258,8 @@ def load_state(force=True):
     STATE.buff_list(force)
     STATE.skill_index(force)
     STATE.skill_list(force)
+    STATE.stat_index(force)
+    STATE.stat_list(force)
 
 
 class HistoryEntry:
@@ -416,18 +419,7 @@ class ItemEditorInfoDetails:
             )
 
         if not enchant_data_list:
-            baseline = {
-                "level": 0,
-                "enchant_stat_data": {
-                    "max_stat_list": [],
-                    "regen_stat_list": [],
-                    "stat_list_static": [],
-                    "stat_list_static_level": [],
-                },
-                "buy_price_list": [],
-                "equip_buffs": [],
-            }
-            enchant_data_list = [baseline]
+            enchant_data_list = [self._baseline_enchant_data(0)]
             self.data["enchant_data_list"] = enchant_data_list
 
         old = enchant_data_list[0].get("equip_buffs", [])
@@ -452,18 +444,19 @@ class ItemEditorInfoDetails:
         log: bool = True,
         refresh: bool = True,
     ) -> list[EnchantStatData]:
-        old = [
-            ed["enchant_stat_data"] for ed in self.data["enchant_data_list"]
-        ]
+        edl = self.data["enchant_data_list"]
+        old = [ed["enchant_stat_data"] for ed in edl]
 
         if new is None:
             return old
 
         snapshot = copy(old) if log else None
 
-        for i, entry in enumerate(new):
-            edl = self.data["enchant_data_list"]
-            edl[i]["enchant_stat_data"] = entry
+        edl[:] = [
+            safe_index(edl, i, self._baseline_enchant_data(i))
+            | {"enchant_stat_data": esd}
+            for i, esd in enumerate(new)
+        ]
 
         if log:
             self.add_history_entry(
@@ -495,6 +488,19 @@ class ItemEditorInfoDetails:
 
         if refresh:
             SIGNALS.s_data_changed.emit(self.idx)
+
+    def _baseline_enchant_data(self, level=0) -> EnchantData:
+        return {
+            "level": level,
+            "enchant_stat_data": {
+                "max_stat_list": [],
+                "regen_stat_list": [],
+                "stat_list_static": [],
+                "stat_list_static_level": [],
+            },
+            "buy_price_list": [],
+            "equip_buffs": [],
+        }
 
 
 class ItemEditorInfo:
@@ -570,7 +576,7 @@ class _Config:
 CONFIG = _Config()
 
 
-def copy(obj):
+def copy[T](obj: T) -> T:
     try:
         return json.loads(json.dumps(obj))
     except TypeError:
@@ -653,6 +659,21 @@ def safe_iv(v, default=0):
     try:
         return int(v)
     except Exception:
+        return default
+
+
+@overload
+def safe_index[T](_list: list[T], idx: int) -> Optional[T]: ...
+@overload
+def safe_index[T](_list: list[T], idx: int, default: T) -> T: ...
+@overload
+def safe_index[T, G](_list: list[T], idx: int, default: G) -> T | G: ...
+@overload
+def safe_index[T](_list: list[T], idx: int, default: None) -> Optional[T]: ...
+def safe_index(_list, idx, default=None):
+    try:
+        return _list[idx]
+    except IndexError:
         return default
 
 

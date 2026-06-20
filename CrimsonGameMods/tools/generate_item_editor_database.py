@@ -104,10 +104,19 @@ def load_stat_data(game_path: str, databse: Path):
     #     if entry.get("key")
     # ]
 
-    # file_path = database / "buffs_list.json"
+    data = [
+        {
+            k: v if k != "stat_type" else cat(entry)
+            for k, v in entry.items()
+            if k in ACCEPTED
+        }
+        for entry in table
+    ]
 
-    # with open(file_path, "w+", encoding="utf-8") as file:
-    #     json.dump(data, file, indent=2)
+    file_path = database / "stats_list.json"
+
+    with open(file_path, "w+", encoding="utf-8") as file:
+        json.dump(data, file, indent=2)
 
 
 def load_buff_data(game_path: str, databse: Path):
