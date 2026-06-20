@@ -1,0 +1,595 @@
+[
+  {
+    "key": 1000000,
+    "stat_level_data": [],
+    "stat_type": "regen_stat_list",
+    "string_key": "Hp",
+    "use_percent": 0
+  },
+  {
+    "key": 1000001,
+    "stat_level_data": [],
+    "stat_type": "regen_stat_list",
+    "string_key": "Fatal",
+    "use_percent": 0
+  },
+  {
+    "key": 1000048,
+    "stat_level_data": [],
+    "stat_type": "regen_stat_list",
+    "string_key": "KnockOut",
+    "use_percent": 0
+  },
+  {
+    "key": 1000002,
+    "stat_level_data": [],
+    "stat_type": "stat_list_static",
+    "string_key": "DDD",
+    "use_percent": 0
+  },
+  {
+    "key": 1000003,
+    "stat_level_data": [],
+    "stat_type": "stat_list_static",
+    "string_key": "DPV",
+    "use_percent": 0
+  },
+  {
+    "key": 1000050,
+    "stat_level_data": [],
+    "stat_type": "stat_list_static",
+    "string_key": "DPVRate",
+    "use_percent": 1
+  },
+  {
+    "key": 1000010,
+    "stat_level_data": [
+      0,
+      29000000,
+      55000000,
+      78000000,
+      99000000,
+      118000000,
+      136000000,
+      152000000,
+      167000000,
+      181000000,
+      194000000,
+      206000000,
+      218000000,
+      229000000,
+      240000000,
+      250000000
+    ],
+    "stat_type": "stat_list_static_level",
+    "string_key": "AttackSpeedRate",
+    "use_percent": 1
+  },
+  {
+    "key": 1000011,
+    "stat_level_data": [
+      0,
+      20000000,
+      40000000,
+      60000000,
+      80000000,
+      100000000,
+      120000000,
+      139000000,
+      157000000,
+      174000000,
+      190000000,
+      204000000,
+      217000000,
+      229000000,
+      240000000,
+      250000000
+    ],
+    "stat_type": "stat_list_static_level",
+    "string_key": "MoveSpeedRate",
+    "use_percent": 1
+  },
+  {
+    "key": 1000007,
+    "stat_level_data": [
+      0,
+      29000000,
+      55000000,
+      78000000,
+      99000000,
+      118000000,
+      136000000,
+      152000000,
+      167000000,
+      181000000,
+      194000000,
+      206000000,
+      218000000,
+      229000000,
+      240000000,
+      250000000
+    ],
+    "stat_type": "stat_list_static_level",
+    "string_key": "CriticalRate",
+    "use_percent": 1
+  },
+  {
+    "key": 1000004,
+    "stat_level_data": [
+      0,
+      2000,
+      4000,
+      6000,
+      8000,
+      10000,
+      12000,
+      14000,
+      16000,
+      18000,
+      20000,
+      21000,
+      22000,
+      23000,
+      24000,
+      25000
+    ],
+    "stat_type": "stat_list_static_level",
+    "string_key": "DHIT",
+    "use_percent": 0
+  },
+  {
+    "key": 1000005,
+    "stat_level_data": [],
+    "stat_type": "stat_list_static",
+    "string_key": "DDV",
+    "use_percent": 0
+  },
+  {
+    "key": 1000006,
+    "stat_level_data": [],
+    "stat_type": "stat_list_static",
+    "string_key": "CriticalDamage",
+    "use_percent": 1
+  },
+  {
+    "key": 1000008,
+    "stat_level_data": [],
+    "stat_type": "stat_list_static",
+    "string_key": "AttackedDamageRate",
+    "use_percent": 1
+  },
+  {
+    "key": 1000009,
+    "stat_level_data": [],
+    "stat_type": "stat_list_static",
+    "string_key": "AttackedDamageReduction",
+    "use_percent": 0
+  },
+  {
+    "key": 1000012,
+    "stat_level_data": [],
+    "stat_type": "stat_list_static",
+    "string_key": "ClimbSpeedRate",
+    "use_percent": 1
+  },
+  {
+    "key": 1000013,
+    "stat_level_data": [],
+    "stat_type": "stat_list_static",
+    "string_key": "SwimSpeedRate",
+    "use_percent": 1
+  },
+  {
+    "key": 1000072,
+    "stat_level_data": [],
+    "stat_type": "regen_stat_list",
+    "string_key": "Hunger",
+    "use_percent": 0
+  },
+  {
+    "key": 1000073,
+    "stat_level_data": [],
+    "stat_type": "regen_stat_list",
+    "string_key": "Social",
+    "use_percent": 0
+  },
+  {
+    "key": 1000049,
+    "stat_level_data": [],
+    "stat_type": "stat_list_static",
+    "string_key": "EquipDropRate",
+    "use_percent": 1
+  },
+  {
+    "key": 1000026,
+    "stat_level_data": [],
+    "stat_type": "regen_stat_list",
+    "string_key": "Stamina",
+    "use_percent": 0
+  },
+  {
+    "key": 1000027,
+    "stat_level_data": [],
+    "stat_type": "regen_stat_list",
+    "string_key": "Mp",
+    "use_percent": 0
+  },
+  {
+    "key": 1000019,
+    "stat_level_data": [],
+    "stat_type": "stat_list_static",
+    "string_key": "EquipMainWeapon",
+    "use_percent": 0
+  },
+  {
+    "key": 1000058,
+    "stat_level_data": [],
+    "stat_type": "stat_list_static",
+    "string_key": "EquipLeftMainWeapon",
+    "use_percent": 0
+  },
+  {
+    "key": 1000021,
+    "stat_level_data": [],
+    "stat_type": "stat_list_static",
+    "string_key": "EquipSubWeapon1",
+    "use_percent": 0
+  },
+  {
+    "key": 1000044,
+    "stat_level_data": [],
+    "stat_type": "stat_list_static",
+    "string_key": "EquipSubWeapon2",
+    "use_percent": 0
+  },
+  {
+    "key": 1000045,
+    "stat_level_data": [],
+    "stat_type": "stat_list_static",
+    "string_key": "EquipBow",
+    "use_percent": 0
+  },
+  {
+    "key": 1000020,
+    "stat_level_data": [],
+    "stat_type": "stat_list_static",
+    "string_key": "BareHandDDD",
+    "use_percent": 0
+  },
+  {
+    "key": 1000070,
+    "stat_level_data": [],
+    "stat_type": "stat_list_static",
+    "string_key": "BareFootDDD",
+    "use_percent": 0
+  },
+  {
+    "key": 1000024,
+    "stat_level_data": [],
+    "stat_type": "regen_stat_list",
+    "string_key": "Confusion",
+    "use_percent": 0
+  },
+  {
+    "key": 1000025,
+    "stat_level_data": [],
+    "stat_type": "regen_stat_list",
+    "string_key": "Morale",
+    "use_percent": 0
+  },
+  {
+    "key": 1000028,
+    "stat_level_data": [],
+    "stat_type": "regen_stat_list",
+    "string_key": "Fury",
+    "use_percent": 0
+  },
+  {
+    "key": 1000031,
+    "stat_level_data": [],
+    "stat_type": "stat_list_static",
+    "string_key": "HitRate",
+    "use_percent": 0
+  },
+  {
+    "key": 1000051,
+    "stat_level_data": [],
+    "stat_type": "stat_list_static",
+    "string_key": "DeadEyeMax",
+    "use_percent": 0
+  },
+  {
+    "key": 1000034,
+    "stat_level_data": [],
+    "stat_type": "stat_list_static",
+    "string_key": "RangeHitRate",
+    "use_percent": 0
+  },
+  {
+    "key": 1000035,
+    "stat_level_data": [],
+    "stat_type": "stat_list_static",
+    "string_key": "MaxDamageRate",
+    "use_percent": 0
+  },
+  {
+    "key": 1000036,
+    "stat_level_data": [],
+    "stat_type": "stat_list_static",
+    "string_key": "Pressure",
+    "use_percent": 0
+  },
+  {
+    "key": 1000063,
+    "stat_level_data": [],
+    "stat_type": "stat_list_static",
+    "string_key": "Mp_UseResourceIncreaseRate",
+    "use_percent": 1
+  },
+  {
+    "key": 1000064,
+    "stat_level_data": [],
+    "stat_type": "stat_list_static",
+    "string_key": "Stamina_UseResourceIncreaseRate",
+    "use_percent": 1
+  },
+  {
+    "key": 1000046,
+    "stat_level_data": [],
+    "stat_type": "stat_list_static",
+    "string_key": "Mp_UseResourceDecreaseRate",
+    "use_percent": 1
+  },
+  {
+    "key": 1000037,
+    "stat_level_data": [],
+    "stat_type": "stat_list_static",
+    "string_key": "Stamina_UseResourceDecreaseRate",
+    "use_percent": 1
+  },
+  {
+    "key": 1000039,
+    "stat_level_data": [],
+    "stat_type": "stat_list_static",
+    "string_key": "MoraleResistance",
+    "use_percent": 0
+  },
+  {
+    "key": 1000043,
+    "stat_level_data": [],
+    "stat_type": "stat_list_static",
+    "string_key": "GuardPVRate",
+    "use_percent": 0
+  },
+  {
+    "key": 1000074,
+    "stat_level_data": [],
+    "stat_type": "stat_list_static",
+    "string_key": "KnockOutPVRate",
+    "use_percent": 0
+  },
+  {
+    "key": 1000047,
+    "stat_level_data": [],
+    "stat_type": "stat_list_static",
+    "string_key": "AddMoneyDropRate",
+    "use_percent": 1
+  },
+  {
+    "key": 1000071,
+    "stat_level_data": [],
+    "stat_type": "stat_list_static",
+    "string_key": "Difficulty",
+    "use_percent": 0
+  },
+  {
+    "key": 1000014,
+    "stat_level_data": [],
+    "stat_type": "regen_stat_list",
+    "string_key": "Temperature",
+    "use_percent": 0
+  },
+  {
+    "key": 1000015,
+    "stat_level_data": [],
+    "stat_type": "regen_stat_list",
+    "string_key": "Electricity",
+    "use_percent": 0
+  },
+  {
+    "key": 1000016,
+    "stat_level_data": [],
+    "stat_type": "stat_list_static",
+    "string_key": "FireResistance",
+    "use_percent": 1
+  },
+  {
+    "key": 1000017,
+    "stat_level_data": [],
+    "stat_type": "stat_list_static",
+    "string_key": "IceResistance",
+    "use_percent": 1
+  },
+  {
+    "key": 1000018,
+    "stat_level_data": [],
+    "stat_type": "stat_list_static",
+    "string_key": "ElectricityResistance",
+    "use_percent": 1
+  },
+  {
+    "key": 1000053,
+    "stat_level_data": [],
+    "stat_type": "stat_list_static",
+    "string_key": "Banking",
+    "use_percent": 0
+  },
+  {
+    "key": 1000054,
+    "stat_level_data": [],
+    "stat_type": "stat_list_static",
+    "string_key": "Farming",
+    "use_percent": 0
+  },
+  {
+    "key": 1000055,
+    "stat_level_data": [],
+    "stat_type": "stat_list_static",
+    "string_key": "Ranching",
+    "use_percent": 0
+  },
+  {
+    "key": 1000056,
+    "stat_level_data": [],
+    "stat_type": "stat_list_static",
+    "string_key": "Logging",
+    "use_percent": 0
+  },
+  {
+    "key": 1000052,
+    "stat_level_data": [],
+    "stat_type": "stat_list_static",
+    "string_key": "Mining",
+    "use_percent": 0
+  },
+  {
+    "key": 1000057,
+    "stat_level_data": [],
+    "stat_type": "stat_list_static",
+    "string_key": "Forging",
+    "use_percent": 0
+  },
+  {
+    "key": 1000033,
+    "stat_level_data": [],
+    "stat_type": "stat_list_static",
+    "string_key": "Fishing",
+    "use_percent": 0
+  },
+  {
+    "key": 1000060,
+    "stat_level_data": [],
+    "stat_type": "stat_list_static",
+    "string_key": "Weaving",
+    "use_percent": 0
+  },
+  {
+    "key": 1000061,
+    "stat_level_data": [],
+    "stat_type": "stat_list_static",
+    "string_key": "Foodprocessing",
+    "use_percent": 0
+  },
+  {
+    "key": 1000062,
+    "stat_level_data": [],
+    "stat_type": "stat_list_static",
+    "string_key": "Crafting",
+    "use_percent": 0
+  },
+  {
+    "key": 1000038,
+    "stat_level_data": [],
+    "stat_type": "stat_list_static",
+    "string_key": "Strengthening",
+    "use_percent": 0
+  },
+  {
+    "key": 1000059,
+    "stat_level_data": [],
+    "stat_type": "stat_list_static",
+    "string_key": "Refining",
+    "use_percent": 0
+  },
+  {
+    "key": 1000065,
+    "stat_level_data": [],
+    "stat_type": "stat_list_static",
+    "string_key": "Gathering",
+    "use_percent": 0
+  },
+  {
+    "key": 1000066,
+    "stat_level_data": [],
+    "stat_type": "stat_list_static",
+    "string_key": "Ornamenting",
+    "use_percent": 0
+  },
+  {
+    "key": 1000067,
+    "stat_level_data": [],
+    "stat_type": "stat_list_static",
+    "string_key": "Drawing",
+    "use_percent": 0
+  },
+  {
+    "key": 1000068,
+    "stat_level_data": [],
+    "stat_type": "stat_list_static",
+    "string_key": "Building",
+    "use_percent": 0
+  },
+  {
+    "key": 1000069,
+    "stat_level_data": [],
+    "stat_type": "stat_list_static",
+    "string_key": "Engineering",
+    "use_percent": 0
+  },
+  {
+    "key": 1000030,
+    "stat_level_data": [],
+    "stat_type": "stat_list_static",
+    "string_key": "Strength",
+    "use_percent": 0
+  },
+  {
+    "key": 1000032,
+    "stat_level_data": [],
+    "stat_type": "stat_list_static",
+    "string_key": "Agility",
+    "use_percent": 0
+  },
+  {
+    "key": 1000040,
+    "stat_level_data": [],
+    "stat_type": "regen_stat_list",
+    "string_key": "Sink",
+    "use_percent": 0
+  },
+  {
+    "key": 1000023,
+    "stat_level_data": [],
+    "stat_type": "regen_stat_list",
+    "string_key": "FireB",
+    "use_percent": 0
+  },
+  {
+    "key": 1000042,
+    "stat_level_data": [],
+    "stat_type": "regen_stat_list",
+    "string_key": "Lapidification",
+    "use_percent": 0
+  },
+  {
+    "key": 1000022,
+    "stat_level_data": [],
+    "stat_type": "regen_stat_list",
+    "string_key": "Light",
+    "use_percent": 0
+  },
+  {
+    "key": 1000041,
+    "stat_level_data": [],
+    "stat_type": "regen_stat_list",
+    "string_key": "Puzzle",
+    "use_percent": 0
+  },
+  {
+    "key": 1000029,
+    "stat_level_data": [],
+    "stat_type": "regen_stat_list",
+    "string_key": "Fresh",
+    "use_percent": 0
+  }
+]
